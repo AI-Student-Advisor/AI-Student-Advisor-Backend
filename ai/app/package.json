@@ -2,7 +2,7 @@
   "name": "ai-student-advisor-ai-component",
   "version": "1.0.0",
   "description": "AI component of the AI Student Advisor application",
-  "main": "app.js",
+  "main": "App.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,6 +13,7 @@
     "langchain": "^0.1.5"
   },
   "devDependencies": {
-    "nodemon": "^3.0.3"
+    "nodemon": "^3.0.3",
+    "typescript": "^5.3.3"
   }
 }
