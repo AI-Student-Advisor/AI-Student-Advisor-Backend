@@ -1,0 +1,18 @@
+{
+  "name": "ai-student-advisor-ai-component",
+  "version": "1.0.0",
+  "description": "AI component of the AI Student Advisor application",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@langchain/openai": "^0.0.12",
+    "langchain": "^0.1.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
