@@ -1,18 +1,17 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { StringOutputParser } from "@langchain/core/output_parsers";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
-import { Agent, AgentExecutor, createOpenAIToolsAgent } from "langchain/agents";
+import { AgentExecutor, createOpenAIToolsAgent } from "langchain/agents";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 
-import { ChatAgentInterface } from "core/chat-agent/ChatAgentInterface";
+import { ChatAgentInterface } from "src/chat-agent/ChatAgentInterface";
 import {
   getUpstashRedisRESTAPIKey,
   getUpstashRedisRESTAPIURL,
-} from "core/config/keys";
+} from "../../config/keys";
 
 type OpenAIChatAgentConfig = {
   openAIApiKey: string;

@@ -5,22 +5,28 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ai-component
-    container_name: ai-component
+    image: ai-core
+    container_name: ai-core
     restart: unless-stopped
     env_file: .env
     environment:
       - OPEN_AI_API_KEY=$OPEN_AI_API_KEY
       - LANGCHAIN_API_KEY=$LANGCHAIN_API_KEY
       - LANGCHAIN_TRACING_V2=$LANGCHAIN_TRACING_V2
+      - UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL
+      - UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN
     ports:
       - "80:8080"
     volumes:
-      - .:/app
-      - node_modules:/app/node_modules
+      - .:/core
+      - node_modules:/core/node_modules
     networks:
       - app-network
-    command: /app/node_modules/.bin/nodemon ./dist/App.js
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        npm run tsc
+        /core/node_modules/.bin/nodemon ./dist/App.js
 
 networks:
   app-network:

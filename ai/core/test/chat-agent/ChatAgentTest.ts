@@ -1,11 +1,8 @@
 import {
   ChatAgentConfig,
   default_config,
-} from "../../core/chat-agent/ChatAgentConfig";
-import {
-  ChatAgentType,
-  getNewChatAgent,
-} from "../../core/chat-agent/ChatAgent";
+} from "../../src/chat-agent/ChatAgentConfig";
+import { ChatAgentType, getNewChatAgent } from "../../src/chat-agent/ChatAgent";
 import { TU } from "../Util";
 
 // chat agent instance

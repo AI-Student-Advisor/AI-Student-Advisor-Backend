@@ -4,6 +4,7 @@
   "description": "AI component of the AI Student Advisor application",
   "main": "App.js",
   "scripts": {
+    "tsc": "rm -fr dist && npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,6 +13,7 @@
     "@langchain/community": "^0.0.19",
     "@langchain/openai": "^0.0.12",
     "@upstash/redis": "^1.28.2",
+    "cheerio": "^1.0.0-rc.12",
     "langchain": "^0.1.5"
   },
   "devDependencies": {
