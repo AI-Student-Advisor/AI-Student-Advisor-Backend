@@ -24,10 +24,10 @@ export const enum LLM_TYPE {
  * Chat agent configurations
  */
 export interface ChatAgentConfig {
-  debug_mode?: boolean;
-  use_knowledge_base?: boolean;
-  remember_history?: boolean;
-  chat_agent_initial_prompt?: string;
+  debug_mode: boolean;
+  use_knowledge_base: boolean;
+  remember_history: boolean;
+  initial_prompt: string;
   vector_db_type: VECTOR_DB_TYPE;
   vector_db_address: string;
   llm_type: LLM_TYPE;
@@ -43,7 +43,7 @@ export const default_config: ChatAgentConfig = {
   vector_db_address: "",
   vector_db_type: VECTOR_DB_TYPE.MEMORY,
   remember_history: false,
-  chat_agent_initial_prompt: "",
+  initial_prompt: "",
   llm_type: LLM_TYPE.OPEN_AI,
   llm_api_key: "",
 };

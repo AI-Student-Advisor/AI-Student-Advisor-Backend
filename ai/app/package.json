@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@langchain/community": "^0.0.19",
     "@langchain/openai": "^0.0.12",
+    "@upstash/redis": "^1.28.2",
     "langchain": "^0.1.5"
   },
   "devDependencies": {
