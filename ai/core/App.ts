@@ -4,6 +4,8 @@ import { TestsToRun, runAppTests } from "./test/Tests";
 
 console.log("AI Student Advisor App - Running");
 
+export const DEBUG_MODE = true;
+
 // ----------------------------
 // Testing
 

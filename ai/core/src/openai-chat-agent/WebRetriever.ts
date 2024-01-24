@@ -3,6 +3,7 @@ import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { createRetrieverTool } from "langchain/tools/retriever";
+import { dlog } from "../../utilities/dlog";
 
 export type WebRetrieverConfig = {
   name: string;
@@ -39,6 +40,8 @@ export class WebRetriever {
 
   async setupRetriever() {
     const loader = new CheerioWebBaseLoader(this.url);
+    dlog.msg("Cheerio web base loader created");
+
     const rawDocs = await loader.load();
 
     const splitter = new RecursiveCharacterTextSplitter({
