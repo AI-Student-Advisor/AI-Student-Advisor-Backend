@@ -46,4 +46,6 @@ export function executeWebRetrieverTests() {
     DEFAULT_URL,
     DEFAULT_TEST_QUERY
   );
+
+  // const cWR = new CheerioWebRetriever();
 }

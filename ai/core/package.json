@@ -10,11 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@langchain/community": "^0.0.19",
+    "langchain": "^0.1.6",
     "@langchain/openai": "^0.0.12",
+    "@langchain/community": "^0.0.19",
     "@upstash/redis": "^1.28.2",
     "cheerio": "^1.0.0-rc.12",
-    "langchain": "^0.1.5"
+    "playwright": "^1.41.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.3",
