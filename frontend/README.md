@@ -3,8 +3,8 @@
 ## Environment
 
 | Requirement | Version Specification |
-| ----------- | --------------------- |
-| node.js     | `^18`                 |
+|-------------|-----------------------|
+| node.js     | `^20`                 |
 | pnpm        | Latest                |
 
 ## Usage
