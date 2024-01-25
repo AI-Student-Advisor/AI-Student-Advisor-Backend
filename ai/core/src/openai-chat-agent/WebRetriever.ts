@@ -6,6 +6,8 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { createRetrieverTool } from "langchain/tools/retriever";
 import { dlog } from "../../utilities/dlog";
+import { getOpenAIAPIKey } from "../../config/keys";
+import { getEmbeddingModel } from "src/langchain/embedding-models/Bedrock";
 
 export type WebRetrieverConfig = {
   name: string;
@@ -44,11 +46,6 @@ export class WebRetriever {
     dlog.msg("Setting up retriever...");
     dlog.msg("URL is: " + this.url);
 
-    // const loader = new TextLoader(
-    //   "src/openai-chat-agent/state_of_the_union.txt"
-    // );
-    // dlog.msg("Text loader created");
-
     // const loader = new PlaywrightWebBaseLoader(this.url, {
     //   launchOptions: {
     //     headless: true,
@@ -62,7 +59,6 @@ export class WebRetriever {
 
     const rawDocs = await loader.load();
     dlog.msg("Raw docs loaded");
-    dlog.msg(rawDocs[0].pageContent);
 
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: this.chunkSize,
@@ -73,10 +69,10 @@ export class WebRetriever {
     const docs = await splitter.splitDocuments(rawDocs);
     dlog.msg("Documents splitter completed");
 
-    const vectorstore = await MemoryVectorStore.fromDocuments(
-      docs,
-      new OpenAIEmbeddings()
-    );
+    // get the configured embedding model: src/langchain/embedding-models/
+    const embeddings = getEmbeddingModel();
+
+    const vectorstore = await MemoryVectorStore.fromDocuments(docs, embeddings);
     dlog.msg("Memory vector store created");
 
     this.retriever = vectorstore.asRetriever();
