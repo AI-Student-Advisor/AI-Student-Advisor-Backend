@@ -4,7 +4,7 @@ import {
   getAWSAccessKeyID,
   getAWSRegion,
   getAWSSecretAccessKey,
-} from "config/keys";
+} from "../../config/keys";
 
 export function getEmbeddingModel() {
   return new BedrockEmbeddings({
@@ -14,5 +14,6 @@ export function getEmbeddingModel() {
       accessKeyId: getAWSAccessKeyID(),
       secretAccessKey: getAWSSecretAccessKey(),
     },
+    maxRetries: 3,
   });
 }

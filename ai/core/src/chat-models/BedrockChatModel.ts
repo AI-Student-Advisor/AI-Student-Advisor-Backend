@@ -14,5 +14,6 @@ export function getChatModel() {
       accessKeyId: getAWSAccessKeyID(),
       secretAccessKey: getAWSSecretAccessKey(),
     },
+    maxRetries: 3,
   });
 }

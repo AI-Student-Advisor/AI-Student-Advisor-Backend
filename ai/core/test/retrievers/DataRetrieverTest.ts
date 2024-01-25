@@ -4,7 +4,7 @@ import { TU } from "../Util";
 
 const TEST_NAME = "DATA_RETRIEVER_TEST";
 
-function testWebDataRetriever() {
+async function testWebDataRetriever() {
   const url = "https://catalogue.uottawa.ca/en/courses/csi/";
 
   const webDataLoader = getWebBaseLoader(url);
@@ -18,6 +18,8 @@ function testWebDataRetriever() {
   const testQuery =
     "Which computer science courses should I take if I'm interested in machine learning?";
 
+  await dataRetriever.setupRetriever();
+
   dataRetriever
     .queryRetriever(testQuery)
     .then((queryWebRetrieverResult) => {
@@ -25,8 +27,9 @@ function testWebDataRetriever() {
       TU.tmprint(
         TEST_NAME,
         "testWebDataRetriever SUCCESS",
-        "ChatAgent response: " + queryWebRetrieverResult
+        "ChatAgent response: "
       );
+      console.dir(queryWebRetrieverResult);
     })
     .catch((error) => {
       TU.tmprintError(TEST_NAME, "testWebDataRetriever FAILED", error);

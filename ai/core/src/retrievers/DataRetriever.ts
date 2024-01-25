@@ -18,6 +18,7 @@ export class DataRetriever {
   type: "webpage" | "website" | "text";
   name: string;
   context: string;
+  loader: any;
   url: string | undefined;
   chunkSize: number;
   chunkOverlap: number;
@@ -25,31 +26,30 @@ export class DataRetriever {
   retrieverTool: any;
 
   // https://js.langchain.com/docs/modules/data_connection/document_transformers/#get-started-with-text-splitters
-  private static DEFAULT_CHUNK_SIZE = 500;
-  private static DEFAULT_CHUNK_OVERLAP = 100;
+  private static DEFAULT_CHUNK_SIZE = 1000;
+  private static DEFAULT_CHUNK_OVERLAP = 200;
 
   constructor(dataRetrieverConfig: DataRetrieverConfig) {
     this.type = dataRetrieverConfig.type;
     this.name = dataRetrieverConfig.name;
     this.context = dataRetrieverConfig.context;
+    this.loader = dataRetrieverConfig.loader;
     this.url = dataRetrieverConfig.url || undefined;
     this.chunkSize =
       dataRetrieverConfig.chunkSize || DataRetriever.DEFAULT_CHUNK_SIZE;
     this.chunkOverlap =
       dataRetrieverConfig.chunkOverlap || DataRetriever.DEFAULT_CHUNK_OVERLAP;
-
-    this.setupRetriever(dataRetrieverConfig.loader);
   }
 
-  async setupRetriever(loader: any) {
+  async setupRetriever() {
     dlog.msg("Setting up retriever...");
 
     // confirm loader is initialized
-    if (loader === undefined || loader === null) {
+    if (this.loader === undefined || this.loader === null) {
       throw new Error("Loader is not initialized");
     }
 
-    const rawDocs = await loader.load();
+    const rawDocs = await this.loader.load();
     dlog.msg("Raw docs loaded");
 
     const splitter = new RecursiveCharacterTextSplitter({
@@ -82,9 +82,12 @@ export class DataRetriever {
   }
 
   async queryRetriever(userQuery: string) {
+    if (this.retriever === undefined || this.retriever === null) {
+      throw new Error("DataRetriever.ts: Retriever is not initialized");
+    }
     const retrieverResult = await this.retriever.getRelevantDocuments(
       userQuery
     );
-    return retrieverResult[0];
+    return retrieverResult;
   }
 }
