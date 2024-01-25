@@ -12,7 +12,8 @@ export const DEBUG_MODE = true;
 // Tests to run
 const testsToRun: TestsToRun = {
   chatAgentTests: true,
-  webRetrieverTests: true,
+  webRetrieverTests: false,
+  dataRetrieverTests: true,
 };
 
 runAppTests(testsToRun);

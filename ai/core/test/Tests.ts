@@ -1,11 +1,13 @@
 import { TU } from "./Util";
 import { executeChatAgentTests } from "./chat-agent/ChatAgentTest";
-import { executeWebRetrieverTests } from "./openai-chat-agent/WebRetrieverTest";
+// import { executeWebRetrieverTests } from "./openai-chat-agent/WebRetrieverTest";
+import { executeDataRetrieverTests } from "./retrievers/DataRetrieverTest";
 
 // interface to specify tests to run
 export interface TestsToRun {
-  chatAgentTests: boolean;
-  webRetrieverTests: boolean;
+  chatAgentTests?: boolean;
+  webRetrieverTests?: boolean;
+  dataRetrieverTests?: boolean;
 }
 
 // run tests
@@ -17,6 +19,10 @@ export function runAppTests(testsToRun: TestsToRun) {
   }
 
   if (testsToRun.webRetrieverTests) {
-    executeWebRetrieverTests();
+    // executeWebRetrieverTests();
+  }
+
+  if (testsToRun.dataRetrieverTests) {
+    executeDataRetrieverTests();
   }
 }
