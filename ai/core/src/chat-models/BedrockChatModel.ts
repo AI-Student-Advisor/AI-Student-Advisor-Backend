@@ -6,7 +6,7 @@ import {
   getAWSSecretAccessKey,
 } from "config/keys";
 
-export function getChatModel() {
+export function getLlamaChatModel() {
   return new Bedrock({
     model: AppConfig.ai.chat_model_name,
     region: getAWSRegion(),

@@ -10,7 +10,7 @@ export type DataRetrieverConfig = {
   name: string;
   context: string;
   loader: any;
-  vector_db_type: VECTOR_DB_TYPE;
+  vectorDBType: VECTOR_DB_TYPE;
   url?: string;
   chunkSize?: number;
   chunkOverlap?: number;
@@ -37,7 +37,7 @@ export class DataRetriever {
     this.name = dataRetrieverConfig.name;
     this.context = dataRetrieverConfig.context;
     this.loader = dataRetrieverConfig.loader;
-    this.vectorDBType = dataRetrieverConfig.vector_db_type;
+    this.vectorDBType = dataRetrieverConfig.vectorDBType;
     this.url = dataRetrieverConfig.url || undefined;
     this.chunkSize =
       dataRetrieverConfig.chunkSize || DataRetriever.DEFAULT_CHUNK_SIZE;

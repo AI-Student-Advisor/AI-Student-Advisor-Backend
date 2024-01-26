@@ -1,3 +1,4 @@
+import { VECTOR_DB_TYPE } from "src/vector-databases/VectorDatabasesConfig";
 import { getWebBaseLoader } from "../../src/data-loaders/WebDataLoaders";
 import { DataRetriever } from "../../src/retrievers/DataRetriever";
 import { TU } from "../Util";
@@ -13,6 +14,7 @@ async function testWebDataRetriever() {
     name: "uOttawaChat",
     context: "University of Ottawa",
     loader: webDataLoader,
+    vectorDBType: VECTOR_DB_TYPE.MEMORY,
   });
 
   const testQuery =
