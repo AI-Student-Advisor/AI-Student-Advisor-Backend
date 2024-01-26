@@ -2,6 +2,7 @@ import { VECTOR_DB_TYPE } from "src/vector-databases/VectorDatabasesConfig";
 import { getWebBaseLoader } from "../../src/data-loaders/WebDataLoaders";
 import { DataRetriever } from "../../src/retrievers/DataRetriever";
 import { TU } from "../Util";
+import { EMBEDDING_MODELS } from "src/embedding-models/EmbeddingModelsConfig";
 
 const TEST_NAME = "DATA_RETRIEVER_TEST";
 
@@ -15,6 +16,7 @@ async function testWebDataRetriever() {
     context: "University of Ottawa",
     loader: webDataLoader,
     vectorDBType: VECTOR_DB_TYPE.MEMORY,
+    embeddingModelType: EMBEDDING_MODELS.OPENAI,
   });
 
   const testQuery =

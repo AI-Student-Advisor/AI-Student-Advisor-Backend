@@ -1,9 +1,10 @@
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { createRetrieverTool } from "langchain/tools/retriever";
 import { dlog } from "../../utilities/dlog";
-import { getEmbeddingModel } from "../embedding-models/BedrockEmbeddingModel";
+import { getEmbeddingModel } from "../embedding-models/EmbeddingModel";
 import { getVectorDatabase } from "src/vector-databases/VectorDatabases";
 import { VECTOR_DB_TYPE } from "src/vector-databases/VectorDatabasesConfig";
+import { EMBEDDING_MODELS } from "src/embedding-models/EmbeddingModelsConfig";
 
 export type DataRetrieverConfig = {
   type: "webpage" | "website" | "text";
@@ -11,6 +12,7 @@ export type DataRetrieverConfig = {
   context: string;
   loader: any;
   vectorDBType: VECTOR_DB_TYPE;
+  embeddingModelType: EMBEDDING_MODELS;
   url?: string;
   chunkSize?: number;
   chunkOverlap?: number;
@@ -22,6 +24,7 @@ export class DataRetriever {
   context: string;
   loader: any;
   vectorDBType: VECTOR_DB_TYPE;
+  embeddingModelType: EMBEDDING_MODELS;
   url: string | undefined;
   chunkSize: number;
   chunkOverlap: number;
@@ -38,6 +41,7 @@ export class DataRetriever {
     this.context = dataRetrieverConfig.context;
     this.loader = dataRetrieverConfig.loader;
     this.vectorDBType = dataRetrieverConfig.vectorDBType;
+    this.embeddingModelType = dataRetrieverConfig.embeddingModelType;
     this.url = dataRetrieverConfig.url || undefined;
     this.chunkSize =
       dataRetrieverConfig.chunkSize || DataRetriever.DEFAULT_CHUNK_SIZE;
@@ -65,8 +69,8 @@ export class DataRetriever {
     const docs = await splitter.splitDocuments(rawDocs);
     dlog.msg("Documents splitter completed");
 
-    // get the configured embedding model: src/langchain/embedding-models/
-    const embeddings = getEmbeddingModel();
+    // get the embedding model based on the type
+    const embeddings = getEmbeddingModel(this.embeddingModelType);
     dlog.msg("Embedding model created");
 
     // get appropriate vector store based on the type

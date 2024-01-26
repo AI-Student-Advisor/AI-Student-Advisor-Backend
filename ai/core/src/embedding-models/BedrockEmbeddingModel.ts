@@ -6,9 +6,9 @@ import {
   getAWSSecretAccessKey,
 } from "../../config/keys";
 
-export function getEmbeddingModel() {
+export function getBedrockEmbeddingModel() {
   return new BedrockEmbeddings({
-    model: AppConfig.ai.embedding_model_name,
+    model: AppConfig.ai.bedrock_embedding_model_name,
     region: getAWSRegion(),
     credentials: {
       accessKeyId: getAWSAccessKeyID(),
