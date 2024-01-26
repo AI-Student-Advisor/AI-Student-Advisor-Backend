@@ -1,14 +1,16 @@
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { createRetrieverTool } from "langchain/tools/retriever";
 import { dlog } from "../../utilities/dlog";
 import { getEmbeddingModel } from "../embedding-models/BedrockEmbeddingModel";
+import { getVectorDatabase } from "src/vector-databases/VectorDatabases";
+import { VECTOR_DB_TYPE } from "src/vector-databases/VectorDatabasesConfig";
 
 export type DataRetrieverConfig = {
   type: "webpage" | "website" | "text";
   name: string;
   context: string;
   loader: any;
+  vector_db_type: VECTOR_DB_TYPE;
   url?: string;
   chunkSize?: number;
   chunkOverlap?: number;
@@ -19,6 +21,7 @@ export class DataRetriever {
   name: string;
   context: string;
   loader: any;
+  vectorDBType: VECTOR_DB_TYPE;
   url: string | undefined;
   chunkSize: number;
   chunkOverlap: number;
@@ -34,6 +37,7 @@ export class DataRetriever {
     this.name = dataRetrieverConfig.name;
     this.context = dataRetrieverConfig.context;
     this.loader = dataRetrieverConfig.loader;
+    this.vectorDBType = dataRetrieverConfig.vector_db_type;
     this.url = dataRetrieverConfig.url || undefined;
     this.chunkSize =
       dataRetrieverConfig.chunkSize || DataRetriever.DEFAULT_CHUNK_SIZE;
@@ -46,7 +50,7 @@ export class DataRetriever {
 
     // confirm loader is initialized
     if (this.loader === undefined || this.loader === null) {
-      throw new Error("Loader is not initialized");
+      throw new Error("DataRetriever.ts: Loader is not initialized");
     }
 
     const rawDocs = await this.loader.load();
@@ -63,9 +67,20 @@ export class DataRetriever {
 
     // get the configured embedding model: src/langchain/embedding-models/
     const embeddings = getEmbeddingModel();
+    dlog.msg("Embedding model created");
 
-    const vectorstore = await MemoryVectorStore.fromDocuments(docs, embeddings);
-    dlog.msg("Memory vector store created");
+    // get appropriate vector store based on the type
+    const vectoreStoreInstance = getVectorDatabase(this.vectorDBType);
+    // verify if vector store instance is valid
+    if (vectoreStoreInstance === undefined || vectoreStoreInstance === null) {
+      throw new Error("DataRetriever.ts: Invalid vector store instance");
+    }
+    // generate embeddings for the documents and store in the vector store
+    const vectorstore = await vectoreStoreInstance.fromDocuments(
+      docs,
+      embeddings
+    );
+    dlog.msg("Vector store created");
 
     this.retriever = vectorstore.asRetriever();
     dlog.msg("Retriever created");
@@ -75,6 +90,9 @@ export class DataRetriever {
       description: `Search for information about ${this.context}. You must use this tool! If user query is not found in the knowledge base, inform the user about it.`,
     });
     dlog.msg("Retriever tool created");
+
+    dlog.msg("Data Retriever setup completed");
+    return this.retriever;
   }
 
   getRetrieverTool() {
