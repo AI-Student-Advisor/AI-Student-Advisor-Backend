@@ -2,7 +2,7 @@
 
 The AI component of the AI Student Advisor is responsible for providing the chat engine with the ability to answer questions based on the data and remember conversation history.
 
-## Primary Components
+## Primary Stages
 
 - **Data Loading:** Ingest data, generate embeddings using LLM model, and store in a hosted vector database
 - **Context Retrieval:** Retieve relevant context from vector database based on user query
@@ -18,11 +18,14 @@ The AI component of the AI Student Advisor is responsible for providing the chat
   <p style="color: grey">source: [LangChain - Retrieval](https://python.langchain.com/docs/modules/data_connection/)</p>
 </div>
 
-## Development
+## Components Required for Chat Agent
 
-### Phase 1 - Idea Verification
+- **Retrieve & Load Data:** Use data loaders to create a retrieval tool for the chat engine
+- **Embedding Generation:** Generate embeddings for the source data using the configured embedding model
+- **Chat Agent Instantiation**: Create a chat agent that can answer questions based on the data & remember conversation history
 
-- Step 0 (optional): Gather data from few selected uOttawa webpages
-- Step 1: Setup a simple chat engine application using LangChain
-- Step 2: Ingest data using data loaders and create a local in-memory vector database
-- Step 3: Create a simple chatbot that can answer questions based on the data & remember conversation history
+![Chat Agent Architecture](./docs/assets/images/overall-chat-creation.svg)
+
+## User Query Handling Workflow
+
+![Chat Agent User Query Handling](./docs/assets/images/chat-agent-user-query-handling.svg)
