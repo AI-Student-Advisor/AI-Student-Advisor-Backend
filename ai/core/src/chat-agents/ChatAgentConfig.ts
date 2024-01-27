@@ -20,7 +20,7 @@ export type ChatAgentConfig = {
   llm_type: LLM_TYPE;
   initial_prompt?: string;
   remember_history?: boolean;
-  tools?: [];
+  tools?: any;
   maxIterations?: number;
   verbose?: boolean;
 };

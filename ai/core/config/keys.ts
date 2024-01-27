@@ -27,7 +27,6 @@ const getUpstashRedisRESTAPIURL = () => {
   return UPSTASH_REDIS_REST_URL;
 };
 
-// process.env.AWS_REGION
 // Get AWS region from environment variables
 const getAWSRegion = () => {
   const { AWS_REGION } = process.env;
@@ -37,7 +36,6 @@ const getAWSRegion = () => {
   return AWS_REGION;
 };
 
-// process.env.AWS_ACCESS_KEY_ID
 // Get AWS access key ID from environment variables
 const getAWSAccessKeyID = () => {
   const { AWS_ACCESS_KEY_ID } = process.env;
@@ -47,7 +45,6 @@ const getAWSAccessKeyID = () => {
   return AWS_ACCESS_KEY_ID;
 };
 
-// process.env.AWS_SECRET_ACCESS_KEY
 // Get AWS secret access key from environment variables
 const getAWSSecretAccessKey = () => {
   const { AWS_SECRET_ACCESS_KEY } = process.env;
@@ -57,6 +54,24 @@ const getAWSSecretAccessKey = () => {
   return AWS_SECRET_ACCESS_KEY;
 };
 
+// Get close vector store Access Key
+const getCloseVectorStoreAccessKey = () => {
+  const { CLOSE_VECTOR_ACCESS_KEY } = process.env;
+  if (!CLOSE_VECTOR_ACCESS_KEY) {
+    throw new Error("CLOSE_VECTOR_ACCESS_KEY not set");
+  }
+  return CLOSE_VECTOR_ACCESS_KEY;
+};
+
+// Get close vector store Secret Key
+const getCloseVectorStoreSecretKey = () => {
+  const { CLOSE_VECTOR_SECRET_KEY } = process.env;
+  if (!CLOSE_VECTOR_SECRET_KEY) {
+    throw new Error("CLOSE_VECTOR_SECRET_KEY not set");
+  }
+  return CLOSE_VECTOR_SECRET_KEY;
+};
+
 export {
   getOpenAIAPIKey,
   getUpstashRedisRESTAPIKey,
@@ -64,4 +79,6 @@ export {
   getAWSRegion,
   getAWSAccessKeyID,
   getAWSSecretAccessKey,
+  getCloseVectorStoreAccessKey,
+  getCloseVectorStoreSecretKey,
 };

@@ -12,6 +12,7 @@ import {
 } from "../../config/keys";
 
 import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchpad";
+import { dlog } from "../../utilities/dlog";
 
 export const INPUT_MESSAGE_KEY = "input";
 export const HISTORY_MESSAGE_KEY = "history";
@@ -23,6 +24,7 @@ export function getCustomAgentExecutor(
   maxIterations?: number,
   verbose?: boolean
 ) {
+  dlog.msg("Setting up custom agent executor...");
   // verify optional parameters
   // check if any tools provided
   if (tools === undefined || tools === null) tools = [];
@@ -41,17 +43,19 @@ export function getCustomAgentExecutor(
   const llm_with_tools = llm.bind({
     tools,
   });
+  dlog.msg("Done binding tools to LLM");
 
   // Initialize the agent with the LLM (with tools) and prompt
   const agent = RunnableSequence.from([
     {
       input: (i) => i.input,
       agent_scratchpad: (i) => formatToOpenAIFunctionMessages(i.steps),
-      chat_history: (i) => i.chat_history,
+      history: (i) => i.history,
     },
     prompt,
     llm_with_tools,
   ]);
+  dlog.msg("Done initializing agent");
 
   // AgentExecutor - calls the agent and executes the tools
   const agentExecutor = new AgentExecutor({
@@ -60,6 +64,7 @@ export function getCustomAgentExecutor(
     verbose: verbose,
     maxIterations: maxIterations,
   });
+  dlog.msg("Done initializing agent executor");
 
   return new RunnableWithMessageHistory({
     runnable: agentExecutor,

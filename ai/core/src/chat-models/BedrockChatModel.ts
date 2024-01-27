@@ -4,7 +4,7 @@ import {
   getAWSAccessKeyID,
   getAWSRegion,
   getAWSSecretAccessKey,
-} from "config/keys";
+} from "../../config/keys";
 
 export function getLlamaChatModel() {
   return new Bedrock({

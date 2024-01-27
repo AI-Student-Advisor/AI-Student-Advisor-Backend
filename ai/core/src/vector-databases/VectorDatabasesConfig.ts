@@ -2,6 +2,6 @@
  * Types of vector databases supported
  */
 export const enum VECTOR_DB_TYPE {
-  PINECONE,
+  CLOSE_VECTOR_STORE,
   MEMORY,
 }

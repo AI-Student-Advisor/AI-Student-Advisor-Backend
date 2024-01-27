@@ -1,12 +1,13 @@
 import { ChatAgentInterface } from "./ChatAgentInterface";
 import { USER_ROLE, ChatAgentConfig } from "./ChatAgentConfig";
 import { getCustomAgentExecutor } from "./CustomAgentExecutor";
-import { getChatModel } from "src/chat-models/ChatModels";
+import { getChatModel } from "../../src/chat-models/ChatModels";
+import { dlog } from "../../utilities/dlog";
 
 // sessionId is used to identify the user and their history
-type AgentInput = {
-  input: string;
-  configurable?: { sessionId: string };
+export type AgentInput = {
+  user: { input: string };
+  config: { configurable: { sessionId: string } };
 };
 
 export const enum QUERY_STATUS {
@@ -14,6 +15,11 @@ export const enum QUERY_STATUS {
   ERROR = "error",
   PENDING = "pending",
 }
+
+export type AgentResponse = {
+  status: QUERY_STATUS;
+  response?: any;
+};
 
 export class ChatAgent implements ChatAgentInterface {
   private chatAgent: any;
@@ -59,15 +65,24 @@ export class ChatAgent implements ChatAgentInterface {
     return this.chatEnabled;
   }
 
-  async query(userQuery: AgentInput, responseHandler?: any) {
+  async query(agentInput: AgentInput, responseHandler?: any) {
     // check if valid input
-    if (!userQuery) throw new Error("Invalid user query");
+    if (!agentInput) throw new Error("Invalid user query");
+    dlog.msg(
+      "ChatAgent.ts: user query received: " +
+        agentInput.user.input +
+        " sessionID: " +
+        agentInput.config.configurable.sessionId
+    );
     // check if chat is enabled
     if (!this.chatEnabled) throw new Error("Chat is disabled");
     // let response handler know response is being prepared
     if (responseHandler) responseHandler({ status: QUERY_STATUS.PENDING });
     // retrieve and return response
-    const response = await this.chatAgent.invoke(userQuery);
+    const response = await this.chatAgent.invoke(
+      agentInput.user, // user input
+      agentInput.config // session ID
+    );
     // let response handler know response is ready
     if (responseHandler)
       responseHandler({ status: QUERY_STATUS.SUCCESS, response });
@@ -76,15 +91,15 @@ export class ChatAgent implements ChatAgentInterface {
   }
 
   // NOT IMPLEMENTED
-  async queryStream(userQuery: AgentInput, responseHandler?: any) {
+  async queryStream(agentInput: AgentInput, responseHandler?: any) {
     // check if valid input
-    if (!userQuery) throw new Error("Invalid user query");
+    if (!agentInput) throw new Error("Invalid user query");
     // check if chat is enabled
     if (!this.chatEnabled) throw new Error("Chat is disabled");
     // let response handler know response is being prepared
     if (responseHandler) responseHandler({ status: QUERY_STATUS.PENDING });
     // retrieve and return response
-    const response = await this.chatAgent.invoke(userQuery);
+    const response = await this.chatAgent.invoke();
     // let response handler know response is ready
     if (responseHandler)
       responseHandler({ status: QUERY_STATUS.SUCCESS, response });
@@ -92,7 +107,11 @@ export class ChatAgent implements ChatAgentInterface {
     return response;
   }
 
+  // return in the format {"input":"foo"}, {"configurable":{"sessionId":"123"}}
   prepareInput(userQuery: string): AgentInput {
-    return { input: userQuery, configurable: { sessionId: this.sessionId } };
+    return {
+      user: { input: userQuery },
+      config: { configurable: { sessionId: this.sessionId } },
+    };
   }
 }
