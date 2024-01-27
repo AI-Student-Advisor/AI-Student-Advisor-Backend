@@ -1,4 +1,5 @@
 // File to handle use of API keys from environment variables
+import "dotenv/config";
 
 // Get OpenAI API key from environment variables
 const getOpenAIAPIKey = () => {
