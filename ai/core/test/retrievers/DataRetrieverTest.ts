@@ -5,6 +5,7 @@ import { TU } from "../Util";
 import { EMBEDDING_MODELS } from "src/embedding-models/EmbeddingModelsConfig";
 
 const TEST_NAME = "DATA_RETRIEVER_TEST";
+TU.setTitle(TEST_NAME);
 
 async function testWebDataRetriever() {
   const url = "https://catalogue.uottawa.ca/en/courses/csi/";
@@ -27,21 +28,17 @@ async function testWebDataRetriever() {
   dataRetriever
     .queryRetriever(testQuery)
     .then((queryWebRetrieverResult) => {
-      TU.tmprint(TEST_NAME, "", "User query: " + testQuery);
-      TU.tmprint(
-        TEST_NAME,
-        "testWebDataRetriever SUCCESS",
-        "ChatAgent response: "
-      );
+      TU.tmprint("testWebDataRetriever", "User query: " + testQuery);
+      TU.tmprint("testWebDataRetriever SUCCESS", "ChatAgent response: ");
       console.dir(queryWebRetrieverResult);
     })
     .catch((error) => {
-      TU.tmprintError(TEST_NAME, "testWebDataRetriever FAILED", error);
+      TU.tmprintError("testWebDataRetriever FAILED", error);
     });
 }
 
 // execute tests
 export function executeDataRetrieverTests() {
-  TU.tprint(TEST_NAME, `Running ${TEST_NAME}!`);
+  TU.tprint(`Running ${TEST_NAME}!`);
   testWebDataRetriever();
 }
