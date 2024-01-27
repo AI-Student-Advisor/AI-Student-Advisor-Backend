@@ -8,12 +8,12 @@ import {
 
 export function getBedrockEmbeddingModel() {
   return new BedrockEmbeddings({
-    model: AppConfig.ai.bedrock_embedding_model_name,
+    model: AppConfig.ai.bedrock.embedding_model_name,
     region: getAWSRegion(),
     credentials: {
       accessKeyId: getAWSAccessKeyID(),
       secretAccessKey: getAWSSecretAccessKey(),
     },
-    maxRetries: 3,
+    maxRetries: AppConfig.ai.bedrock.embedding_model_max_retries,
   });
 }

@@ -9,14 +9,15 @@ export interface TestsToRun {
 }
 
 // run tests
-export function runAppTests(testsToRun: TestsToRun) {
+export async function runAppTests(testsToRun: TestsToRun) {
   TU.qtprint("TESTS", "Running tests!");
+  let result: any = false;
 
   if (testsToRun.dataRetrieverTests) {
-    executeDataRetrieverTests();
+    result = await executeDataRetrieverTests();
   }
 
   if (testsToRun.chatAgentTests) {
-    executeChatAgentTests();
+    result = await executeChatAgentTests();
   }
 }

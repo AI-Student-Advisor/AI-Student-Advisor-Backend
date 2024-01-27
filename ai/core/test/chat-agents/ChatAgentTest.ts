@@ -26,7 +26,6 @@ Basic workflow for a webpage based chat agent:
   - A response handler can be used to handle the response and get the status of the query (ex: to show a loading spinner)
 
 */
-
 import {
   AgentResponse,
   ChatAgent,
@@ -41,45 +40,100 @@ import { VECTOR_DB_TYPE } from "../../src/vector-databases/VectorDatabasesConfig
 import { TU } from "../Util";
 
 const TEST_NAME = "CHAT_AGENT_TEST";
-TU.setTitle(TEST_NAME);
 
-const url = "https://catalogue.uottawa.ca/en/courses/csi/";
-const testQuery =
-  "Which computer science courses should I take if I'm interested in machine learning?";
-// const url = "https://example.com/";
-// const testQuery = "What is example domain used for?";
+const TEST_PARAMS = {
+  using_test_query: false, // if false, will start CLI interface
+  testUrl: "https://catalogue.uottawa.ca/en/courses/csi/",
+  testQuery:
+    "What courses should I take if I am interested in machine learning?",
+  llm_model: LLM_TYPE.OPEN_AI,
+  embeddings_model: EMBEDDING_MODELS.OPENAI,
+  data_retriever_name: "uOttawaChat",
+  data_context: "University of Ottawa",
+  loadCloseVectorStoreFromCloud: true,
+  vector_db_type: VECTOR_DB_TYPE.CLOSE_VECTOR_STORE,
+  sessionId: crypto.randomUUID(),
+};
 
 async function testChatAgent() {
   // PART 1: Get Retriever Tool
-  const webDataLoader = getWebBaseLoader(url);
+  const webDataLoader = getWebBaseLoader(TEST_PARAMS.testUrl);
   const dataRetriever = new DataRetriever({
-    type: "webpage",
-    name: "uOttawaChat",
-    context: "University of Ottawa",
+    name: TEST_PARAMS.data_retriever_name,
+    context: TEST_PARAMS.data_context,
     loader: webDataLoader,
-    loadCloseVectorStoreFromCloud: true,
-    vectorDBType: VECTOR_DB_TYPE.CLOSE_VECTOR_STORE,
-    embeddingModelType: EMBEDDING_MODELS.OPENAI,
+    loadCloseVectorStoreFromCloud: TEST_PARAMS.loadCloseVectorStoreFromCloud,
+    vectorDBType: TEST_PARAMS.vector_db_type,
+    embeddingModelType: TEST_PARAMS.embeddings_model,
   });
   const retrieverTool = await dataRetriever.setupRetriever();
 
   // PART 2: Create Chat Agent
   const chatAgentConfig: ChatAgentConfig = {
-    sessionId: "123", // required parameter
-    llm_type: LLM_TYPE.LLAMA, // we will be using Llama 2 model
+    sessionId: TEST_PARAMS.sessionId, // required parameter
+    llm_type: TEST_PARAMS.llm_model, // LLM to use
     // provide retriever tool so chat agent can retriever context from out data
     tools: [retrieverTool],
   };
   const chatAgent = new ChatAgent(chatAgentConfig);
 
   // PART 3: Enable Chat and Query the Chat Agent
-  chatAgent.enableChat();
-  // prepare input method returns the AgentInput object with the session ID associated with the chat agent
-  const agentInput = chatAgent.prepareInput(testQuery);
-  // create a response handler which takes in AgentResponse object
-  const responseHandler = getResponseHandler();
-  // query the chat agent with the user query and the response handler
-  chatAgent.query(agentInput, responseHandler);
+  const chatEnabled = await chatAgent.enableChat();
+  if (!chatEnabled) {
+    TU.tmprintError("testChatAgent FAILED", "Chat agent failed to enable");
+    return;
+  } else {
+    TU.tmprint("testChatAgent", "Chat agent enabled");
+  }
+
+  if (TEST_PARAMS.using_test_query) {
+    // prepare input method returns the AgentInput object with the session ID associated with the chat agent
+    const agentInput = chatAgent.prepareInput(TEST_PARAMS.testQuery);
+    // create a response handler which takes in AgentResponse object
+    const responseHandler = getResponseHandler();
+    // query the chat agent with the user query and the response handler
+    await chatAgent.query(agentInput, responseHandler);
+  } else {
+    // start CLI interface for chat agent
+    cli(chatAgent);
+  }
+}
+
+function cli(chatAgent: ChatAgent) {
+  TU.print(
+    "\nCLI-based AI Student Advisor ready for your query related to " +
+      TEST_PARAMS.data_context +
+      ". Type 'exit' to exit.\n"
+  );
+  // start prompt
+  const prompt = require("prompt");
+  // start prompt
+  prompt.start();
+  // start chat
+  startChat(prompt, chatAgent);
+}
+
+function startChat(prompt: any, chatAgent: ChatAgent) {
+  prompt.get(["query"], async (err: any, result: any) => {
+    // check for error
+    if (err) {
+      TU.tmprintError("cli FAILED", err);
+      return;
+    }
+    // check if user wants to exit
+    if (result.query === "exit") {
+      TU.tmprint("cli EXIT", "Exiting CLI");
+      printTestDone();
+      return;
+    }
+    // prepare input method returns the AgentInput object with the session ID associated with the chat agent
+    const agentInput = chatAgent.prepareInput(result.query);
+    // create a response handler which takes in AgentResponse object
+    const responseHandler = getResponseHandler();
+    // query the chat agent with the user query and the response handler
+    await chatAgent.query(agentInput, responseHandler);
+    startChat(prompt, chatAgent);
+  });
 }
 
 // utility method to get a response handler
@@ -100,11 +154,10 @@ function getResponseHandler() {
       case QUERY_STATUS.SUCCESS:
         // stop the response is loading message
         printLoadingMessage(true);
+        // Below line for additional debugging
+        // console.log(JSON.stringify(response.response, null, 2));
         // if response is not pending, print the response
-        TU.tmprint(
-          "testChatAgent SUCCESS",
-          "ChatAgent response: " + response.response
-        );
+        TU.print("AI Student Advisor response: " + response.response.output);
         break;
       default:
         TU.tmprintError("testChatAgent FAILED", "Invalid response status");
@@ -119,8 +172,8 @@ let printingMessage: any = undefined;
 function printLoadingMessage(stopExecution: boolean) {
   if (!stopExecution) {
     printingMessage = setInterval(() => {
-      TU.tmprint("testChatAgent", "Query in process. Waiting for response...");
-    }, 10000);
+      TU.print("Waiting for LLM response...");
+    }, 2000);
     return;
   } else {
     clearInterval(printingMessage);
@@ -128,8 +181,13 @@ function printLoadingMessage(stopExecution: boolean) {
   }
 }
 
+function printTestDone() {
+  TU.tprint(`Done ${TEST_NAME}!`);
+}
+
 // execute tests
-export function executeChatAgentTests() {
+export async function executeChatAgentTests() {
+  TU.setTitle(TEST_NAME);
   TU.tprint(`Running ${TEST_NAME}!`);
-  testChatAgent();
+  await testChatAgent();
 }

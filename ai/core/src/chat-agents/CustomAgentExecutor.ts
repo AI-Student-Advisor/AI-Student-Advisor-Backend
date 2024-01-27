@@ -10,8 +10,8 @@ import {
   getUpstashRedisRESTAPIKey,
   getUpstashRedisRESTAPIURL,
 } from "../../config/keys";
-
-import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchpad";
+import { BaseMessage } from "@langchain/core/messages";
+import { AgentAction, AgentFinish } from "@langchain/core/agents";
 import { dlog } from "../../utilities/dlog";
 
 export const INPUT_MESSAGE_KEY = "input";
@@ -49,11 +49,12 @@ export function getCustomAgentExecutor(
   const agent = RunnableSequence.from([
     {
       input: (i) => i.input,
-      agent_scratchpad: (i) => formatToOpenAIFunctionMessages(i.steps),
+      agent_scratchpad: (i) => i.steps,
       history: (i) => i.history,
     },
     prompt,
     llm_with_tools,
+    customOutputParser,
   ]);
   dlog.msg("Done initializing agent");
 
@@ -79,4 +80,36 @@ export function getCustomAgentExecutor(
     inputMessagesKey: INPUT_MESSAGE_KEY,
     historyMessagesKey: HISTORY_MESSAGE_KEY,
   });
+}
+
+/** Define the custom output parser */
+function customOutputParser(message: BaseMessage): AgentAction | AgentFinish {
+  const text = message.content;
+  if (typeof text !== "string") {
+    throw new Error(
+      `Message content is not a string. Received: ${JSON.stringify(
+        text,
+        null,
+        2
+      )}`
+    );
+  }
+  /** If the input includes "Final Answer" return as an instance of `AgentFinish` */
+  if (text.includes("Final Answer:")) {
+    const parts = text.split("Final Answer:");
+    const input = parts[parts.length - 1].trim();
+    const finalAnswers = { output: input };
+    return { log: text, returnValues: finalAnswers };
+  }
+  /** Use RegEx to extract any actions and their values */
+  const match = /Action: (.*)\nAction Input: (.*)/s.exec(text);
+  if (!match) {
+    throw new Error(`Could not parse LLM output: ${text}`);
+  }
+  /** Return as an instance of `AgentAction` */
+  return {
+    tool: match[1].trim(),
+    toolInput: match[2].trim().replace(/^"+|"+$/g, ""),
+    log: text,
+  };
 }

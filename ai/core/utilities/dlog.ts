@@ -1,11 +1,11 @@
-import { DEBUG_MODE } from "../App";
-
 // ----------------------------
 // Debugging Loggers
 
+import { AppConfig } from "../config/AppConfig";
+
 export const dlog = {
   msg: (message: string) => {
-    if (DEBUG_MODE) {
+    if (AppConfig.DEBUG_MODE) {
       console.log("DLOG: ", message);
     }
   },

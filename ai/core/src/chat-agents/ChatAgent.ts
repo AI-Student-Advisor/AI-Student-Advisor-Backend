@@ -1,8 +1,9 @@
-import { ChatAgentInterface } from "./ChatAgentInterface";
 import { USER_ROLE, ChatAgentConfig } from "./ChatAgentConfig";
 import { getCustomAgentExecutor } from "./CustomAgentExecutor";
 import { getChatModel } from "../../src/chat-models/ChatModels";
 import { dlog } from "../../utilities/dlog";
+import { LLM_TYPE } from "src/chat-models/ChatModelsConfig";
+import { getOpenAIAgentExecutor } from "./OpenAIAgentExecutor";
 
 // sessionId is used to identify the user and their history
 export type AgentInput = {
@@ -21,11 +22,16 @@ export type AgentResponse = {
   response?: any;
 };
 
-export class ChatAgent implements ChatAgentInterface {
+export class ChatAgent {
   private chatAgent: any;
   private chatEnabled: boolean = false;
   private userRole: USER_ROLE;
   private sessionId: string = "";
+  private llmType: LLM_TYPE;
+  private initialPrompt?: string;
+  private tools?: [];
+  private maxIterations?: number;
+  private verbose?: boolean;
 
   constructor(chatAgentConfig: ChatAgentConfig) {
     // Order is important
@@ -34,15 +40,15 @@ export class ChatAgent implements ChatAgentInterface {
     this.userRole = chatAgentConfig.user_role || "student";
     // Set the sessionId
     this.sessionId = chatAgentConfig.sessionId;
+    // Set params for the chat agent
+    this.llmType = chatAgentConfig.llm_type;
+    this.initialPrompt = chatAgentConfig.initial_prompt;
+    this.tools = chatAgentConfig.tools;
+    this.maxIterations = chatAgentConfig.maxIterations;
+    this.verbose = chatAgentConfig.verbose;
 
     // Setup the chat agent
-    this.chatAgent = getCustomAgentExecutor(
-      getChatModel(chatAgentConfig.llm_type),
-      this.getSystemPrompt(chatAgentConfig.initial_prompt),
-      chatAgentConfig.tools,
-      chatAgentConfig.maxIterations,
-      chatAgentConfig.verbose
-    );
+    this.chatAgent = undefined;
   }
 
   private getSystemPrompt(initialPrompt?: string) {
@@ -53,10 +59,34 @@ export class ChatAgent implements ChatAgentInterface {
     }
   }
 
-  enableChat(): boolean {
-    // confirm chatAgent has been initialized
-    if (!this.chatAgent) throw new Error("Chat agent not initialized");
+  async enableChat() {
+    // initialize chat agent if not already initialized
+    if (this.chatAgent === null || this.chatAgent == undefined) {
+      // if using Open AI LLM
+      if (this.llmType === LLM_TYPE.OPEN_AI) {
+        this.chatAgent = await getOpenAIAgentExecutor(
+          this.getSystemPrompt(this.initialPrompt),
+          this.tools,
+          this.maxIterations,
+          this.verbose
+        );
+        dlog.msg("ChatAgent.ts: Open AI agent initialized");
+      }
+      // if using custom LLM
+      else {
+        this.chatAgent = getCustomAgentExecutor(
+          getChatModel(this.llmType),
+          this.getSystemPrompt(this.initialPrompt),
+          this.tools,
+          this.maxIterations,
+          this.verbose
+        );
+        dlog.msg("ChatAgent.ts: Custom agent initialized");
+      }
+    }
+    // enable chat
     this.chatEnabled = true;
+    dlog.msg("ChatAgent.ts: Chat enabled");
     return this.chatEnabled;
   }
 
@@ -77,17 +107,26 @@ export class ChatAgent implements ChatAgentInterface {
     // check if chat is enabled
     if (!this.chatEnabled) throw new Error("Chat is disabled");
     // let response handler know response is being prepared
-    if (responseHandler) responseHandler({ status: QUERY_STATUS.PENDING });
-    // retrieve and return response
-    const response = await this.chatAgent.invoke(
-      agentInput.user, // user input
-      agentInput.config // session ID
-    );
-    // let response handler know response is ready
-    if (responseHandler)
-      responseHandler({ status: QUERY_STATUS.SUCCESS, response });
-    // return the response directly as well in case response handler is not being used
-    return response;
+    if (responseHandler != null && responseHandler != undefined)
+      responseHandler({ status: QUERY_STATUS.PENDING });
+    try {
+      // retrieve and return response
+      const response = await this.chatAgent.invoke(
+        agentInput.user, // user input
+        agentInput.config // session ID
+      );
+      // let response handler know response is ready
+      if (responseHandler)
+        responseHandler({ status: QUERY_STATUS.SUCCESS, response });
+      // return the response directly as well in case response handler is not being used
+      return response;
+    } catch (error) {
+      // let response handler know about the error
+      if (responseHandler)
+        responseHandler({ status: QUERY_STATUS.ERROR, response: error });
+      // return the response directly as well in case response handler is not being used
+      return "Error: Unable to generate response. Please try again later.";
+    }
   }
 
   // NOT IMPLEMENTED

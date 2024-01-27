@@ -2,11 +2,12 @@
 
 import { LLM_TYPE } from "./ChatModelsConfig";
 import { getLlamaChatModel } from "./BedrockChatModel";
+import { getOpenAIChatModel } from "./OpenAIChatModel";
 
 export function getChatModel(llmType: LLM_TYPE) {
   switch (llmType) {
     case LLM_TYPE.OPEN_AI:
-    // return new OpenAIChatModel();
+      return getOpenAIChatModel();
     case LLM_TYPE.PALM:
     // return new PalmChatModel();
     case LLM_TYPE.LLAMA:

@@ -4,9 +4,9 @@ import { getOpenAIAPIKey } from "../../config/keys";
 
 export function getOpenAIEmbeddingModel() {
   return new OpenAIEmbeddings({
-    modelName: AppConfig.ai.openai_embedding_model_name,
+    modelName: AppConfig.ai.openai.embedding_model_name,
     openAIApiKey: getOpenAIAPIKey(),
-    timeout: 10000,
-    maxRetries: 3,
+    timeout: AppConfig.ai.openai.embedding_model_timeout,
+    maxRetries: AppConfig.ai.openai.embedding_model_max_retries,
   });
 }

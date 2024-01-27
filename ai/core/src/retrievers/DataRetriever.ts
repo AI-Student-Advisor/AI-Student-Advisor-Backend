@@ -13,7 +13,6 @@ import {
 } from "../../config/keys";
 
 export type DataRetrieverConfig = {
-  type: "webpage" | "website" | "text";
   name: string;
   context: string;
   loader: any;
@@ -26,7 +25,6 @@ export type DataRetrieverConfig = {
 };
 
 export class DataRetriever {
-  type: "webpage" | "website" | "text";
   name: string;
   context: string;
   loader?: any;
@@ -37,16 +35,16 @@ export class DataRetriever {
   chunkSize: number;
   chunkOverlap: number;
   retrieverTool: any;
+  private retriever: any;
 
   // https://js.langchain.com/docs/modules/data_connection/document_transformers/#get-started-with-text-splitters
   private static DEFAULT_CHUNK_SIZE = 1000;
   private static DEFAULT_CHUNK_OVERLAP = 200;
 
   constructor(dataRetrieverConfig: DataRetrieverConfig) {
-    this.type = dataRetrieverConfig.type;
     this.name = dataRetrieverConfig.name;
     this.context = dataRetrieverConfig.context;
-    this.loader = dataRetrieverConfig.loader || false;
+    this.loader = dataRetrieverConfig.loader;
     this.loadCloseVectorStoreFromCloud =
       dataRetrieverConfig.loadCloseVectorStoreFromCloud || false;
     this.vectorDBType = dataRetrieverConfig.vectorDBType;
@@ -96,24 +94,44 @@ export class DataRetriever {
         throw new Error("DataRetriever.ts: Invalid vector store instance");
       }
 
-      // generate embeddings for the documents and store in the vector store
-      vectorstore = await vectoreStoreInstance.fromDocuments(docs, embeddings);
-      dlog.msg("Vector store created");
-
       // Save the vector store to cloud
-      if (vectorstore instanceof CloseVectorNode) {
-        await vectorstore.saveToCloud({
-          description: "uOttawa",
-          public: true,
-        });
-        dlog.msg("Vector store saved to cloud");
+      if (this.vectorDBType === VECTOR_DB_TYPE.CLOSE_VECTOR_STORE) {
+        // generate embeddings for the documents and store in the vector store
+        vectorstore = await vectoreStoreInstance.fromDocuments(
+          docs,
+          embeddings,
+          undefined,
+          {
+            key: getCloseVectorStoreAccessKey(),
+            secret: getCloseVectorStoreSecretKey(),
+          }
+        );
+        dlog.msg("Vector store created");
 
-        const { uuid } = vectorstore.instance;
-        dlog.msg("Vector store UUID: " + uuid);
+        if (vectorstore instanceof CloseVectorNode) {
+          await vectorstore.saveToCloud({
+            description: "uOttawa",
+            public: true,
+          });
+          dlog.msg("Vector store saved to cloud");
+
+          const { uuid } = vectorstore.instance;
+          dlog.msg("Vector store UUID: " + uuid);
+        }
+      } else {
+        // Most likely in-memory store
+        vectorstore = await vectoreStoreInstance.fromDocuments(
+          docs,
+          embeddings
+        );
+        dlog.msg("Vector store created");
       }
     }
 
-    this.retrieverTool = createRetrieverTool(vectorstore.asRetriever(), {
+    // create retriever using the vector store
+    this.retriever = vectorstore.asRetriever();
+    // setup retriever tool
+    this.retrieverTool = createRetrieverTool(this.retriever, {
       name: this.name,
       description: `Search for information about ${this.context}. You must use this tool! If user query is not found in the knowledge base, inform the user about it.`,
     });
@@ -128,10 +146,11 @@ export class DataRetriever {
   }
 
   async queryRetriever(userQuery: string) {
-    if (this.retrieverTool === undefined || this.retrieverTool === null) {
+    if (this.retriever === undefined || this.retriever === null) {
       throw new Error("DataRetriever.ts: Retriever is not initialized");
     }
-    const retrieverResult = await this.retrieverTool.getRelevantDocuments(
+    dlog.msg("DataRetriever.ts: User query received: " + userQuery);
+    const retrieverResult = await this.retriever.getRelevantDocuments(
       userQuery
     );
     return retrieverResult;

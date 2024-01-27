@@ -5,19 +5,24 @@ import { TU } from "../Util";
 import { EMBEDDING_MODELS } from "src/embedding-models/EmbeddingModelsConfig";
 
 const TEST_NAME = "DATA_RETRIEVER_TEST";
-TU.setTitle(TEST_NAME);
+
+const TEST_PARAMS = {
+  testUrl: "https://catalogue.uottawa.ca/en/courses/csi/",
+  data_retriever_name: "uOttawaChat",
+  data_context: "University of Ottawa",
+  loadCloseVectorStoreFromCloud: false,
+  vector_db_type: VECTOR_DB_TYPE.MEMORY,
+  embeddings_model: EMBEDDING_MODELS.OPENAI,
+};
 
 async function testWebDataRetriever() {
-  const url = "https://catalogue.uottawa.ca/en/courses/csi/";
-
-  const webDataLoader = getWebBaseLoader(url);
   const dataRetriever = new DataRetriever({
-    type: "webpage",
-    name: "uOttawaChat",
-    context: "University of Ottawa",
-    loader: webDataLoader,
-    vectorDBType: VECTOR_DB_TYPE.MEMORY,
-    embeddingModelType: EMBEDDING_MODELS.OPENAI,
+    name: TEST_PARAMS.data_retriever_name,
+    context: TEST_PARAMS.data_context,
+    loader: getWebBaseLoader(TEST_PARAMS.testUrl),
+    vectorDBType: TEST_PARAMS.vector_db_type,
+    loadCloseVectorStoreFromCloud: TEST_PARAMS.loadCloseVectorStoreFromCloud,
+    embeddingModelType: TEST_PARAMS.embeddings_model,
   });
 
   const testQuery =
@@ -25,7 +30,7 @@ async function testWebDataRetriever() {
 
   await dataRetriever.setupRetriever();
 
-  dataRetriever
+  await dataRetriever
     .queryRetriever(testQuery)
     .then((queryWebRetrieverResult) => {
       TU.tmprint("testWebDataRetriever", "User query: " + testQuery);
@@ -35,10 +40,15 @@ async function testWebDataRetriever() {
     .catch((error) => {
       TU.tmprintError("testWebDataRetriever FAILED", error);
     });
+
+  return true;
 }
 
 // execute tests
-export function executeDataRetrieverTests() {
+export async function executeDataRetrieverTests() {
+  TU.setTitle(TEST_NAME);
   TU.tprint(`Running ${TEST_NAME}!`);
-  testWebDataRetriever();
+  const result = await testWebDataRetriever();
+  TU.tprint("Tests completed");
+  return result;
 }
