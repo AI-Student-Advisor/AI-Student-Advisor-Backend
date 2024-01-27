@@ -1,4 +1,10 @@
+import { fetchConversation } from "/src/api/Conversation.ts";
+import {
+    PostResponseFail,
+    PostResponseSuccess
+} from "/src/api/interfaces/Conversation.ts";
 import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
+import { v4 as uuid } from "uuid";
 
 export default function ChatConversation() {
     const messages = [
@@ -15,6 +21,26 @@ export default function ChatConversation() {
         { sender: "You", text: "Hello" },
         { sender: "Advisor", text: "Hello" }
     ];
+
+    void fetchConversation(
+        {
+            id: uuid(),
+            contentType: "text/plain",
+            content: "Hello, this is the client",
+            author: {
+                role: "user"
+            }
+        },
+        (response) => {
+            if (response.status === "success") {
+                const successResponse = response as PostResponseSuccess;
+                console.log(successResponse);
+            } else if (response.status === "fail") {
+                const failResponse = response as PostResponseFail;
+                console.error(failResponse);
+            }
+        }
+    );
 
     return (
         <div className="flex-1">

@@ -85,7 +85,7 @@ function HistoryConversationList({
     children,
     ...otherProps
 }: ConversationListProps) {
-    if (children === null || children === undefined) {
+    if (!children) {
         return <></>;
     }
 
