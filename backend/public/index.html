@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nodejs Server-Sent Events</title>
+  </head>
+  <body>
+    <h1>Hello SSE!</h1>
+
+    <h2>List of Server-sent events</h2>
+    <ul id="sse-list"></ul>
+
+    <script>
+      const api = new EventSource("/api");
+      api.addEventListener("open", () => {
+        console.log("Opened");
+      });
+
+      api.addEventListener("error", () => {
+        console.error("Err");
+      });
+
+      api.addEventListener("message", () => {
+        console.log("Received message");
+      });
+    </script>
+  </body>
+</html>
