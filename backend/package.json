@@ -97,7 +97,7 @@
     "yargs": "^3.10.0"
   },
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "node server.js"
   },
   "keywords": [],
   "author": "",
