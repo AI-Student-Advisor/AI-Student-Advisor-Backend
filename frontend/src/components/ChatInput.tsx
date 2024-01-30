@@ -1,15 +1,38 @@
 import { faPaperPlane, faStop } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Textarea } from "@nextui-org/react";
-import { useState } from "react";
+import React, { useState } from "react";
 
-export default function ChatInput() {
+export type OnSendMessageCallback = (text: string) => void;
+export type OnStopGenerateCallback = () => void;
+
+export interface ChatInputProps extends React.ComponentProps<"form"> {
+    onSendMessage?: OnSendMessageCallback;
+    onStopGenerate?: OnStopGenerateCallback;
+    isGenerating: boolean;
+}
+
+export default function ChatInput({
+    onSendMessage,
+    onStopGenerate,
+    isGenerating,
+    ...otherProps
+}: ChatInputProps) {
     const [input, setInput] = useState("");
     const [buttonDisabled, setButtonDisabled] = useState(true);
-    const [isGenerating] = useState(false);
+
+    function buttonClickHandler() {
+        if (onSendMessage && !isGenerating) {
+            onSendMessage(input);
+            setInput("");
+        }
+        if (onStopGenerate && isGenerating) {
+            onStopGenerate();
+        }
+    }
 
     return (
-        <form className="flex items-center">
+        <form {...otherProps}>
             <Textarea
                 isRequired
                 variant="flat"
@@ -23,12 +46,13 @@ export default function ChatInput() {
                 type="text"
                 placeholder="Type your message..."
                 color="secondary"
+                isDisabled={isGenerating}
             />
             <div role="separator" className="px-3"></div>
             <Button
                 isIconOnly
                 className="text-base text-white"
-                onClick={() => {}}
+                onClick={buttonClickHandler}
                 color="primary"
                 variant="solid"
                 isDisabled={buttonDisabled}

@@ -5,5 +5,5 @@ export interface Control {
     /**
      * Predefined control signals.
      */
-    signal: "generation-done";
+    signal: "generation-done" | "generation-error";
 }

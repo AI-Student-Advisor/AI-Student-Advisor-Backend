@@ -3,7 +3,6 @@ import {
     PostResponseFail,
     PostResponseSuccess
 } from "/src/api/interfaces/Conversation.ts";
-import { Message } from "/src/api/interfaces/StructMessage.ts";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 type SseOnEventCallbackType = (
@@ -11,22 +10,20 @@ type SseOnEventCallbackType = (
 ) => void;
 
 // TODO: Now using the mock server. To be switched to the real backend.
-export async function fetchConversation(
-    message: Message,
-    onPush: SseOnEventCallbackType
+export async function sendMessage(
+    request: PostRequest,
+    onPush: SseOnEventCallbackType,
+    signal?: AbortSignal
 ) {
-    const request: PostRequest = {
-        message: message
-    };
-
     await fetchEventSource("http://localhost:5174", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
+        signal: signal,
         openWhenHidden: true,
         body: JSON.stringify(request),
-        onopen: async (response) => {
+        async onopen(response) {
             const contentType = response.headers.get("Content-Type");
             if (
                 Boolean(contentType) &&
@@ -36,10 +33,10 @@ export async function fetchConversation(
                 throw await response.json();
             }
         },
-        onerror: (error) => {
+        onerror(error) {
             throw error;
         },
-        onmessage: async (event) => {
+        onmessage(event) {
             const { data } = event;
             if (data) {
                 onPush(JSON.parse(data));

@@ -27,23 +27,23 @@ app.post("/", (request, response) => {
     const data = request.body;
     console.log(data);
 
-    let conversationId = uuid();
+    let sessionId = uuid();
 
     if (data.message.id) {
-        conversationId = data.message.id;
+        sessionId = data.message.id;
     }
 
     const responseUserMessage = {
         status: "success",
         type: "message",
-        id: conversationId,
+        id: sessionId,
         message: data.message
     };
 
     const responseMessage = {
         status: "success",
         type: "message",
-        id: conversationId,
+        id: sessionId,
         message: {
             id: uuid(),
             contentType: "text/plain",
@@ -56,7 +56,7 @@ app.post("/", (request, response) => {
     const responseControl = {
         status: "success",
         type: "control",
-        id: "09126fe7-351a-4a66-978e-c813b26d51be",
+        id: sessionId,
         control: {
             signal: "generation-done"
         }
@@ -66,8 +66,6 @@ app.post("/", (request, response) => {
     response.setHeader("Connection", "keep-alive");
     response.setHeader("Cache-Control", "no-cache");
     response.setHeader("X-Accel-Buffering", "no");
-
-    response.flushHeaders();
 
     response.write("event: message\n");
     response.write(`data: ${JSON.stringify(responseUserMessage)}`);
@@ -87,7 +85,7 @@ app.post("/", (request, response) => {
             response.write("\n\n");
             response.end();
         }
-    }, 200);
+    }, 100);
 
     response.on("close", () => {
         response.end();

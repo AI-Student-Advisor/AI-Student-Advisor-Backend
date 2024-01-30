@@ -1,13 +1,16 @@
 import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Switch } from "@nextui-org/react";
+import React from "react";
 import useDarkMode from "use-dark-mode";
 
-export default function ChatToolbar() {
+export interface ChatToolbarProps extends React.ComponentProps<"div"> {}
+
+export default function ChatToolbar({ ...otherProps }: ChatToolbarProps) {
     const darkMode = useDarkMode();
 
     return (
-        <div className="flex justify-between items-center">
+        <div {...otherProps}>
             <Switch
                 isSelected={!darkMode.value}
                 onValueChange={darkMode.toggle}

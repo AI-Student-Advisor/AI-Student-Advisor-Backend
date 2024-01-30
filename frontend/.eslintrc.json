@@ -28,7 +28,6 @@
         "arrow-body-style": "error",
         "block-scoped-var": "error",
         "camelcase": "error",
-        "capitalized-comments": "error",
         "class-methods-use-this": "error",
         "consistent-return": [
             "error",

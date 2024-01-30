@@ -1,29 +1,43 @@
-import { fetchHistoryConversations } from "/src/api/HistoryConversations.ts";
 import { HistoryConversation } from "/src/api/interfaces/StructHistoryConversation.ts";
 import { Accordion, AccordionItem } from "@nextui-org/react";
 import React, { ReactElement, useEffect, useState } from "react";
 
-export default function ChatConversationHistory() {
-    const emptyConversationId = "";
-    const [selectedConversationId, setSelectedConversationId] =
-        useState(emptyConversationId);
+export type OnSelectConversationCallback = (sessionId: string) => void;
+export type OnDeleteConversationCallback = (sessionId: string) => void;
+export type OnRenameConversationCallback = (
+    sessionId: string,
+    newName: string
+) => void;
+
+export interface ChatConversationHistoryProps
+    extends React.ComponentProps<"div"> {
+    historyConversations: HistoryConversation[];
+    onSelectConversation?: OnSelectConversationCallback;
+    onDeleteConversation?: OnDeleteConversationCallback;
+    onRenameConversation?: OnRenameConversationCallback;
+}
+
+export default function ChatConversationHistory({
+    historyConversations,
+    onSelectConversation,
+    onDeleteConversation,
+    onRenameConversation,
+    ...otherProps
+}: ChatConversationHistoryProps) {
+    const [selectedSessionId, setSelectedSessionId] = useState("");
     const [historyConversationMapIdView, setHistoryConversationMapIdView] =
         useState(new Map<string, HistoryConversation>());
     const [historyConversationMapDateView, setHistoryConversationMapDateView] =
         useState(new Map<string, HistoryConversation[]>());
 
     useEffect(() => {
-        async function f() {
-            const historyConversations = await fetchHistoryConversations();
-            setHistoryConversationMapIdView(
-                historyConversations.reduce((map, entry) => {
-                    map.set(entry.id, entry);
-                    return map;
-                }, new Map<string, HistoryConversation>())
-            );
-        }
-        void f();
-    }, []);
+        setHistoryConversationMapIdView(
+            historyConversations.reduce((map, entry) => {
+                map.set(entry.id, entry);
+                return map;
+            }, new Map<string, HistoryConversation>())
+        );
+    }, [historyConversations]);
 
     useEffect(() => {
         const historyConversations = Array.from(
@@ -55,13 +69,13 @@ export default function ChatConversationHistory() {
                     key={null}
                     onConversationEntryClick={(child) => {
                         // TODO: Do real handling logic
-                        setSelectedConversationId(child.key!);
+                        setSelectedSessionId(child.key!);
                     }}
                 >
                     {value.map((value) => (
                         <HistoryConversationEntry
                             key={value.id}
-                            selected={selectedConversationId === value.id}
+                            selected={selectedSessionId === value.id}
                         >
                             {value.title}
                         </HistoryConversationEntry>
@@ -71,7 +85,11 @@ export default function ChatConversationHistory() {
         );
     });
 
-    return <Accordion>{...accordionItems}</Accordion>;
+    return (
+        <div {...otherProps}>
+            <Accordion>{...accordionItems}</Accordion>
+        </div>
+    );
 }
 
 interface ConversationListProps extends React.ComponentProps<"ul"> {
