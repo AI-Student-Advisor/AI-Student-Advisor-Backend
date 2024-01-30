@@ -29,3 +29,9 @@ The AI component of the AI Student Advisor is responsible for providing the chat
 ## User Query Handling Workflow
 
 ![Chat Agent User Query Handling](./docs/assets/images/chat-agent-user-query-handling.svg)
+
+## API
+
+### User Query Handling
+
+![User Query Handling](./docs/assets/images/api-query-handling.jpeg)
