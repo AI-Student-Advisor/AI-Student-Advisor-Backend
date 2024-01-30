@@ -89,6 +89,7 @@
     "uglify-to-browserify": "^1.0.2",
     "unpipe": "^1.0.0",
     "utils-merge": "^1.0.1",
+    "uuid": "^9.0.1",
     "vary": "^1.1.2",
     "void-elements": "^2.0.1",
     "window-size": "^0.1.0",
@@ -97,7 +98,7 @@
     "yargs": "^3.10.0"
   },
   "scripts": {
-    "dev": "node server.js"
+    "dev": "node session.js"
   },
   "keywords": [],
   "author": "",
