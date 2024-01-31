@@ -17,13 +17,13 @@ const responseWords = "Hi, I'm the mock server. It's nice to meet you!"
         return [value, " "];
     });
 
-app.options("/", (request, response) => {
+app.options("/api/conversation", (request, response) => {
     response.setHeader("Access-Control-Allow-Headers", "Content-Type");
     response.flushHeaders();
     response.end();
 });
 
-app.post("/", (request, response) => {
+app.post("/api/conversation", (request, response) => {
     const data = request.body;
     console.log(data);
 
@@ -92,4 +92,4 @@ app.post("/", (request, response) => {
     });
 });
 
-app.listen(5174);
+app.listen(3001);

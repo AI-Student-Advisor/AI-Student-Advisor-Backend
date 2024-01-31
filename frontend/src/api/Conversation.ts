@@ -9,13 +9,14 @@ type SseOnEventCallbackType = (
     response: PostResponseFail | PostResponseSuccess
 ) => void;
 
-// TODO: Now using the mock server. To be switched to the real backend.
+const apiEndpoint = "/api/conversation";
+
 export async function sendMessage(
     request: PostRequest,
     onPush: SseOnEventCallbackType,
     signal?: AbortSignal
 ) {
-    await fetchEventSource("http://localhost:5174", {
+    await fetchEventSource(`${import.meta.env.VITE_API_ROOT}${apiEndpoint}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
