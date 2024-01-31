@@ -37,9 +37,7 @@ function eventHandlers(req, res, next) {
     Connection: "keep-alive",
     "Cache-Control": "no-cache",
   });
-  res.write("event: message\n");
-  res.write("data: " + JSON.stringify(parameters) + "\n");
-  res.write("\n\n");
+
   if (parameters.id == undefined) {
     //Request a query in a new conversation
     try {
@@ -69,6 +67,15 @@ function eventHandlers(req, res, next) {
     res.end("ERROR");
     return;
   }
+  res.write("event: message\n");
+  const userRequest: PostResponseSuccess = {
+    status: "success",
+    type: "message",
+    id: session.id,
+    message: parameters,
+  };
+  res.write("data: " + JSON.stringify(userRequest) + "\n");
+  res.write("\n\n");
   session.chatAgent = getTestChatAgent();
   if (
     parameters.message.content != undefined &&
