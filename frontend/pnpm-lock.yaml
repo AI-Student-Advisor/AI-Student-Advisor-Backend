@@ -32,9 +32,9 @@ dependencies:
   react-dom:
     specifier: ^18.2.0
     version: 18.2.0(react@18.2.0)
-  use-dark-mode:
-    specifier: ^2.3.1
-    version: 2.3.1(react@18.2.0)
+  usehooks-ts:
+    specifier: ^2.10.0
+    version: 2.10.0(react-dom@18.2.0)(react@18.2.0)
   uuid:
     specifier: ^9.0.1
     version: 9.0.1
@@ -3311,14 +3311,6 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
 
-  /@use-it/event-listener@0.1.7(react@18.2.0):
-    resolution: {integrity: sha512-hgfExDzUU9uTRTPDCpw2s9jWTxcxmpJya3fK5ADpf5VDpSy8WYwY/kh28XE0tUcbsljeP8wfan48QvAQTSSa3Q==}
-    peerDependencies:
-      react: '>=16.8.0'
-    dependencies:
-      react: 18.2.0
-    dev: false
-
   /@vitejs/plugin-react-swc@3.5.0(vite@5.0.12):
     resolution: {integrity: sha512-1PrOvAaDpqlCV+Up8RkAh9qaiUjoDUcjtttyhXDKw53XA6Ve16SOp6cCOpRs8Dj8DqUQs6eTW5YkLcLJjrXAig==}
     peerDependencies:
@@ -4851,16 +4843,6 @@ packages:
       react: 18.2.0
     dev: false
 
-  /use-dark-mode@2.3.1(react@18.2.0):
-    resolution: {integrity: sha512-hmcdJR96tTustRQdaQwe6jMrZHnmPqXBxgy4jaQ4gsfhwajsCpjECuq9prgDe9XxMx/f9r96o2/md6O4Lwhwjg==}
-    peerDependencies:
-      react: ^16.8.0
-    dependencies:
-      '@use-it/event-listener': 0.1.7(react@18.2.0)
-      react: 18.2.0
-      use-persisted-state: 0.3.3(react@18.2.0)
-    dev: false
-
   /use-isomorphic-layout-effect@1.1.2(@types/react@18.2.48)(react@18.2.0):
     resolution: {integrity: sha512-49L8yCO3iGT/ZF9QttjwLF/ZD9Iwto5LnH5LmEdk/6cFmXddqi2ulF0edxTwjj+7mqvpVVGQWvbXZdn32wRSHA==}
     peerDependencies:
@@ -4888,15 +4870,6 @@ packages:
       use-isomorphic-layout-effect: 1.1.2(@types/react@18.2.48)(react@18.2.0)
     dev: false
 
-  /use-persisted-state@0.3.3(react@18.2.0):
-    resolution: {integrity: sha512-pCNlvYC8+XjRxwnIut4teGC9f2p9aD88R8OGseQGZa2dvqG/h1vEGk1vRE1IZG0Vf161UDpn+NlW4+UGubQflQ==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0
-    dependencies:
-      '@use-it/event-listener': 0.1.7(react@18.2.0)
-      react: 18.2.0
-    dev: false
-
   /use-sidecar@1.1.2(@types/react@18.2.48)(react@18.2.0):
     resolution: {integrity: sha512-epTbsLuzZ7lPClpz2TyryBfztm7m+28DlEv2ZCQ3MDr5ssiwyOwGH/e5F9CkfWjJ1t4clvI58yF822/GUkjjhw==}
     engines: {node: '>=10'}
@@ -4911,6 +4884,17 @@ packages:
       detect-node-es: 1.1.0
       react: 18.2.0
       tslib: 2.6.2
+    dev: false
+
+  /usehooks-ts@2.10.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-hN22L5pqcsM1LwL6Q3p1QfxI9K+wuP4lrBXyCQ4Vi5Zo94YhphqRh2l7G7uhqPzLunAObLUAoSKzo64lisNyWQ==}
+    engines: {node: '>=16.15.0'}
+    peerDependencies:
+      react: ^16.8.0  || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0  || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /util-deprecate@1.0.2:

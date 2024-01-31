@@ -45,30 +45,32 @@ export default function Chat() {
 
         void sendMessage(
             { message: message },
-            (response) => {
-                if (response.status === "success") {
-                    const successResponse = response as PostResponseSuccess;
-                    switch (successResponse.type) {
-                        case "message":
-                            handleMessageResponse(successResponse.message!);
-                            break;
-                        case "control":
-                            handleControlResponse(successResponse.control!);
-                            break;
-                        default:
-                            console.error(
-                                `Unknown response type ${successResponse.type}`
-                            );
-                    }
-                } else if (response.status === "fail") {
-                    const failResponse = response as PostResponseFail;
-                    console.error(`Request failed: ${failResponse.reason}`);
-                }
-            },
+            handleResponse,
             generationController.current.signal
         );
 
         setIsGenerating(true);
+    }
+
+    function handleResponse(response: PostResponseFail | PostResponseSuccess) {
+        if (response.status === "success") {
+            const successResponse = response as PostResponseSuccess;
+            switch (successResponse.type) {
+                case "message":
+                    handleMessageResponse(successResponse.message!);
+                    break;
+                case "control":
+                    handleControlResponse(successResponse.control!);
+                    break;
+                default:
+                    console.error(
+                        `Unknown response type ${successResponse.type}`
+                    );
+            }
+        } else if (response.status === "fail") {
+            const failResponse = response as PostResponseFail;
+            console.error(`Request failed: ${failResponse.reason}`);
+        }
     }
 
     function handleMessageResponse(message: Message) {
