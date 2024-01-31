@@ -11,7 +11,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import * as express from "express";
 const app = express();
-app.use(express.json());
+app.use(express.static("public"));
 
 const sessions: PostResponseSuccess[] = [];
 function eventHandlers(req, res, next) {
@@ -91,7 +91,6 @@ function eventHandlers(req, res, next) {
       }
     }, 5000);
     console.log("Session out");
-    res.end("OK");
   } else {
     ///Testing code
     ///The query.message that should not be empty
