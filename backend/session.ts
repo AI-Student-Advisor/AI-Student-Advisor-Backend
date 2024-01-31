@@ -11,9 +11,9 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import * as express from "express";
 const app = express();
-app.use(express.static("public"));
+app.use(express.json());
 
-var sessions: PostResponseSuccess[] = [];
+const sessions: PostResponseSuccess[] = [];
 function eventHandlers(req, res, next) {
   const { query } = req;
   let session: PostResponseSuccess | undefined;
@@ -28,16 +28,16 @@ function eventHandlers(req, res, next) {
       session = getNewSession();
       sessions.push(session);
     } catch (error) {
-      var errSession = getErrorSession(error);
+      const errSession = getErrorSession(error);
       res.write(JSON.stringify(errSession));
     }
   } else {
     //Request a query in a created conversation
-    let index = findSession(query.id);
+    const index = findSession(query.id);
     if (index != -1) {
       session = sessions[index];
     } else {
-      var errSession = getErrorSession(
+      const errSession = getErrorSession(
         new Error("Cannot find the conversation.")
       );
       res.write(JSON.stringify(errSession));
@@ -103,7 +103,7 @@ function eventHandlers(req, res, next) {
 }
 
 function getNewSession(): PostResponseSuccess {
-  var newSession: PostResponseSuccess = {
+  const newSession: PostResponseSuccess = {
     status: "success",
     type: "message",
     id: uuidv4(),
@@ -118,7 +118,7 @@ function getNewSession(): PostResponseSuccess {
 }
 
 function getErrorSession(error: Error): PostResponseFail {
-  var newSession: PostResponseFail = {
+  const newSession: PostResponseFail = {
     status: "fail",
     reason: error.message,
   };
@@ -127,7 +127,7 @@ function getErrorSession(error: Error): PostResponseFail {
 }
 
 function getNewMessage(response: string): Message {
-  let message: Message = {
+  const message: Message = {
     id: uuidv4(),
     contentType: "message",
     content: response,
@@ -137,7 +137,7 @@ function getNewMessage(response: string): Message {
 }
 
 function getTestChatAgent(): Agent {
-  let newAgent: Agent = {
+  const newAgent: Agent = {
     query(id: string, queryStr: string): string {
       //TO DO: testing code
       return '{"status": "yes", "response": "abcccc"}';
@@ -156,6 +156,7 @@ function findSession(id: string): number {
   return -1;
 }
 
-app.get("/api", eventHandlers);
+app.post("/api/conversation", eventHandlers);
+app.get("/api/conversation", eventHandlers);
 
 app.listen(3001, () => console.log("App listening: http://localhost:3001"));
