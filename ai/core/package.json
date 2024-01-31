@@ -1,0 +1,35 @@
+{
+  "name": "ai-student-advisor-ai-component",
+  "version": "1.0.0",
+  "description": "AI component of the AI Student Advisor application",
+  "main": "App.js",
+  "scripts": {
+    "tsc": "rm -fr dist && npx tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.499.0",
+    "@aws-sdk/credential-provider-node": "^3.499.0",
+    "@aws-sdk/types": "^3.496.0",
+    "@langchain/community": "^0.0.19",
+    "@langchain/openai": "^0.0.12",
+    "@smithy/eventstream-codec": "^2.1.1",
+    "@smithy/protocol-http": "^3.1.1",
+    "@smithy/signature-v4": "^2.1.1",
+    "@smithy/util-utf8": "^2.1.1",
+    "@upstash/redis": "^1.28.2",
+    "cheerio": "^1.0.0-rc.12",
+    "closevector-node": "^0.1.0-alpha.10",
+    "dotenv": "^16.4.1",
+    "langchain": "^0.1.6",
+    "playwright": "^1.41.1",
+    "prompt": "^1.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3",
+    "typescript": "^5.3.3"
+  }
+}

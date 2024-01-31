@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-core
+    container_name: ai-core
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - OPEN_AI_API_KEY=$OPEN_AI_API_KEY
+      - UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL
+      - UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN
+      - AWS_REGION=$AWS_REGION
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - CLOSE_VECTOR_ACCESS_KEY=$CLOSE_VECTOR_ACCESS_KEY
+      - CLOSE_VECTOR_SECRET_KEY=$CLOSE_VECTOR_SECRET_KEY
+    ports:
+      - "80:8080"
+    volumes:
+      - .:/core
+      - node_modules:/core/node_modules
+    networks:
+      - app-network
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        npm run tsc
+        /core/node_modules/.bin/nodemon ./dist/App.js
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+  node_modules:
