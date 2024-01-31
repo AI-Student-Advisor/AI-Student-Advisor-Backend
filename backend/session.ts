@@ -13,15 +13,15 @@ import * as express from "express";
 const app = express();
 app.use(express.static("public"));
 app.use(express.json());
-app.options("/api/conversation", (req, res) => {
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.flushHeaders();
-  res.end();
-});
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   next();
+});
+app.options("/api/conversation", (req, res) => {
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.flushHeaders();
+  res.end();
 });
 const sessions: PostResponseSuccess[] = [];
 
@@ -38,7 +38,7 @@ function eventHandlers(req, res, next) {
     "Cache-Control": "no-cache",
   });
   res.write("event: message\n");
-  res.write("data: ${JSON.stringify(parameters)}\n");
+  res.write("data: " + JSON.stringify(parameters) + "\n");
   res.write("\n\n");
   if (parameters.id == undefined) {
     //Request a query in a new conversation
@@ -48,7 +48,7 @@ function eventHandlers(req, res, next) {
     } catch (error) {
       const errSession = getErrorSession(error);
       res.write("event: message\n");
-      res.write("data: ${JSON.stringify(errSession)}\n");
+      res.write("data: " + JSON.stringify(errSession) + "\n");
       res.write("\n\n");
     }
   } else {
@@ -61,7 +61,7 @@ function eventHandlers(req, res, next) {
         new Error("Cannot find the conversation.")
       );
       res.write("event: message\n");
-      res.write("data: ${JSON.stringify(errSession)}\n");
+      res.write("data: " + JSON.stringify(errSession) + "\n");
       res.write("\n\n");
     }
   }
@@ -95,14 +95,14 @@ function eventHandlers(req, res, next) {
           session!.message = undefined;
           console.log("Loop done");
           res.write("event: message\n");
-          res.write("data: ${JSON.stringify(session)}\n");
+          res.write("data: " + JSON.stringify(session) + "\n");
           res.write("\n\n");
           clearInterval(loop);
         } else {
           let message: Message = getNewMessage(result.response);
           session!.message = message;
           res.write("event: message\n");
-          res.write("data: ${JSON.stringify(session)}\n");
+          res.write("data: " + JSON.stringify(session) + "\n");
           res.write("\n\n");
           console.log(
             "LOG: Message sent: session ID: " +
@@ -117,7 +117,7 @@ function eventHandlers(req, res, next) {
         session!.control = control;
         session!.message = undefined;
         res.write("event: message\n");
-        res.write("data: ${JSON.stringify(session)}\n");
+        res.write("data: " + JSON.stringify(session) + "\n");
         res.write("\n\n");
         clearInterval(loop);
       } finally {
@@ -200,5 +200,4 @@ function sendSuccessResponse(
 
 app.post("/api/conversation", eventHandlers);
 //app.get("/api/conversation", eventHandlers);
-app.get("/api", event.init);
 app.listen(3001, () => console.log("App listening: http://localhost:3001"));
