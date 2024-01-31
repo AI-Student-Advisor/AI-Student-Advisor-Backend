@@ -10,7 +10,6 @@ import {
 } from "./session_interface";
 import { v4 as uuidv4 } from "uuid";
 import * as express from "express";
-import SSE from "express-sse-ts";
 const app = express();
 app.use(express.static("public"));
 app.use(express.json());
@@ -24,7 +23,6 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   next();
 });
-const event = new SSE();
 const sessions: PostResponseSuccess[] = [];
 
 function parameterHandler(res, req, next) {
@@ -34,15 +32,14 @@ function parameterHandler(res, req, next) {
 function eventHandlers(req, res, next) {
   const parameters = parameterHandler(res, req, next);
   let session: PostResponseSuccess | undefined;
-  /*
   res.writeHead(200, {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
     "Content-Type": "text/event-stream",
     Connection: "keep-alive",
     "Cache-Control": "no-cache",
-  });*/
-
+  });
+  res.write("event: message\n");
+  res.write("data: ${JSON.stringify(parameters)}\n");
+  res.write("\n\n");
   if (parameters.id == undefined) {
     //Request a query in a new conversation
     try {
@@ -50,7 +47,9 @@ function eventHandlers(req, res, next) {
       sessions.push(session);
     } catch (error) {
       const errSession = getErrorSession(error);
-      event.send(JSON.stringify(errSession));
+      res.write("event: message\n");
+      res.write("data: ${JSON.stringify(errSession)}\n");
+      res.write("\n\n");
     }
   } else {
     //Request a query in a created conversation
@@ -61,7 +60,9 @@ function eventHandlers(req, res, next) {
       const errSession = getErrorSession(
         new Error("Cannot find the conversation.")
       );
-      event.send(JSON.stringify(errSession));
+      res.write("event: message\n");
+      res.write("data: ${JSON.stringify(errSession)}\n");
+      res.write("\n\n");
     }
   }
   if (session == undefined) {
@@ -93,12 +94,16 @@ function eventHandlers(req, res, next) {
           session!.control = control;
           session!.message = undefined;
           console.log("Loop done");
-          event.send(JSON.stringify(session.control), "message");
+          res.write("event: message\n");
+          res.write("data: ${JSON.stringify(session)}\n");
+          res.write("\n\n");
           clearInterval(loop);
         } else {
           let message: Message = getNewMessage(result.response);
           session!.message = message;
-          event.send(JSON.stringify(session.message), "message");
+          res.write("event: message\n");
+          res.write("data: ${JSON.stringify(session)}\n");
+          res.write("\n\n");
           console.log(
             "LOG: Message sent: session ID: " +
               session?.id +
@@ -111,7 +116,9 @@ function eventHandlers(req, res, next) {
         let control: Control = { signal: "generation-error" };
         session!.control = control;
         session!.message = undefined;
-        event.send(JSON.stringify(session.control), "message");
+        res.write("event: message\n");
+        res.write("data: ${JSON.stringify(session)}\n");
+        res.write("\n\n");
         clearInterval(loop);
       } finally {
         flag--;
