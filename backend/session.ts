@@ -10,37 +10,58 @@ import {
 } from "./session_interface";
 import { v4 as uuidv4 } from "uuid";
 import * as express from "express";
+import SSE from "express-sse-ts";
 const app = express();
 app.use(express.static("public"));
-
+app.use(express.json());
+app.options("/api/conversation", (req, res) => {
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.flushHeaders();
+  res.end();
+});
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  next();
+});
+const event = new SSE();
 const sessions: PostResponseSuccess[] = [];
+
+function parameterHandler(res, req, next) {
+  return req.body;
+}
+
 function eventHandlers(req, res, next) {
-  const { query } = req;
+  const parameters = parameterHandler(res, req, next);
   let session: PostResponseSuccess | undefined;
+  /*
   res.writeHead(200, {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
     "Content-Type": "text/event-stream",
     Connection: "keep-alive",
     "Cache-Control": "no-cache",
-  });
-  if (query.id == undefined) {
+  });*/
+
+  if (parameters.id == undefined) {
     //Request a query in a new conversation
     try {
       session = getNewSession();
       sessions.push(session);
     } catch (error) {
       const errSession = getErrorSession(error);
-      res.write(JSON.stringify(errSession));
+      event.send(JSON.stringify(errSession));
     }
   } else {
     //Request a query in a created conversation
-    const index = findSession(query.id);
+    const index = findSession(parameters.id);
     if (index != -1) {
       session = sessions[index];
     } else {
       const errSession = getErrorSession(
         new Error("Cannot find the conversation.")
       );
-      res.write(JSON.stringify(errSession));
+      event.send(JSON.stringify(errSession));
     }
   }
   if (session == undefined) {
@@ -48,9 +69,15 @@ function eventHandlers(req, res, next) {
     return;
   }
   session.chatAgent = getTestChatAgent();
-  if (query.message != undefined && session.chatAgent != undefined) {
+  if (
+    parameters.message.content != undefined &&
+    session.chatAgent != undefined
+  ) {
     //Testing
-    let solution: string = session.chatAgent.query(session.id, query);
+    let solution: string = session.chatAgent.query(
+      session.id,
+      parameters.message.content
+    );
     var flag = 10;
     var loop = setInterval(() => {
       try {
@@ -66,12 +93,12 @@ function eventHandlers(req, res, next) {
           session!.control = control;
           session!.message = undefined;
           console.log("Loop done");
-          res.write(JSON.stringify(session));
+          event.send(JSON.stringify(session.control), "message");
           clearInterval(loop);
         } else {
           let message: Message = getNewMessage(result.response);
           session!.message = message;
-          res.write(JSON.stringify(session));
+          event.send(JSON.stringify(session.message), "message");
           console.log(
             "LOG: Message sent: session ID: " +
               session?.id +
@@ -84,20 +111,20 @@ function eventHandlers(req, res, next) {
         let control: Control = { signal: "generation-error" };
         session!.control = control;
         session!.message = undefined;
-        res.write(JSON.stringify(session));
+        event.send(JSON.stringify(session.control), "message");
         clearInterval(loop);
       } finally {
         flag--;
       }
     }, 5000);
-    console.log("Session out");
   } else {
     ///Testing code
     ///The query.message that should not be empty
+    console.log("Invalid.");
     res.end("ERROR");
   }
-
   // Close the connection when the client disconnects
+  console.log("Session out");
   req.on("close", () => res.end("OK"));
 }
 
@@ -154,8 +181,17 @@ function findSession(id: string): number {
   }
   return -1;
 }
+/*
+function sendSuccessResponse(
+  event: SSE,
+  type: string,
+  id: string,
+  data: Message | Control
+) {
+  event.send();
+}*/
 
 app.post("/api/conversation", eventHandlers);
-app.get("/api/conversation", eventHandlers);
-
+//app.get("/api/conversation", eventHandlers);
+app.get("/api", event.init);
 app.listen(3001, () => console.log("App listening: http://localhost:3001"));

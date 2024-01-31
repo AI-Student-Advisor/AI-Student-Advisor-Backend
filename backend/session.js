@@ -2,18 +2,37 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var uuid_1 = require("uuid");
 var express = require("express");
+var express_sse_ts_1 = require("express-sse-ts");
 var app = express();
 app.use(express.static("public"));
+app.use(express.json());
+app.options("/api/conversation", function (req, res) {
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.flushHeaders();
+    res.end();
+});
+app.use(function (req, res, next) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    next();
+});
+var event = new express_sse_ts_1.default();
 var sessions = [];
+function parameterHandler(res, req, next) {
+    return req.body;
+}
 function eventHandlers(req, res, next) {
-    var query = req.query;
+    var parameters = parameterHandler(res, req, next);
     var session;
+    /*
     res.writeHead(200, {
-        "Content-Type": "text/event-stream",
-        Connection: "keep-alive",
-        "Cache-Control": "no-cache",
-    });
-    if (query.id == undefined) {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Content-Type": "text/event-stream",
+      Connection: "keep-alive",
+      "Cache-Control": "no-cache",
+    });*/
+    if (parameters.id == undefined) {
         //Request a query in a new conversation
         try {
             session = getNewSession();
@@ -21,18 +40,18 @@ function eventHandlers(req, res, next) {
         }
         catch (error) {
             var errSession = getErrorSession(error);
-            res.write(JSON.stringify(errSession));
+            event.send(JSON.stringify(errSession));
         }
     }
     else {
         //Request a query in a created conversation
-        var index = findSession(query.id);
+        var index = findSession(parameters.id);
         if (index != -1) {
             session = sessions[index];
         }
         else {
             var errSession = getErrorSession(new Error("Cannot find the conversation."));
-            res.write(JSON.stringify(errSession));
+            event.send(JSON.stringify(errSession));
         }
     }
     if (session == undefined) {
@@ -40,9 +59,10 @@ function eventHandlers(req, res, next) {
         return;
     }
     session.chatAgent = getTestChatAgent();
-    if (query.message != undefined && session.chatAgent != undefined) {
+    if (parameters.message.content != undefined &&
+        session.chatAgent != undefined) {
         //Testing
-        var solution_1 = session.chatAgent.query(session.id, query);
+        var solution_1 = session.chatAgent.query(session.id, parameters.message.content);
         var flag = 10;
         var loop = setInterval(function () {
             try {
@@ -58,13 +78,13 @@ function eventHandlers(req, res, next) {
                     session.control = control;
                     session.message = undefined;
                     console.log("Loop done");
-                    res.write(JSON.stringify(session));
+                    event.send(JSON.stringify(session.control), "message");
                     clearInterval(loop);
                 }
                 else {
                     var message = getNewMessage(result.response);
                     session.message = message;
-                    res.write(JSON.stringify(session));
+                    event.send(JSON.stringify(session.message), "message");
                     console.log("LOG: Message sent: session ID: " +
                         (session === null || session === void 0 ? void 0 : session.id) +
                         "\nMessage: " +
@@ -76,21 +96,22 @@ function eventHandlers(req, res, next) {
                 var control = { signal: "generation-error" };
                 session.control = control;
                 session.message = undefined;
-                res.write(JSON.stringify(session));
+                event.send(JSON.stringify(session.control), "message");
                 clearInterval(loop);
             }
             finally {
                 flag--;
             }
         }, 5000);
-        console.log("Session out");
     }
     else {
         ///Testing code
         ///The query.message that should not be empty
+        console.log("Invalid.");
         res.end("ERROR");
     }
     // Close the connection when the client disconnects
+    console.log("Session out");
     req.on("close", function () { return res.end("OK"); });
 }
 function getNewSession() {
@@ -142,6 +163,16 @@ function findSession(id) {
     }
     return -1;
 }
+/*
+function sendSuccessResponse(
+  event: SSE,
+  type: string,
+  id: string,
+  data: Message | Control
+) {
+  event.send();
+}*/
 app.post("/api/conversation", eventHandlers);
-app.get("/api/conversation", eventHandlers);
+//app.get("/api/conversation", eventHandlers);
+app.get("/api", event.init);
 app.listen(3001, function () { return console.log("App listening: http://localhost:3001"); });
