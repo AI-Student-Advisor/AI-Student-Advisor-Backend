@@ -1,20 +1,15 @@
 import { CloseVectorNode } from "@langchain/community/vectorstores/closevector/node";
-import { VECTOR_DB_TYPE } from "./VectorDatabasesConfig";
-import { EMBEDDING_MODELS } from "ai/embedding-models/EmbeddingModelsConfig";
 import { AppConfig } from "../../config/AppConfig";
 import {
   getCloseVectorStoreAccessKey,
   getCloseVectorStoreSecretKey,
 } from "../../config/keys";
-import { getEmbeddingModel } from "../embedding-models/EmbeddingModel";
 
-export async function getCloseVectorStore(
-  embeddingModelType: EMBEDDING_MODELS
-) {
+export async function getCloseVectorStore(embeddingModel: any) {
   // Load the vector store from the cloud
   const loadedVectorStore = await CloseVectorNode.loadFromCloud({
     uuid: AppConfig.ai.close_vector_store_uuid,
-    embeddings: getEmbeddingModel(embeddingModelType),
+    embeddings: embeddingModel,
     credentials: {
       key: getCloseVectorStoreAccessKey(),
       secret: getCloseVectorStoreSecretKey(),

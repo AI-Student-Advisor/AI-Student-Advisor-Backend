@@ -1,8 +1,4 @@
-import {
-  AgentExecutor,
-  createOpenAIFunctionsAgent,
-  createOpenAIToolsAgent,
-} from "langchain/agents";
+import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
@@ -15,7 +11,6 @@ import {
 } from "../../config/keys";
 import { dlog } from "../../utilities/dlog";
 import { getOpenAIChatModel } from "../chat-models/OpenAIChatModel";
-import { AppConfig } from "config/AppConfig";
 
 export const INPUT_MESSAGE_KEY = "input";
 export const HISTORY_MESSAGE_KEY = "history";

@@ -28,16 +28,16 @@ Basic workflow for a webpage based chat agent:
 */
 import {
   AgentResponse,
-  ChatAgent,
+  LLM_TYPE,
   QUERY_STATUS,
-} from "../../ai/chat-agents/ChatAgent";
-import { ChatAgentConfig } from "../../ai/chat-agents/ChatAgentConfig";
-import { LLM_TYPE } from "../../ai/chat-models/ChatModelsConfig";
+  EMBEDDING_MODELS,
+  VECTOR_DB_TYPE,
+  ChatAgentConfig,
+} from "../../types/ai/AITypes";
 import { getWebBaseLoader } from "../../ai/data-loaders/WebDataLoaders";
-import { EMBEDDING_MODELS } from "../../ai/embedding-models/EmbeddingModelsConfig";
-import { DataRetriever } from "../../ai/retrievers/DataRetriever";
-import { VECTOR_DB_TYPE } from "../../ai/vector-databases/VectorDatabasesConfig";
+import { DataRetriever } from "../../ai/data-retrievers/DataRetriever";
 import { TU } from "../Util";
+import { ChatAgent } from "../../ai/chat-agents/ChatAgent";
 
 const TEST_NAME = "CHAT_AGENT_TEST";
 

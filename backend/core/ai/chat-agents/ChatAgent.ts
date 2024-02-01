@@ -1,26 +1,14 @@
-import { USER_ROLE, ChatAgentConfig } from "./ChatAgentConfig";
 import { getCustomAgentExecutor } from "./CustomAgentExecutor";
+import { getOpenAIAgentExecutor } from "./OpenAIAgentExecutor";
 import { getChatModel } from "../chat-models/ChatModels";
 import { dlog } from "../../utilities/dlog";
-import { LLM_TYPE } from "ai/chat-models/ChatModelsConfig";
-import { getOpenAIAgentExecutor } from "./OpenAIAgentExecutor";
-
-// sessionId is used to identify the user and their history
-export type AgentInput = {
-  user: { input: string };
-  config: { configurable: { sessionId: string } };
-};
-
-export const enum QUERY_STATUS {
-  SUCCESS = "success",
-  ERROR = "error",
-  PENDING = "pending",
-}
-
-export type AgentResponse = {
-  status: QUERY_STATUS;
-  response?: any;
-};
+import {
+  AgentInput,
+  QUERY_STATUS,
+  USER_ROLE,
+  LLM_TYPE,
+  ChatAgentConfig,
+} from "../../types/ai/AITypes";
 
 export class ChatAgent {
   private chatAgent: any;

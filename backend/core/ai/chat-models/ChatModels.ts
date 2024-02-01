@@ -1,6 +1,6 @@
 // Return chat model based on llm type
 
-import { LLM_TYPE } from "./ChatModelsConfig";
+import { LLM_TYPE } from "../../types/ai/AITypes";
 import { getLlamaChatModel } from "./BedrockChatModel";
 import { getOpenAIChatModel } from "./OpenAIChatModel";
 

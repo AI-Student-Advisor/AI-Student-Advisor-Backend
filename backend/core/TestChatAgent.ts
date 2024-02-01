@@ -12,18 +12,16 @@
  */
 
 import {
+  LLM_TYPE,
+  EMBEDDING_MODELS,
+  VECTOR_DB_TYPE,
   AgentInput,
-  AgentResponse,
-  ChatAgent,
-  QUERY_STATUS,
-} from "./ai/chat-agents/ChatAgent";
-import { ChatAgentConfig } from "./ai/chat-agents/ChatAgentConfig";
-import { LLM_TYPE } from "./ai/chat-models/ChatModelsConfig";
+  ChatAgentConfig,
+} from "./types/ai/AITypes";
 import { getWebBaseLoader } from "./ai/data-loaders/WebDataLoaders";
-import { EMBEDDING_MODELS } from "./ai/embedding-models/EmbeddingModelsConfig";
-import { DataRetriever } from "./ai/retrievers/DataRetriever";
-import { VECTOR_DB_TYPE } from "./ai/vector-databases/VectorDatabasesConfig";
+import { DataRetriever } from "./ai/data-retrievers/DataRetriever";
 import { TU } from "./test/Util";
+import { ChatAgent } from "./ai/chat-agents/ChatAgent";
 
 class TestChatAgent {
   private static TEST_PARAMS = {
@@ -36,7 +34,7 @@ class TestChatAgent {
     data_retriever_name: "uOttawaChat",
     data_context: "University of Ottawa",
     loadCloseVectorStoreFromCloud: true,
-    vector_db_type: VECTOR_DB_TYPE.CLOSE_VECTOR_STORE,
+    vector_db_type: VECTOR_DB_TYPE.CLOSE_VECTOR_STORE_CLOUD,
     sessionId: crypto.randomUUID(),
   };
   private chatAgent: any;
