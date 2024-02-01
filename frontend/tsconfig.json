@@ -28,11 +28,9 @@
         "jsx": "react-jsx",
         "incremental": true,
         "allowImportingTsExtensions": true,
-        "paths": {
-            "/*": ["./*"]
-        }
+        "baseUrl": "./src"
     },
-    "include": ["src"],
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
     "references": [
         {
             "path": "./tsconfig.node.json"

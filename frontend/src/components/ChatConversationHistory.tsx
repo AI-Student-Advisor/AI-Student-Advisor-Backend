@@ -1,5 +1,5 @@
-import { HistoryConversation } from "/src/api/interfaces/StructHistoryConversation.ts";
 import { Accordion, AccordionItem } from "@nextui-org/react";
+import { HistoryConversation } from "api/interfaces/StructHistoryConversation.ts";
 import React, { ReactElement, useEffect, useState } from "react";
 
 export type OnSelectConversationCallback = (sessionId: string) => void;

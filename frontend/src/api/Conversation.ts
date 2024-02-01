@@ -1,11 +1,11 @@
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import {
     PostRequest,
     PostResponseFail,
     PostResponseSuccess
-} from "/src/api/interfaces/Conversation.ts";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
+} from "api/interfaces/Conversation.ts";
 
-type SseOnEventCallbackType = (
+type SseOnPushCallback = (
     response: PostResponseFail | PostResponseSuccess
 ) => void;
 
@@ -13,7 +13,7 @@ const apiEndpoint = "/api/conversation";
 
 export async function sendMessage(
     request: PostRequest,
-    onPush: SseOnEventCallbackType,
+    onPush: SseOnPushCallback,
     signal?: AbortSignal
 ) {
     await fetchEventSource(`${import.meta.env.VITE_API_ROOT}${apiEndpoint}`, {

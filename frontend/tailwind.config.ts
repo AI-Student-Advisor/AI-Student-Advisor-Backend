@@ -1,7 +1,7 @@
-/** @type {import("tailwindcss").Config} */
 import { nextui } from "@nextui-org/react";
+import { Config } from "tailwindcss";
 
-export default {
+const config: Config = {
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
@@ -112,3 +112,5 @@ export default {
         })
     ]
 };
+
+export default config;

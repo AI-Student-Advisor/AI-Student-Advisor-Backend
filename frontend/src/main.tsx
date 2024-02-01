@@ -1,6 +1,6 @@
-import App from "./App.tsx";
-import "./main.css";
 import { NextUIProvider } from "@nextui-org/react";
+import App from "App.tsx";
+import "main.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 

@@ -1,5 +1,5 @@
-import { Control } from "/src/api/interfaces/StructControl.ts";
-import { Message } from "/src/api/interfaces/StructMessage.ts";
+import { Control } from "api/interfaces/StructControl.ts";
+import { Message } from "api/interfaces/StructMessage.ts";
 
 interface ResponseBase {
     status: "success" | "fail";

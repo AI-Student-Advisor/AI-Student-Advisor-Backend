@@ -1,5 +1,5 @@
-import { Message } from "/src/api/interfaces/StructMessage.ts";
 import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
+import { Message } from "api/interfaces/StructMessage.ts";
 import React from "react";
 
 export interface ChatConversationProps extends React.ComponentProps<"div"> {

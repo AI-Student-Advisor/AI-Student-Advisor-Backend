@@ -1,4 +1,4 @@
-import Chat from "/src/pages/Chat.tsx";
+import Chat from "pages/Chat.tsx";
 import { useDarkMode } from "usehooks-ts";
 
 export default function App() {

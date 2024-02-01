@@ -1,19 +1,19 @@
-import { sendMessage } from "/src/api/Conversation.ts";
-import { fetchHistoryConversations } from "/src/api/HistoryConversations.ts";
-import {
-    PostResponseFail,
-    PostResponseSuccess
-} from "/src/api/interfaces/Conversation.ts";
-import { Control } from "/src/api/interfaces/StructControl.ts";
-import { HistoryConversation } from "/src/api/interfaces/StructHistoryConversation.ts";
-import { Message } from "/src/api/interfaces/StructMessage.ts";
-import ChatConversation from "/src/components/ChatConversation.tsx";
-import ChatConversationHistory from "/src/components/ChatConversationHistory.tsx";
-import ChatInput from "/src/components/ChatInput.tsx";
-import ChatToolbar from "/src/components/ChatToolbar.tsx";
 import { faPenFancy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, ScrollShadow } from "@nextui-org/react";
+import { sendMessage } from "api/Conversation.ts";
+import { fetchHistoryConversations } from "api/HistoryConversations.ts";
+import {
+    PostResponseFail,
+    PostResponseSuccess
+} from "api/interfaces/Conversation.ts";
+import { Control } from "api/interfaces/StructControl.ts";
+import { HistoryConversation } from "api/interfaces/StructHistoryConversation.ts";
+import { Message } from "api/interfaces/StructMessage.ts";
+import ChatConversation from "components/ChatConversation.tsx";
+import ChatConversationHistory from "components/ChatConversationHistory.tsx";
+import ChatInput from "components/ChatInput.tsx";
+import ChatToolbar from "components/ChatToolbar.tsx";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 
