@@ -1,8 +1,7 @@
-import { VECTOR_DB_TYPE } from "ai/vector-databases/VectorDatabasesConfig";
 import { getWebBaseLoader } from "../../ai/data-loaders/WebDataLoaders";
-import { DataRetriever } from "../../ai/retrievers/DataRetriever";
+import { DataRetriever } from "../../ai/data-retrievers/DataRetriever";
 import { TU } from "../Util";
-import { EMBEDDING_MODELS } from "ai/embedding-models/EmbeddingModelsConfig";
+import { EMBEDDING_MODELS, VECTOR_DB_TYPE } from "../../types/ai/AITypes";
 
 const TEST_NAME = "DATA_RETRIEVER_TEST";
 

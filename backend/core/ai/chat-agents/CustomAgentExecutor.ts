@@ -6,12 +6,12 @@ import {
 import { AgentExecutor } from "langchain/agents";
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
+import { BaseMessage } from "@langchain/core/messages";
+import { AgentAction, AgentFinish } from "@langchain/core/agents";
 import {
   getUpstashRedisRESTAPIKey,
   getUpstashRedisRESTAPIURL,
 } from "../../config/keys";
-import { BaseMessage } from "@langchain/core/messages";
-import { AgentAction, AgentFinish } from "@langchain/core/agents";
 import { dlog } from "../../utilities/dlog";
 
 export const INPUT_MESSAGE_KEY = "input";
