@@ -8,7 +8,7 @@ import {
   USER_ROLE,
   LLM_TYPE,
   ChatAgentConfig,
-} from "../../types/ai/AITypes";
+} from "../../structs/ai/AIStructs";
 
 export class ChatAgent {
   private chatAgent: any;
@@ -80,6 +80,11 @@ export class ChatAgent {
 
   disableChat(): boolean {
     this.chatEnabled = false;
+    return this.chatEnabled;
+  }
+
+  // check if chat is enabled
+  isChatEnabled(): boolean {
     return this.chatEnabled;
   }
 

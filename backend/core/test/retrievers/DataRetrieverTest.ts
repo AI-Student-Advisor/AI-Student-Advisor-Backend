@@ -1,7 +1,7 @@
 import { getWebBaseLoader } from "../../ai/data-loaders/WebDataLoaders";
 import { DataRetriever } from "../../ai/data-retrievers/DataRetriever";
 import { TU } from "../Util";
-import { EMBEDDING_MODELS, VECTOR_DB_TYPE } from "../../types/ai/AITypes";
+import { EMBEDDING_MODELS, VECTOR_DB_TYPE } from "../../structs/ai/AIStructs";
 
 const TEST_NAME = "DATA_RETRIEVER_TEST";
 

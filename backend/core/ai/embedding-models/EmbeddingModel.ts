@@ -1,6 +1,6 @@
 // Return embedding model by type
 
-import { EMBEDDING_MODELS } from "../../types/ai/AITypes";
+import { EMBEDDING_MODELS } from "../../structs/ai/AIStructs";
 import { getBedrockEmbeddingModel } from "./BedrockEmbeddingModel";
 import { getOpenAIEmbeddingModel } from "./OpenAIEmbeddingModel";
 

@@ -17,7 +17,7 @@ import {
   VECTOR_DB_TYPE,
   AgentInput,
   ChatAgentConfig,
-} from "./types/ai/AITypes";
+} from "./structs/ai/AIStructs";
 import { getWebBaseLoader } from "./ai/data-loaders/WebDataLoaders";
 import { DataRetriever } from "./ai/data-retrievers/DataRetriever";
 import { TU } from "./test/Util";

@@ -2,7 +2,7 @@
 
 import { CloseVectorNode } from "@langchain/community/vectorstores/closevector/node";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { VECTOR_DB_TYPE } from "../../types/ai/AITypes";
+import { VECTOR_DB_TYPE } from "../../structs/ai/AIStructs";
 import { getCloseVectorStore } from "./CloseVectorStore";
 
 export function getVectorDatabase(vectorDBType: VECTOR_DB_TYPE) {

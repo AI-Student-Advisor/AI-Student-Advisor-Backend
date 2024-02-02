@@ -1,6 +1,6 @@
 import { createRetrieverTool } from "langchain/tools/retriever";
 import { dlog } from "../../utilities/dlog";
-import { VECTOR_DB_TYPE, EMBEDDING_MODELS } from "../../types/ai/AITypes";
+import { VECTOR_DB_TYPE, EMBEDDING_MODELS } from "../../structs/ai/AIStructs";
 import { getVectorStore } from "../vector-stores/VectorStore";
 
 export type DataRetrieverConfig = {

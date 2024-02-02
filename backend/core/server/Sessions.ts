@@ -1,20 +1,26 @@
-class Session {
-  public id: string;
-  public userId: string;
-  public expiresAt: Date;
+import { ChatAgent } from "ai/chat-agents/ChatAgent";
+import { APISession, SessionId } from "../structs/api/APIStructs";
 
-  constructor(id: string, userId: string, expiresAt: Date) {
-    this.id = id;
-    this.userId = userId;
-    this.expiresAt = expiresAt;
+export class Session implements APISession {
+  id: SessionId;
+  chatAgent?: ChatAgent;
+  response?: any;
+
+  constructor(sessionConfig: APISession) {
+    this.id = sessionConfig.id;
+    this.chatAgent = sessionConfig.chatAgent;
+    this.response = sessionConfig.response;
   }
 }
 
-class SessionManager {
+export class SessionManager {
   private sessions: Map<string, Session> = new Map();
 
-  public createSession(session: Session): void {
+  // Creates a new session, adds it to the session manager and returns the new session
+  public getNewSession(sessionConfig: APISession): Session {
+    const session: Session = new Session(sessionConfig);
     this.sessions.set(session.id, session);
+    return session;
   }
 
   public getSession(sessionId: string): Session | undefined {

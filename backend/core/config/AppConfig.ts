@@ -1,4 +1,8 @@
 export const AppConfig = {
+  api: {
+    port: 3000,
+    message_max_length: 10000,
+  },
   ai: {
     bedrock: {
       embedding_model_name: "amazon.titan-embed-text-v1",
