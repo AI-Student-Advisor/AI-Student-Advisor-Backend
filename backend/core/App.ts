@@ -3,8 +3,13 @@
 import { ChatAgent } from "ai/chat-agents/ChatAgent";
 import { getTestChatAgent } from "./TestChatAgent";
 import { TestsToRun, runAppTests } from "./test/Tests";
+import { runConversationTest } from "test/api/ConversationEndpointTest";
 
 console.log("AI Student Advisor App - Running");
+
+// ----------------------------
+// ConversationEndpoint
+runConversationTest();
 
 // ----------------------------
 // TestChatAgent
@@ -15,7 +20,7 @@ const runTestChatAgent = async () => {
 
   console.log(await chatAgent.query(chatAgent.prepareInput(testQuery)));
 };
-runTestChatAgent();
+// runTestChatAgent();
 // ----------------------------
 // Testing
 const RUN_TESTS = false;

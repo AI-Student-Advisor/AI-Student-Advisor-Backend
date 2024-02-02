@@ -33,11 +33,11 @@ import {
   EMBEDDING_MODELS,
   VECTOR_DB_TYPE,
   ChatAgentConfig,
-} from "../../structs/ai/AIStructs";
-import { getWebBaseLoader } from "../../ai/data-loaders/WebDataLoaders";
-import { DataRetriever } from "../../ai/data-retrievers/DataRetriever";
-import { TU } from "../Util";
-import { ChatAgent } from "../../ai/chat-agents/ChatAgent";
+} from "../../../structs/ai/AIStructs";
+import { getWebBaseLoader } from "../../../ai/data-loaders/WebDataLoaders";
+import { DataRetriever } from "../../../ai/data-retrievers/DataRetriever";
+import { TU } from "../../Util";
+import { ChatAgent } from "../../../ai/chat-agents/ChatAgent";
 
 const TEST_NAME = "CHAT_AGENT_TEST";
 

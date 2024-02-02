@@ -5,7 +5,7 @@ import {
   sendControlResponse,
   sendErrResponse,
   sendMsgResponse,
-} from "../Server";
+} from "../../Server";
 import { AgentResponse, QUERY_STATUS } from "../../structs/ai/AIStructs";
 import {
   AUTHOR_ROLE,
@@ -27,7 +27,7 @@ import {
  * @param res
  * @returns
  */
-export async function query(params: PostRequest, res: Response) {
+async function query(params: PostRequest, res: Response) {
   // Validate the request message
   const validationResult = validateRequestMessage(params.message);
   if (!validationResult.valid) {
@@ -82,7 +82,7 @@ function getResponseHandler(res: Response) {
         sendErrResponse(agentResponse.response, res);
         break;
       case QUERY_STATUS.SUCCESS:
-        sendMsgResponse(agentResponse.response, res);
+        sendMsgResponse(getNewMessage(agentResponse.response), res);
         break;
       case QUERY_STATUS.DONE:
         sendControlResponse(CONTROL_SIGNAL.GENERATION_DONE, res);
@@ -120,12 +120,16 @@ function validateRequestMessage(message: Message | undefined): {
   return { valid, err: "" };
 }
 
-function getNewMessage(response: string, message_id: string): Message {
+function getNewMessage(response: string): Message {
   const message: Message = {
-    id: message_id,
+    id: crypto.randomUUID(),
     contentType: "text/plain",
     content: response,
     author: { role: AUTHOR_ROLE.ASSISTANT },
   };
   return message;
 }
+
+export const ConversationEndpoints = {
+  query,
+};

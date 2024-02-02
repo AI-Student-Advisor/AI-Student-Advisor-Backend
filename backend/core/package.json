@@ -2,9 +2,10 @@
   "name": "ai-student-advisor-ai-component",
   "version": "1.0.0",
   "description": "AI component of the AI Student Advisor application",
-  "main": "App.js",
+  "main": "Server.js",
   "scripts": {
     "tsc": "rm -fr dist && npx tsc",
+    "start": "/core/node_modules/.bin/nodemon -L ./dist/Server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -16,6 +17,7 @@
     "@aws-sdk/types": "^3.496.0",
     "@langchain/community": "^0.0.19",
     "@langchain/openai": "^0.0.12",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@smithy/eventstream-codec": "^2.1.1",
     "@smithy/protocol-http": "^3.1.1",
     "@smithy/signature-v4": "^2.1.1",

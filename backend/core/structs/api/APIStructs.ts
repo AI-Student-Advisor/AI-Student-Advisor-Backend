@@ -101,6 +101,7 @@ export const enum RESPONSE_TYPE {
  */
 interface ResponseBase {
   status: REQUEST_STATUS;
+  type: RESPONSE_TYPE;
 }
 
 /**
@@ -109,7 +110,6 @@ interface ResponseBase {
  * Response payload interface when request succeeds
  */
 export interface PostResponseSuccess extends ResponseBase {
-  type: RESPONSE_TYPE;
   /**
    * Conversation ID
    *

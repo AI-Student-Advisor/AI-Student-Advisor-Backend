@@ -1,9 +1,8 @@
 import express, { Express, Request, Response } from "express";
-import { AppConfig } from "../config/AppConfig";
-import { query } from "./api/Conversation";
-import { Session, SessionManager } from "./Sessions";
+import { AppConfig } from "./config/AppConfig";
+import { ConversationEndpoints } from "./server/api/Conversation";
+import { Session, SessionManager } from "./server/Sessions";
 import {
-  APISession,
   PostResponseSuccess,
   REQUEST_STATUS,
   RESPONSE_TYPE,
@@ -12,7 +11,11 @@ import {
   PostResponseFail,
   CONTROL_SIGNAL,
   PostResponseControl,
-} from "structs/api/APIStructs";
+} from "./structs/api/APIStructs";
+import { runConversationTest } from "./test/api/ConversationEndpointTest";
+import { dlog } from "./utilities/dlog";
+
+dlog.msg("Server.ts - Setting up Server");
 
 // Create a new Express application
 const app: Express = express();
@@ -53,6 +56,9 @@ function eventHandler(
   });
   // Close the connection when the client disconnects
   req.on("close", () => res.end("OK"));
+
+  // Query the chat agent - asynchoronous
+  ConversationEndpoints.query(params, res);
 }
 
 export function getSession(
@@ -74,18 +80,6 @@ export function getSession(
   }
 }
 
-function getNewSession(): Session {
-  const newSessionConfig: APISession = {
-    id: crypto.randomUUID(), // session ID
-    response: {
-      id: crypto.randomUUID(), // response ID
-      status: REQUEST_STATUS.SUCCESS,
-      type: RESPONSE_TYPE.MESSAGE,
-    },
-  };
-  return sessionManager.getNewSession(newSessionConfig);
-}
-
 function sendData(res: Response, data: string) {
   res.write("event: message\n");
   res.write("data: " + data + "\n");
@@ -105,6 +99,7 @@ export function sendMsgResponse(message: Message, res: Response) {
 
 export function sendErrResponse(err: string, res: Response) {
   const errResponse: PostResponseFail = {
+    type: RESPONSE_TYPE.MESSAGE,
     status: REQUEST_STATUS.FAIL,
     reason: err,
   };
@@ -136,9 +131,25 @@ export function sendControlResponse(
 app.post("/api/conversation", (req, res, next) =>
   eventHandler(req, res, next, req.body)
 );
+app.get("/", (req, res, next) => {
+  res.send("API up and running");
+});
+
+function conversationTest(req: Request, res: Response, next: any) {
+  // Set up the response headers
+  res.writeHead(200, {
+    "Content-Type": "text/plain",
+    Connection: "keep-alive",
+    "Cache-Control": "no-cache",
+  });
+  res.write("running conversation test\n");
+  // run test
+  runConversationTest();
+  req.on("close", () => res.end("Test OK"));
+}
+
+app.get("/api/test", conversationTest);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
-function eventHandlers(req: Request, res: Response, next: any) {}

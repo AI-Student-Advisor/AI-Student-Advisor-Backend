@@ -29,7 +29,7 @@ services:
     command:
       - |
         npm run tsc
-        /core/node_modules/.bin/nodemon -L ./dist/App.js
+        npm run start
 
 networks:
   app-network:
