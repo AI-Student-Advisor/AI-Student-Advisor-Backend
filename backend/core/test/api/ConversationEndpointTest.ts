@@ -43,6 +43,14 @@ async function sendMessage(
   onPush: SseOnPushCallback,
   signal?: AbortSignal
 ) {
+  await fetch(`${port}${apiEndpoint}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+
   await fetchEventSource(`${port}${apiEndpoint}`, {
     method: "POST",
     headers: {

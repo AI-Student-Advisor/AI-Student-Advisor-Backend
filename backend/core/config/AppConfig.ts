@@ -1,6 +1,6 @@
 export const AppConfig = {
   api: {
-    port: 3000,
+    port: 3001,
     message_max_length: 10000,
   },
   ai: {
