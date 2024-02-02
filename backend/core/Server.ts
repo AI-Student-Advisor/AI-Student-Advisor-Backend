@@ -19,8 +19,8 @@ dlog.msg("Server.ts - Setting up Server");
 
 // Create a new Express application
 const app: Express = express();
-// Get the port from the config file or use 3000 as default
-const port = AppConfig.api.port || 3000;
+// Get the port from the config file or use 3001 as default
+const port = AppConfig.api.port || 3001;
 // Session manager
 const sessionManager = new SessionManager();
 
@@ -48,6 +48,9 @@ function eventHandler(
   next: any,
   params: PostRequest
 ) {
+  console.log(
+    "INFO: Request received on /api/conversation: " + JSON.stringify(params)
+  );
   // Set up the response headers
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
@@ -94,7 +97,8 @@ export function sendMsgResponse(message: Message, res: Response) {
     message,
   };
   sendData(res, JSON.stringify(userRequest));
-  console.log("INFO: Sent Message: " + message);
+  console.log("INFO: Sent Message: ");
+  console.dir(message);
 }
 
 export function sendErrResponse(err: string, res: Response) {
@@ -105,7 +109,8 @@ export function sendErrResponse(err: string, res: Response) {
   };
   const sessionStr = JSON.stringify(errResponse);
   sendData(res, sessionStr);
-  console.log("INFO: Sent error:" + sessionStr);
+  console.log("INFO: Sent error:");
+  console.dir(errResponse);
 }
 
 export function sendControlResponse(
@@ -119,7 +124,7 @@ export function sendControlResponse(
     message,
   };
   sendData(res, JSON.stringify(controlResponse));
-  console.log("INFO: Sent Control: " + controlResponse.control);
+  console.log("INFO: Sent Control: " + controlResponse.control.signal);
 }
 
 /**
@@ -131,24 +136,10 @@ export function sendControlResponse(
 app.post("/api/conversation", (req, res, next) =>
   eventHandler(req, res, next, req.body)
 );
-app.get("/", (req, res, next) => {
-  res.send("API up and running");
+
+app.get("/api", (req, res) => {
+  res.send("AI Student Advisor - API up and running");
 });
-
-function conversationTest(req: Request, res: Response, next: any) {
-  // Set up the response headers
-  res.writeHead(200, {
-    "Content-Type": "text/plain",
-    Connection: "keep-alive",
-    "Cache-Control": "no-cache",
-  });
-  res.write("running conversation test\n");
-  // run test
-  runConversationTest();
-  req.on("close", () => res.end("Test OK"));
-}
-
-app.get("/api/test", conversationTest);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
