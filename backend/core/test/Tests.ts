@@ -1,6 +1,6 @@
 import { TU } from "./Util";
-import { executeChatAgentTests } from "./chat-agents/ChatAgentTest";
-import { executeDataRetrieverTests } from "./retrievers/DataRetrieverTest";
+import { executeChatAgentTests } from "./ai/chat-agents/ChatAgentTest";
+import { executeDataRetrieverTests } from "./ai/retrievers/DataRetrieverTest";
 
 // interface to specify tests to run
 export interface TestsToRun {

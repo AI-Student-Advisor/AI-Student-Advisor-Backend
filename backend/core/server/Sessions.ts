@@ -1,7 +1,6 @@
 import { ChatAgent } from "ai/chat-agents/ChatAgent";
 import { APISession, SessionId } from "../structs/api/APIStructs";
-import { LLM_TYPE } from "structs/ai/AIStructs";
-import { getTestChatAgent } from "TestChatAgent";
+import { getTestChatAgent } from "../TestChatAgent";
 
 export class Session implements APISession {
   id: SessionId;
