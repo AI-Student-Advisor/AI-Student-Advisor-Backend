@@ -21,8 +21,8 @@ services:
     ports:
       - "80:8080"
     volumes:
-      - .:/core
-      - node_modules:/core/node_modules
+      - .:/backend
+      - node_modules:/backend/node_modules
     networks:
       - app-network
     entrypoint: ["/bin/sh", "-c"]

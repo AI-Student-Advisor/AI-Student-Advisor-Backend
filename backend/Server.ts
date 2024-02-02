@@ -30,19 +30,19 @@ app.use(express.json());
 
 // Set up CORS
 // TESTING: Allow all origins
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: any) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   next();
 });
-app.options("/api/conversation", (req, res) => {
+app.options("/api/conversation", (req: Request, res: Response) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.flushHeaders();
   res.end();
 });
 
 // Set up the event handler
-function eventHandler(
+async function eventHandler(
   req: Request,
   res: Response,
   next: any,
@@ -56,12 +56,14 @@ function eventHandler(
     "Content-Type": "text/event-stream",
     Connection: "keep-alive",
     "Cache-Control": "no-cache",
+    "Access-Control-Allow-Origin": "*",
   });
-  // Close the connection when the client disconnects
-  req.on("close", () => res.end("OK"));
 
   // Query the chat agent - asynchoronous
-  ConversationEndpoints.query(params, res);
+  await ConversationEndpoints.query(params, res);
+
+  // Close the connection when the client disconnects
+  req.on("close", () => res.end("OK"));
 }
 
 export function getSession(
@@ -133,11 +135,11 @@ export function sendControlResponse(
  * Handles the conversation API endpoint.
  * Expects a 'PostRequest' object in the request body.
  */
-app.post("/api/conversation", (req, res, next) =>
+app.post("/api/conversation", (req: Request, res: Response, next: any) =>
   eventHandler(req, res, next, req.body)
 );
 
-app.get("/api", (req, res) => {
+app.get("/api", (req: Request, res: Response) => {
   res.send("AI Student Advisor - API up and running");
 });
 
