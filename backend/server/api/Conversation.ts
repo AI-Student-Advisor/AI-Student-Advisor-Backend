@@ -57,7 +57,7 @@ async function query(params: PostRequest, res: Response) {
     // create a response handler which which will handle the responses from the chat agent
     const responseHandler = getResponseHandler(res);
     // query the chat agent with the user query and the response handler
-    session.chatAgent.query(agentInput, responseHandler);
+    await session.chatAgent.query(agentInput, responseHandler);
   } else {
     // if chat agent is not available or chat is not enabled, send a message to the client
     const err = session.chatAgent
@@ -82,7 +82,13 @@ function getResponseHandler(res: Response) {
         sendErrResponse(agentResponse.response, res);
         break;
       case QUERY_STATUS.SUCCESS:
-        sendMsgResponse(getNewMessage(agentResponse.response), res);
+        const queryResult = agentResponse.response;
+        // send the response to the client
+        if (queryResult !== undefined && queryResult.output !== undefined) {
+          sendMsgResponse(getNewMessage(queryResult.output), res);
+          // TESTING: until we have streaming
+          sendControlResponse(CONTROL_SIGNAL.GENERATION_DONE, res);
+        }
         break;
       case QUERY_STATUS.DONE:
         sendControlResponse(CONTROL_SIGNAL.GENERATION_DONE, res);

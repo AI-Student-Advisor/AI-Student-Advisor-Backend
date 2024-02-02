@@ -1,0 +1,54 @@
+# Local History for Visual Studio Code
+.history/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv
+
+# API keys and secrets
+# .env # TODO: Uncomment once we have organization accounts
+creds.js
+
+# Distribution / packaging
+node_modules
+build
+dist
+dist-ssr
+*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.code-workspace
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# tsbuildinfo
+*.tsbuildinfo
+
+# vite.js
+.vite
