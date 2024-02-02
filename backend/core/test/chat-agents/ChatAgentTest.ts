@@ -33,7 +33,7 @@ import {
   EMBEDDING_MODELS,
   VECTOR_DB_TYPE,
   ChatAgentConfig,
-} from "../../types/ai/AITypes";
+} from "../../structs/ai/AIStructs";
 import { getWebBaseLoader } from "../../ai/data-loaders/WebDataLoaders";
 import { DataRetriever } from "../../ai/data-retrievers/DataRetriever";
 import { TU } from "../Util";

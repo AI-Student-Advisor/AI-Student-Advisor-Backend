@@ -1,7 +1,7 @@
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { CloseVectorNode } from "@langchain/community/vectorstores/closevector/node";
 import { getEmbeddingModel } from "../embedding-models/EmbeddingModel";
-import { VectorStoreConfig } from "../../types/ai/AITypes";
+import { VectorStoreConfig } from "../../structs/ai/AIStructs";
 import { getCloudVectorDatabase, getVectorDatabase } from "./VectorDatabases";
 import { dlog } from "../../utilities/dlog";
 import {
