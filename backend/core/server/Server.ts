@@ -4,15 +4,14 @@ import { query } from "./api/Conversation";
 import { Session, SessionManager } from "./Sessions";
 import {
   APISession,
-  EventHandlerParams,
   PostResponseSuccess,
   REQUEST_STATUS,
   RESPONSE_TYPE,
   Message,
   PostRequest,
   PostResponseFail,
-  SessionId,
-  Control,
+  CONTROL_SIGNAL,
+  PostResponseControl,
 } from "structs/api/APIStructs";
 
 // Create a new Express application
@@ -57,7 +56,7 @@ function eventHandler(
 }
 
 export function getSession(
-  sessionID: SessionId,
+  sessionID: string | undefined,
   res: Response
 ): Session | undefined {
   // If a valid session ID is provided, get the session by ID
@@ -115,20 +114,17 @@ export function sendErrResponse(err: string, res: Response) {
 }
 
 export function sendControlResponse(
-  control: Control,
-  status: REQUEST_STATUS,
+  signal: CONTROL_SIGNAL,
   res: Response,
   message?: Message
 ) {
-  const controlResponse: PostResponseSuccess = {
-    id: crypto.randomUUID(), // unqiue ID for each message
-    status,
+  const controlResponse: PostResponseControl = {
     type: RESPONSE_TYPE.CONTROL,
-    control,
+    control: { signal },
     message,
   };
   sendData(res, JSON.stringify(controlResponse));
-  console.log("INFO: Sent Control: " + control);
+  console.log("INFO: Sent Control: " + controlResponse.control);
 }
 
 /**

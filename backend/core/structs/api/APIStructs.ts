@@ -1,7 +1,7 @@
 /**
  * Type for session ID
  */
-export type SessionId = string | undefined;
+export type SessionId = string;
 
 /**
  * Interface for the parameters for the event handler
@@ -9,6 +9,12 @@ export type SessionId = string | undefined;
 export interface EventHandlerParams {
   id?: SessionId;
   message?: Message;
+}
+
+export const enum AUTHOR_ROLE {
+  USER = "user",
+  ASSISTANT = "assistant",
+  SYSTEM = "system",
 }
 
 /**
@@ -36,6 +42,8 @@ export interface Message {
  * Predefined control signals.
  */
 export const enum CONTROL_SIGNAL {
+  GENERATION_PENDING = "generation-pending",
+  GENERATION_STARTED = "generation-started",
   GENERATION_DONE = "generation-done",
   GENERATION_ERROR = "generation-error",
 }
@@ -113,7 +121,6 @@ export interface PostResponseSuccess extends ResponseBase {
    */
   id: string;
   message?: Message;
-  control?: Control;
 }
 
 /**
@@ -123,7 +130,12 @@ export interface PostResponseSuccess extends ResponseBase {
  */
 export interface PostResponseFail extends ResponseBase {
   reason: string;
-  control?: Control;
+}
+
+export interface PostResponseControl {
+  type: RESPONSE_TYPE.CONTROL;
+  control: Control;
+  message?: Message;
 }
 
 /**
