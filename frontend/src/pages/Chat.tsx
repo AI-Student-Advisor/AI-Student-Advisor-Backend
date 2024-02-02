@@ -4,25 +4,40 @@ import { Button, ScrollShadow } from "@nextui-org/react";
 import { sendMessage } from "api/Conversation.ts";
 import { fetchHistoryConversations } from "api/HistoryConversations.ts";
 import {
+    Message,
+    CONTROL_SIGNAL,
+    PostResponseControl,
     PostResponseFail,
-    PostResponseSuccess
-} from "api/interfaces/Conversation.ts";
-import { Control } from "api/interfaces/StructControl.ts";
+    PostResponseSuccess,
+    REQUEST_STATUS,
+    RESPONSE_TYPE,
+    AUTHOR_ROLE,
+    CONTENT_TYPE
+} from "api/interfaces/APIStructs.ts";
 import { HistoryConversation } from "api/interfaces/StructHistoryConversation.ts";
-import { Message } from "api/interfaces/StructMessage.ts";
 import ChatConversation from "components/ChatConversation.tsx";
 import ChatConversationHistory from "components/ChatConversationHistory.tsx";
 import ChatInput from "components/ChatInput.tsx";
 import ChatToolbar from "components/ChatToolbar.tsx";
 import { useEffect, useRef, useState } from "react";
-import { v4 as uuid } from "uuid";
 
 export default function Chat() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [historyConversations, setHistoryConversations] = useState<
         HistoryConversation[]
     >([]);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const context = "University of Ottawa";
+    const initialAssistantMessage: Message = {
+        id: crypto.randomUUID(),
+        contentType: CONTENT_TYPE.TEXT,
+        content: `Bonjour! This is AI Student Advisor - your virtual companion here to assist you with any information related to the ${context}! How can I help you today?`,
+        author: {
+            role: AUTHOR_ROLE.ASSISTANT
+        }
+    };
+    const [messages, setMessages] = useState<Message[]>([
+        initialAssistantMessage
+    ]);
     const generationController = useRef<AbortController>(new AbortController());
 
     useEffect(() => {
@@ -35,45 +50,70 @@ export default function Chat() {
         generationController.current = new AbortController();
 
         const message: Message = {
-            id: uuid(),
-            contentType: "text/plain",
+            id: crypto.randomUUID(),
+            contentType: CONTENT_TYPE.TEXT,
             content: text,
             author: {
-                role: "user"
+                role: AUTHOR_ROLE.USER
             }
         };
+
+        // add user input to conversation messages
+        setMessages([...messages, message]);
 
         void sendMessage(
             { message: message },
             handleResponse,
+            sendMessageErrorHandler,
             generationController.current.signal
         );
 
         setIsGenerating(true);
     }
 
-    function handleResponse(response: PostResponseFail | PostResponseSuccess) {
-        if (response.status === "success") {
-            const successResponse = response as PostResponseSuccess;
-            switch (successResponse.type) {
-                case "message":
+    function sendMessageErrorHandler(err: Error) {
+        const message: Message = {
+            id: crypto.randomUUID(),
+            contentType: CONTENT_TYPE.TEXT,
+            content: err.message,
+            author: {
+                role: AUTHOR_ROLE.SYSTEM
+            }
+        };
+        setMessages([...messages, message]);
+    }
+
+    function handleResponse(
+        response: PostResponseFail | PostResponseSuccess | PostResponseControl
+    ) {
+        if (response.type === RESPONSE_TYPE.MESSAGE) {
+            switch (response.status) {
+                case REQUEST_STATUS.SUCCESS: {
+                    const successResponse = response as PostResponseSuccess;
                     handleMessageResponse(successResponse.message!);
                     break;
-                case "control":
-                    handleControlResponse(successResponse.control!);
+                }
+                case REQUEST_STATUS.FAIL: {
+                    const failResponse = response as PostResponseFail;
+                    console.error(`Request failed: ${failResponse.reason}`);
                     break;
+                }
                 default:
-                    console.error(
-                        `Unknown response type ${successResponse.type}`
-                    );
+                    console.error(`Unknown response status ${response.status}`);
             }
-        } else if (response.status === "fail") {
-            const failResponse = response as PostResponseFail;
-            console.error(`Request failed: ${failResponse.reason}`);
+        } else if (response.type === RESPONSE_TYPE.CONTROL) {
+            const controlResponse = response as PostResponseControl;
+            handleControlResponse(controlResponse.control.signal);
+        } else {
+            console.error(`Unknown response type ${response}`);
         }
     }
 
     function handleMessageResponse(message: Message) {
+        console.log(
+            "DEBUG: handleMessageResponse: New message recieved",
+            message
+        );
         setMessages((prevMessages) => {
             /* eslint-disable no-magic-numbers */
             if (
@@ -87,16 +127,24 @@ export default function Chat() {
         });
     }
 
-    function handleControlResponse(control: Control) {
-        switch (control.signal) {
-            case "generation-done":
+    function handleControlResponse(signal: CONTROL_SIGNAL) {
+        switch (signal) {
+            case CONTROL_SIGNAL.GENERATION_PENDING:
+                console.log("DEBUG: Message generation pending");
+                break;
+            case CONTROL_SIGNAL.GENERATION_STARTED:
+                console.log("DEBUG: Message generation started");
+                break;
+            case CONTROL_SIGNAL.GENERATION_DONE:
+                console.log("DEBUG: Message generation done");
                 setIsGenerating(false);
                 break;
-            case "generation-error":
+            case CONTROL_SIGNAL.GENERATION_ERROR:
+                console.error("Message generation error");
                 setIsGenerating(false);
                 break;
             default:
-                console.error(`Unknown control signal: ${control.signal}`);
+                console.error(`Unknown control signal: ${signal}`);
         }
     }
 
