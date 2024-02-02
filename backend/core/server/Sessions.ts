@@ -1,5 +1,7 @@
 import { ChatAgent } from "ai/chat-agents/ChatAgent";
 import { APISession, SessionId } from "../structs/api/APIStructs";
+import { LLM_TYPE } from "structs/ai/AIStructs";
+import { getTestChatAgent } from "TestChatAgent";
 
 export class Session implements APISession {
   id: SessionId;
@@ -10,6 +12,14 @@ export class Session implements APISession {
     this.id = sessionConfig.id;
     this.chatAgent = sessionConfig.chatAgent;
     this.response = sessionConfig.response;
+  }
+
+  async setupChatAgent() {
+    this.chatAgent = await getTestChatAgent();
+  }
+
+  getChatAgent() {
+    return this.chatAgent;
   }
 }
 
@@ -23,11 +33,11 @@ export class SessionManager {
     return session;
   }
 
-  public getSession(sessionId: string): Session | undefined {
+  public getSession(sessionId: SessionId): Session | undefined {
     return this.sessions.get(sessionId);
   }
 
-  public deleteSession(sessionId: string): void {
+  public deleteSession(sessionId: SessionId): void {
     this.sessions.delete(sessionId);
   }
 }

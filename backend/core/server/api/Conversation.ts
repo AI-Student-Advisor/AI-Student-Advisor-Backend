@@ -1,9 +1,18 @@
 import { Response } from "express";
 import { AppConfig } from "../../config/AppConfig";
-import { getSession, sendErrResponse, sendMsgResponse } from "../Server";
-import { Session } from "../Sessions";
+import {
+  getSession,
+  sendControlResponse,
+  sendErrResponse,
+  sendMsgResponse,
+} from "../Server";
 import { AgentResponse, QUERY_STATUS } from "../../structs/ai/AIStructs";
-import { Message, PostRequest } from "../../structs/api/APIStructs";
+import {
+  AUTHOR_ROLE,
+  CONTROL_SIGNAL,
+  Message,
+  PostRequest,
+} from "../../structs/api/APIStructs";
 
 /**
  * Query the chat agent with the user query and return the response to the client
@@ -18,7 +27,7 @@ import { Message, PostRequest } from "../../structs/api/APIStructs";
  * @param res
  * @returns
  */
-export function query(params: PostRequest, res: Response) {
+export async function query(params: PostRequest, res: Response) {
   // Validate the request message
   const validationResult = validateRequestMessage(params.message);
   if (!validationResult.valid) {
@@ -37,6 +46,9 @@ export function query(params: PostRequest, res: Response) {
     res.end();
     return;
   }
+
+  // setup chat agent if not already initialized
+  if (session.chatAgent === undefined) await session.setupChatAgent();
 
   // confirm chat agent is available and enabled
   if (session.chatAgent && session.chatAgent.isChatEnabled()) {
@@ -57,20 +69,33 @@ export function query(params: PostRequest, res: Response) {
 
 // utility method to get a response handler
 function getResponseHandler(res: Response) {
-  return (agentResponse: AgentResponse, res: Response) => {
+  const handler = (res: Response) => (agentResponse: AgentResponse) => {
     // check the status of the response
     switch (agentResponse.status) {
       case QUERY_STATUS.PENDING:
-        
+        sendControlResponse(CONTROL_SIGNAL.GENERATION_PENDING, res);
+        break;
+      case QUERY_STATUS.STARTED:
+        sendControlResponse(CONTROL_SIGNAL.GENERATION_STARTED, res);
         break;
       case QUERY_STATUS.ERROR:
+        sendErrResponse(agentResponse.response, res);
         break;
       case QUERY_STATUS.SUCCESS:
+        sendMsgResponse(agentResponse.response, res);
+        break;
+      case QUERY_STATUS.DONE:
+        sendControlResponse(CONTROL_SIGNAL.GENERATION_DONE, res);
         break;
       default:
+        sendErrResponse(
+          "Unknown QUERY_STATUS type from the Agent: " + agentResponse.status,
+          res
+        );
         break;
     }
   };
+  return handler(res);
 }
 
 function validateRequestMessage(message: Message | undefined): {
@@ -93,4 +118,14 @@ function validateRequestMessage(message: Message | undefined): {
     };
   }
   return { valid, err: "" };
+}
+
+function getNewMessage(response: string, message_id: string): Message {
+  const message: Message = {
+    id: message_id,
+    contentType: "text/plain",
+    content: response,
+    author: { role: AUTHOR_ROLE.ASSISTANT },
+  };
+  return message;
 }

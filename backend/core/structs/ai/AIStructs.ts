@@ -6,6 +6,8 @@ export const enum QUERY_STATUS {
   SUCCESS = "success",
   ERROR = "error",
   PENDING = "pending",
+  STARTED = "started",
+  DONE = "done",
 }
 
 export type AgentResponse = {
