@@ -1,14 +1,4 @@
-import { Control } from "api/interfaces/StructControl.ts";
-import { Message } from "api/interfaces/StructMessage.ts";
-
-export const enum REQUEST_STATUS {
-    SUCCESS = "success",
-    FAIL = "fail"
-}
-
-interface ResponseBase {
-    status: "success" | "fail";
-}
+import { Control, Message, UUID } from "api/interfaces/CommonStruct.ts";
 
 /**
  * `POST /api/conversation`
@@ -23,13 +13,12 @@ export interface PostRequest {
      *
      * Can be `undefined` for creating a new conversation.
      */
-    id?: string;
+    id?: UUID;
     message: Message;
 }
 
-export enum RESPONSE_TYPE {
-    MESSAGE = "message",
-    CONTROL = "control"
+interface ResponseBase {
+    status: "success" | "fail";
 }
 
 /**
@@ -38,7 +27,7 @@ export enum RESPONSE_TYPE {
  * Response payload interface when request succeeds
  */
 export interface PostResponseSuccess extends ResponseBase {
-    type: "message";
+    type: "message" | "control";
     /**
      * Conversation ID
      *
@@ -48,9 +37,15 @@ export interface PostResponseSuccess extends ResponseBase {
      * conversation ID or return the conversation ID that is sent through the
      * request payload.
      */
-    id: string;
-    message?: Message;
-    control?: Control;
+    id: UUID;
+}
+
+export interface PostResponseMessage extends PostResponseSuccess {
+    message: Message;
+}
+
+export interface PostResponseControl extends PostResponseSuccess {
+    control: Control;
 }
 
 /**
@@ -59,12 +54,5 @@ export interface PostResponseSuccess extends ResponseBase {
  * Response payload interface when request fails
  */
 export interface PostResponseFail extends ResponseBase {
-    type: "message";
     reason: string;
-}
-
-export interface PostResponseControl {
-    type: RESPONSE_TYPE.CONTROL;
-    control: Control;
-    message?: Message;
 }

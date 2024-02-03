@@ -21,8 +21,7 @@
         "framer-motion": "^10.18.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "usehooks-ts": "^2.10.0",
-        "uuid": "^9.0.1"
+        "usehooks-ts": "^2.10.0"
     },
     "devDependencies": {
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
