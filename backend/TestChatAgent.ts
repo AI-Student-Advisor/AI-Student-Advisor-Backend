@@ -74,13 +74,7 @@ class TestChatAgent {
 
   // enable chat agent
   async enableChat() {
-    const chatEnabled = await this.chatAgent.enableChat();
-    if (!chatEnabled) {
-      TU.tmprintError("testChatAgent FAILED", "Chat agent failed to enable");
-      return;
-    } else {
-      TU.tmprint("testChatAgent", "Chat agent enabled");
-    }
+    await this.chatAgent.enableChat();
   }
 
   // query the chat agent with the user query and the response handler

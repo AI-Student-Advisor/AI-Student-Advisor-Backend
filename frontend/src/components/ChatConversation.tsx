@@ -20,7 +20,9 @@ export default function ChatConversation({
                     </CardHeader>
                     <Divider />
                     {message.contentType === CONTENT_TYPE.TEXT ? (
-                        <CardBody>{message.content}</CardBody>
+                        <CardBody className="whitespace-pre-line">
+                            {message.content}
+                        </CardBody>
                     ) : (
                         <></>
                     )}

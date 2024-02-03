@@ -48,6 +48,8 @@ export class ChatAgent {
   }
 
   async enableChat() {
+    // check if chat is already enabled
+    if (this.chatEnabled) return this.chatEnabled;
     // initialize chat agent if not already initialized
     if (this.chatAgent === null || this.chatAgent == undefined) {
       // if using Open AI LLM
@@ -58,7 +60,7 @@ export class ChatAgent {
           this.maxIterations,
           this.verbose
         );
-        dlog.msg("ChatAgent.ts: Open AI agent initialized");
+        dlog.msg("ChatAgent: Open AI agent initialized");
       }
       // if using custom LLM
       else {
@@ -69,12 +71,12 @@ export class ChatAgent {
           this.maxIterations,
           this.verbose
         );
-        dlog.msg("ChatAgent.ts: Custom agent initialized");
+        dlog.msg("ChatAgent: Custom agent initialized");
       }
     }
     // enable chat
     this.chatEnabled = true;
-    dlog.msg("ChatAgent.ts: Chat enabled");
+    dlog.msg("ChatAgent: Chat enabled");
     return this.chatEnabled;
   }
 
@@ -92,7 +94,7 @@ export class ChatAgent {
     // check if valid input
     if (!agentInput) throw new Error("Invalid user query");
     dlog.msg(
-      "ChatAgent.ts: user query received: " +
+      "ChatAgent: user query received: " +
         agentInput.user.input +
         " sessionID: " +
         agentInput.config.configurable.sessionId
