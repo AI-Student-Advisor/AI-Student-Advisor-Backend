@@ -4,7 +4,6 @@ import { Button, ScrollShadow } from "@nextui-org/react";
 import { sendMessage } from "api/Conversation.ts";
 import { fetchHistoryConversations } from "api/HistoryConversations.ts";
 import {
-    Control,
     HistoryConversation,
     Message,
     UUID
@@ -86,18 +85,12 @@ export default function Chat() {
     function handleSuccessResponse(response: PostResponseSuccess) {
         let errorString = "";
 
-        setSessionId(response.id);
-
         switch (response.type) {
             case "message":
-                handleMessageResponse(
-                    (response as PostResponseMessage).message
-                );
+                handleMessageResponse(response as PostResponseMessage);
                 break;
             case "control":
-                handleControlResponse(
-                    (response as PostResponseControl).control
-                );
+                handleControlResponse(response as PostResponseControl);
                 break;
             default:
                 errorString = `Unknown response type ${response.type}`;
@@ -106,7 +99,10 @@ export default function Chat() {
         }
     }
 
-    function handleMessageResponse(message: Message) {
+    function handleMessageResponse(response: PostResponseMessage) {
+        const { id, message } = response;
+        setSessionId(id);
+
         setMessages((prevMessages) => {
             /* eslint-disable no-magic-numbers */
             if (
@@ -120,7 +116,8 @@ export default function Chat() {
         });
     }
 
-    function handleControlResponse(control: Control) {
+    function handleControlResponse(response: PostResponseControl) {
+        const { control } = response;
         let errorString = "";
 
         switch (control.signal) {
