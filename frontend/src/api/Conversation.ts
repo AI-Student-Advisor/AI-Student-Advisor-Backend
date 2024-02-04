@@ -15,7 +15,6 @@ const apiEndpoint = "/api/conversation";
 export async function sendMessage(
     request: PostRequest,
     onPush: SseOnPushCallback,
-    onError: (error: Error) => void,
     signal?: AbortSignal
 ) {
     await fetchEventSource(`${import.meta.env.VITE_API_ROOT}${apiEndpoint}`, {
@@ -41,7 +40,7 @@ export async function sendMessage(
             console.log("querying completed");
         },
         onerror(error) {
-            onError(error);
+            throw error;
         },
         onmessage(event) {
             console.log("onmessage", event);

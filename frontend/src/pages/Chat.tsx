@@ -38,6 +38,7 @@ export default function Chat() {
     const [messages, setMessages] = useState<Message[]>([
         initialAssistantMessage
     ]);
+    const [sessionID, setSessionID] = useState<string>();
     const generationController = useRef<AbortController>(new AbortController());
 
     useEffect(() => {
@@ -62,25 +63,17 @@ export default function Chat() {
         setMessages([...messages, message]);
 
         void sendMessage(
-            { message: message },
+            { message: message, id: sessionID },
             handleResponse,
-            sendMessageErrorHandler,
             generationController.current.signal
-        );
+        ).catch(sendMessageErrorHandler);
 
         setIsGenerating(true);
     }
 
     function sendMessageErrorHandler(err: Error) {
-        const message: Message = {
-            id: crypto.randomUUID(),
-            contentType: CONTENT_TYPE.TEXT,
-            content: err.message,
-            author: {
-                role: AUTHOR_ROLE.SYSTEM
-            }
-        };
-        setMessages([...messages, message]);
+        console.log("SendMessageErrorHandler: ");
+        console.dir(err);
     }
 
     function handleResponse(
@@ -90,12 +83,16 @@ export default function Chat() {
             switch (response.status) {
                 case REQUEST_STATUS.SUCCESS: {
                     const successResponse = response as PostResponseSuccess;
+                    // if session id not set, set it
+                    if (!sessionID) {
+                        setSessionID(successResponse.id);
+                    }
                     handleMessageResponse(successResponse.message!);
                     break;
                 }
                 case REQUEST_STATUS.FAIL: {
                     const failResponse = response as PostResponseFail;
-                    console.error(`Request failed: ${failResponse.reason}`);
+                    handleErrorResponse(failResponse.reason);
                     break;
                 }
                 default:
@@ -125,6 +122,22 @@ export default function Chat() {
             /* eslint-enable no-magic-numbers */
             return [...prevMessages, message];
         });
+    }
+
+    function handleErrorResponse(err: string) {
+        const errMessage = `An error occurred! Please refresh the page or try again later.\n\nDetails: ${err}`;
+        console.log("handleErrorResponse: ");
+        console.dir(err);
+        const message: Message = {
+            id: crypto.randomUUID(),
+            contentType: CONTENT_TYPE.TEXT,
+            content: errMessage,
+            author: {
+                role: AUTHOR_ROLE.SYSTEM
+            }
+        };
+        setMessages([...messages, message]);
+        setIsGenerating(false);
     }
 
     function handleControlResponse(signal: CONTROL_SIGNAL) {

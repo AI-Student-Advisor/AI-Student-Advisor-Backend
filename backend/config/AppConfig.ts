@@ -29,5 +29,5 @@ export const AppConfig = {
     close_vector_store_uuid:
       "file-fccd8af8549b5019d1c9f52ef7d063c27a5241da87ee2dad8e3c2f69b2f1d56f-a7bc8902-2bd3-4a08-bf0f-e7f6bd16cbfd",
   },
-  DEBUG_MODE: false,
+  DEBUG_MODE: true,
 };

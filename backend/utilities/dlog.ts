@@ -9,4 +9,14 @@ export const dlog = {
       console.log("DLOG: ", message);
     }
   },
+  err: (message: string) => {
+    if (AppConfig.DEBUG_MODE) {
+      console.error("DLOG: ", message);
+    }
+  },
+  dir: (obj: any) => {
+    if (AppConfig.DEBUG_MODE) {
+      console.dir(obj);
+    }
+  },
 };
