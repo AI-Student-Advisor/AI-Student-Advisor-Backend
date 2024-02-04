@@ -150,7 +150,7 @@ export default function Chat() {
     function handleError(error: any | object | string) {
         // TODO: Need more user-friendly error prompt
         const message: Message = {
-            id: "00000000-0000-0000-0000-00000000",
+            id: crypto.randomUUID(),
             contentType: "text/plain",
             content: error.toString(),
             author: {
