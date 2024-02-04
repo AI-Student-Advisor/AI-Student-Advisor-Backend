@@ -7,7 +7,7 @@ import { Control, Message, UUID } from "api/interfaces/CommonStruct.ts";
  */
 export interface PostRequest {
     /**
-     * Conversation ID
+     * Session ID
      *
      * A unique identifier for a conversation.
      *
@@ -17,7 +17,7 @@ export interface PostRequest {
     message: Message;
 }
 
-interface ResponseBase {
+export interface PostResponseBase {
     status: "success" | "fail";
 }
 
@@ -26,10 +26,10 @@ interface ResponseBase {
  *
  * Response payload interface when request succeeds
  */
-export interface PostResponseSuccess extends ResponseBase {
+export interface PostResponseSuccess extends PostResponseBase {
     type: "message" | "control";
     /**
-     * Conversation ID
+     * Session ID
      *
      * A unique identifier for a conversation.
      *
@@ -53,6 +53,6 @@ export interface PostResponseControl extends PostResponseSuccess {
  *
  * Response payload interface when request fails
  */
-export interface PostResponseFail extends ResponseBase {
+export interface PostResponseFail extends PostResponseBase {
     reason: string;
 }

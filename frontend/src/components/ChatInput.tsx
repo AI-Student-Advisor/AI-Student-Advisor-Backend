@@ -6,7 +6,7 @@ import React, { useState } from "react";
 export type OnSendMessageCallback = (text: string) => void;
 export type OnStopGenerateCallback = () => void;
 
-export type ChatInputStatus = "idle" | "pending" | "generating";
+export type ChatInputStatus = "idle" | "waiting" | "pending" | "generating";
 
 export interface ChatInputProps extends React.ComponentProps<"form"> {
     value: string;
@@ -59,7 +59,9 @@ export default function ChatInput({
                 onClick={buttonClickHandler}
                 color="primary"
                 variant="solid"
-                isDisabled={isInputEmpty || status === "pending"}
+                isDisabled={
+                    isInputEmpty || status === "waiting" || status === "pending"
+                }
             >
                 {status === "generating" ? (
                     <FontAwesomeIcon icon={faStop} />

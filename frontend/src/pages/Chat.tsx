@@ -6,9 +6,11 @@ import { fetchHistoryConversations } from "api/HistoryConversations.ts";
 import {
     Control,
     HistoryConversation,
-    Message
+    Message,
+    UUID
 } from "api/interfaces/CommonStruct.ts";
 import {
+    PostResponseBase,
     PostResponseControl,
     PostResponseFail,
     PostResponseMessage,
@@ -23,6 +25,7 @@ import { useEffect, useRef, useState } from "react";
 export default function Chat() {
     const [inputStatus, setInputStatus] = useState<ChatInputStatus>("idle");
     const [inputValue, setInputValue] = useState("");
+    const [sessionId, setSessionId] = useState<UUID | undefined>(undefined);
     const [historyConversations, setHistoryConversations] = useState<
         HistoryConversation[]
     >([]);
@@ -35,7 +38,8 @@ export default function Chat() {
         })();
     }, []);
 
-    function sendMessageHandler(text: string) {
+    function handleSendMessage(text: string) {
+        setInputStatus("waiting");
         generationController.current = new AbortController();
 
         const message: Message = {
@@ -47,40 +51,58 @@ export default function Chat() {
             }
         };
 
+        // Append user sent message
+        setMessages((prevMessages) => [...prevMessages, message]);
+
         void sendMessage(
-            { message: message },
+            { id: sessionId, message: message },
             handleResponse,
             generationController.current.signal
         ).catch((error) => {
-            // TODO: Implement proper error handling here
             console.error(error);
+            handleError(error);
         });
     }
 
-    function handleResponse(response: PostResponseFail | PostResponseSuccess) {
-        if (response.status === "success") {
-            const successResponse = response as PostResponseSuccess;
-            switch (successResponse.type) {
-                case "message":
-                    handleMessageResponse(
-                        (response as PostResponseMessage).message
-                    );
-                    break;
-                case "control":
-                    handleControlResponse(
-                        (response as PostResponseControl).control
-                    );
-                    break;
-                default:
-                    // TODO: Implement proper error handling here
-                    console.error(
-                        `Unknown response type ${successResponse.type}`
-                    );
-            }
-        } else if (response.status === "fail") {
-            const failResponse = response as PostResponseFail;
-            // TODO: Implement proper error handling here
-            console.error(`Request failed: ${failResponse.reason}`);
+    function handleResponse(response: PostResponseBase) {
+        let errorString = "";
+
+        switch (response.status) {
+            case "success":
+                handleSuccessResponse(response as PostResponseSuccess);
+                break;
+            case "fail":
+                errorString = `Request failed: ${(response as PostResponseFail).reason}`;
+                console.error(errorString);
+                handleError(errorString);
+                break;
+            default:
+                errorString = `Unknown response status ${response.status}`;
+                console.error(errorString);
+                handleError(errorString);
+        }
+    }
+
+    function handleSuccessResponse(response: PostResponseSuccess) {
+        let errorString = "";
+
+        setSessionId(response.id);
+
+        switch (response.type) {
+            case "message":
+                handleMessageResponse(
+                    (response as PostResponseMessage).message
+                );
+                break;
+            case "control":
+                handleControlResponse(
+                    (response as PostResponseControl).control
+                );
+                break;
+            default:
+                errorString = `Unknown response type ${response.type}`;
+                console.error(errorString);
+                handleError(errorString);
         }
     }
 
@@ -99,6 +121,8 @@ export default function Chat() {
     }
 
     function handleControlResponse(control: Control) {
+        let errorString = "";
+
         switch (control.signal) {
             case "generation-pending":
                 setInputStatus("pending");
@@ -111,16 +135,33 @@ export default function Chat() {
                 setInputValue("");
                 break;
             case "generation-error":
-                // TODO: Implement proper error handling here
-                setInputStatus("idle");
+                errorString = "Signal generation-error received";
+                console.error(errorString);
+                handleError(errorString);
                 break;
             default:
-                // TODO: Implement proper error handling here
-                console.error(`Unknown control signal: ${control.signal}`);
+                errorString = `Unknown control signal: ${control.signal}`;
+                console.error(errorString);
+                handleError(errorString);
         }
     }
 
-    function stopGenerateHandler() {
+    // eslint-disable-next-line
+    function handleError(error: any | object | string) {
+        // TODO: Need more user-friendly error prompt
+        const message: Message = {
+            id: "00000000-0000-0000-0000-00000000",
+            contentType: "text/plain",
+            content: error.toString(),
+            author: {
+                role: "system"
+            }
+        };
+        setMessages((prevMessages) => [...prevMessages, message]);
+        setInputStatus("idle");
+    }
+
+    function handleStopGenerate() {
         generationController.current.abort();
         setInputStatus("idle");
     }
@@ -153,8 +194,8 @@ export default function Chat() {
                     value={inputValue}
                     setValue={setInputValue}
                     className="pb-4 w-[64rem] flex items-center"
-                    onSendMessage={sendMessageHandler}
-                    onStopGenerate={stopGenerateHandler}
+                    onSendMessage={handleSendMessage}
+                    onStopGenerate={handleStopGenerate}
                     status={inputStatus}
                 />
             </div>

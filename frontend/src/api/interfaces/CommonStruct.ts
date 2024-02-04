@@ -43,7 +43,7 @@ export interface Control {
  */
 export interface HistoryConversation {
     /**
-     * Conversation ID
+     * Session ID
      */
     id: UUID;
     /**

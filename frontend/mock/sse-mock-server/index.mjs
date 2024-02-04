@@ -1,6 +1,5 @@
 import express from "express";
 
-const uuid = crypto.randomUUID;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const app = express();
@@ -29,18 +28,11 @@ app.post("/api/conversation", async (request, response) => {
     const data = request.body;
     console.log(data);
 
-    let sessionId = uuid();
+    let sessionId = crypto.randomUUID();
 
     if (data.message.id) {
         sessionId = data.message.id;
     }
-
-    const responseUserMessage = {
-        status: "success",
-        type: "message",
-        id: sessionId,
-        message: data.message
-    };
 
     const responseControlPending = {
         status: "success",
@@ -56,7 +48,7 @@ app.post("/api/conversation", async (request, response) => {
         type: "control",
         id: sessionId,
         control: {
-            signal: "generation-start"
+            signal: "generation-started"
         }
     };
 
@@ -65,7 +57,7 @@ app.post("/api/conversation", async (request, response) => {
         type: "message",
         id: sessionId,
         message: {
-            id: uuid(),
+            id: crypto.randomUUID(),
             contentType: "text/plain",
             content: "",
             author: {
@@ -86,10 +78,6 @@ app.post("/api/conversation", async (request, response) => {
     response.setHeader("Connection", "keep-alive");
     response.setHeader("Cache-Control", "no-cache");
     response.setHeader("X-Accel-Buffering", "no");
-
-    response.write("event: message\n");
-    response.write(`data: ${JSON.stringify(responseUserMessage)}`);
-    response.write("\n\n");
 
     response.write("event: message\n");
     response.write(`data: ${JSON.stringify(responseControlPending)}`);
