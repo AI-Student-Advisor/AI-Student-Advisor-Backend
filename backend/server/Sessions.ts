@@ -1,6 +1,7 @@
 import { ChatAgent } from "ai/chat-agents/ChatAgent";
 import { APISession, SessionId } from "../structs/api/APIStructs";
 import { getTestChatAgent } from "../TestChatAgent";
+import { dlog } from "../utilities/dlog";
 
 export class Session implements APISession {
   id: SessionId;
@@ -29,6 +30,7 @@ export class SessionManager {
   public getNewSession(sessionConfig: APISession): Session {
     const session: Session = new Session(sessionConfig);
     this.sessions.set(session.id, session);
+    dlog.msg("SessionManager: New session created: ID: " + session.id);
     return session;
   }
 
@@ -37,6 +39,7 @@ export class SessionManager {
   }
 
   public deleteSession(sessionId: SessionId): void {
+    dlog.msg("SessionManager: Deleting session: ID: " + sessionId);
     this.sessions.delete(sessionId);
   }
 }

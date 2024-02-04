@@ -11,8 +11,8 @@ import {
   PostResponseFail,
   CONTROL_SIGNAL,
   PostResponseControl,
+  SessionId,
 } from "./structs/api/APIStructs";
-import { runConversationTest } from "./test/api/ConversationEndpointTest";
 import { dlog } from "./utilities/dlog";
 
 dlog.msg("Server.ts - Setting up Server");
@@ -59,30 +59,50 @@ async function eventHandler(
     "Access-Control-Allow-Origin": "*",
   });
 
-  // Query the chat agent - asynchoronous
-  await ConversationEndpoints.query(params, res);
+  try {
+    // Get session if ID provided, otherwise create a new session
+    const session = getSession(params.id, res);
 
-  // Close the connection when the client disconnects
-  req.on("close", () => res.end("OK"));
+    // Query the chat agent - asynchoronous
+    await ConversationEndpoints.query(session, params.message, res);
+
+    // Close the connection when the client disconnects
+    req.on("close", () => {
+      dlog.msg("Server: Client disconnected");
+      res.end("OK");
+      sessionManager.deleteSession(session.id);
+    });
+  } catch (err: any) {
+    dlog.err("Server: Error in eventHandler: " + err);
+    sendErrResponse(err instanceof Error ? err.message : err, res);
+    sendControlResponse(
+      CONTROL_SIGNAL.GENERATION_ERROR,
+      REQUEST_STATUS.FAIL,
+      res
+    );
+    // timeout for 4 seconds to allow the client to receive the error message
+    setTimeout(() => {
+      res.destroy(err);
+      dlog.msg("Server: response destroyed");
+    }, 4000);
+  }
 }
 
 export function getSession(
   sessionID: string | undefined,
   res: Response
-): Session | undefined {
+): Session {
   // If a valid session ID is provided, get the session by ID
   if (sessionID) {
     // get the session by ID
     const session = sessionManager.getSession(sessionID);
     // If the session does not exist, return an error control?: Control,
-    if (session === undefined) {
-      sendErrResponse(`Session not found for the given id: ${sessionID}`, res);
-    }
-    return session;
-  } else {
-    // Create a new session
-    return sessionManager.getNewSession({ id: crypto.randomUUID() });
+    if (session === undefined)
+      throw new Error("Session not found for the given id: " + sessionID);
+    else return session;
   }
+  // Create a new session
+  else return sessionManager.getNewSession({ id: crypto.randomUUID() });
 }
 
 function sendData(res: Response, data: string) {
@@ -91,9 +111,13 @@ function sendData(res: Response, data: string) {
   res.write("\n\n");
 }
 
-export function sendMsgResponse(message: Message, res: Response) {
+export function sendMsgResponse(
+  id: SessionId,
+  message: Message,
+  res: Response
+) {
   const userRequest: PostResponseSuccess = {
-    id: crypto.randomUUID(), // unqiue ID for each message
+    id,
     status: REQUEST_STATUS.SUCCESS,
     type: RESPONSE_TYPE.MESSAGE,
     message,
@@ -117,13 +141,13 @@ export function sendErrResponse(err: string, res: Response) {
 
 export function sendControlResponse(
   signal: CONTROL_SIGNAL,
-  res: Response,
-  message?: Message
+  status: REQUEST_STATUS,
+  res: Response
 ) {
   const controlResponse: PostResponseControl = {
     type: RESPONSE_TYPE.CONTROL,
     control: { signal },
-    message,
+    status,
   };
   sendData(res, JSON.stringify(controlResponse));
   console.log("INFO: Sent Control: " + controlResponse.control.signal);

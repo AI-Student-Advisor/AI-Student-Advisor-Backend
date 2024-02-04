@@ -132,10 +132,9 @@ export interface PostResponseFail extends ResponseBase {
   reason: string;
 }
 
-export interface PostResponseControl {
+export interface PostResponseControl extends ResponseBase {
   type: RESPONSE_TYPE.CONTROL;
   control: Control;
-  message?: Message;
 }
 
 /**
