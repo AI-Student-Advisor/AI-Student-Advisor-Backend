@@ -1,20 +1,19 @@
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import {
     PostRequest,
     PostResponseFail,
-    PostResponseSuccess,
-    PostResponseControl
-} from "./interfaces/APIStructs";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
+    PostResponseSuccess
+} from "api/interfaces/Conversation.ts";
 
-type SseOnPushCallback = (
-    response: PostResponseFail | PostResponseSuccess | PostResponseControl
+type OnResponseCallback = (
+    response: PostResponseFail | PostResponseSuccess
 ) => void;
 
 const apiEndpoint = "/api/conversation";
 
 export async function sendMessage(
     request: PostRequest,
-    onPush: SseOnPushCallback,
+    onResponse?: OnResponseCallback,
     signal?: AbortSignal
 ) {
     await fetchEventSource(`${import.meta.env.VITE_API_ROOT}${apiEndpoint}`, {
@@ -26,27 +25,34 @@ export async function sendMessage(
         openWhenHidden: true,
         body: JSON.stringify(request),
         async onopen(response) {
-            console.log("onopen", response);
             const contentType = response.headers.get("Content-Type");
+            if (!contentType) {
+                throw new TypeError("Server did not specify Content-Type");
+            }
+
             if (
-                Boolean(contentType) &&
                 // eslint-disable-next-line no-magic-numbers
-                contentType!.indexOf("application/json") >= 0
+                contentType.indexOf("text/event-stream") >= 0
+            ) {
+                return;
+            }
+
+            if (
+                // eslint-disable-next-line no-magic-numbers
+                contentType.indexOf("application/json") >= 0
             ) {
                 throw await response.json();
             }
-        },
-        onclose() {
-            console.log("querying completed");
+
+            throw new TypeError(`Unknown Content-Type: ${contentType}`);
         },
         onerror(error) {
             throw error;
         },
         onmessage(event) {
-            console.log("onmessage", event);
             const { data } = event;
-            if (data) {
-                onPush(JSON.parse(data));
+            if (data && onResponse) {
+                onResponse(JSON.parse(data));
             }
         }
     });

@@ -1,14 +1,4 @@
-import { Control } from "api/interfaces/StructControl.ts";
-import { Message } from "api/interfaces/StructMessage.ts";
-
-export const enum REQUEST_STATUS {
-    SUCCESS = "success",
-    FAIL = "fail"
-}
-
-interface ResponseBase {
-    status: "success" | "fail";
-}
+import { Control, Message, UUID } from "api/interfaces/CommonStruct.ts";
 
 /**
  * `POST /api/conversation`
@@ -17,19 +7,18 @@ interface ResponseBase {
  */
 export interface PostRequest {
     /**
-     * Conversation ID
+     * Session ID
      *
      * A unique identifier for a conversation.
      *
      * Can be `undefined` for creating a new conversation.
      */
-    id?: string;
+    id?: UUID;
     message: Message;
 }
 
-export enum RESPONSE_TYPE {
-    MESSAGE = "message",
-    CONTROL = "control"
+export interface PostResponseBase {
+    status: "success" | "fail";
 }
 
 /**
@@ -37,10 +26,10 @@ export enum RESPONSE_TYPE {
  *
  * Response payload interface when request succeeds
  */
-export interface PostResponseSuccess extends ResponseBase {
-    type: "message";
+export interface PostResponseSuccess extends PostResponseBase {
+    type: "message" | "control";
     /**
-     * Conversation ID
+     * Session ID
      *
      * A unique identifier for a conversation.
      *
@@ -48,9 +37,15 @@ export interface PostResponseSuccess extends ResponseBase {
      * conversation ID or return the conversation ID that is sent through the
      * request payload.
      */
-    id: string;
-    message?: Message;
-    control?: Control;
+    id: UUID;
+}
+
+export interface PostResponseMessage extends PostResponseSuccess {
+    message: Message;
+}
+
+export interface PostResponseControl extends PostResponseSuccess {
+    control: Control;
 }
 
 /**
@@ -58,13 +53,6 @@ export interface PostResponseSuccess extends ResponseBase {
  *
  * Response payload interface when request fails
  */
-export interface PostResponseFail extends ResponseBase {
-    type: "message";
+export interface PostResponseFail extends PostResponseBase {
     reason: string;
-}
-
-export interface PostResponseControl {
-    type: RESPONSE_TYPE.CONTROL;
-    control: Control;
-    message?: Message;
 }

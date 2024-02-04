@@ -6,27 +6,31 @@ import React, { useState } from "react";
 export type OnSendMessageCallback = (text: string) => void;
 export type OnStopGenerateCallback = () => void;
 
+export type ChatInputStatus = "idle" | "waiting" | "pending" | "generating";
+
 export interface ChatInputProps extends React.ComponentProps<"form"> {
+    value: string;
+    setValue: React.Dispatch<React.SetStateAction<string>>;
+    status: ChatInputStatus;
     onSendMessage?: OnSendMessageCallback;
     onStopGenerate?: OnStopGenerateCallback;
-    isGenerating: boolean;
 }
 
 export default function ChatInput({
+    value,
+    setValue,
+    status,
     onSendMessage,
     onStopGenerate,
-    isGenerating,
     ...otherProps
 }: ChatInputProps) {
-    const [input, setInput] = useState("");
-    const [buttonDisabled, setButtonDisabled] = useState(true);
+    const [isInputEmpty, setIsInputEmpty] = useState(true);
 
     function buttonClickHandler() {
-        if (onSendMessage && !isGenerating) {
-            onSendMessage(input);
-            setInput("");
+        if (onSendMessage && status === "idle") {
+            onSendMessage(value);
         }
-        if (onStopGenerate && isGenerating) {
+        if (onStopGenerate && status === "generating") {
             onStopGenerate();
         }
     }
@@ -37,16 +41,16 @@ export default function ChatInput({
                 isRequired
                 variant="flat"
                 size="lg"
-                value={input}
+                value={value}
                 minRows={1}
                 onValueChange={(v) => {
-                    setInput(v);
-                    setButtonDisabled(v === "");
+                    setValue(v);
+                    setIsInputEmpty(v === "");
                 }}
                 type="text"
                 placeholder="Type your message..."
                 color="secondary"
-                isDisabled={isGenerating}
+                isDisabled={status !== "idle"}
             />
             <div role="separator" className="px-3"></div>
             <Button
@@ -55,9 +59,11 @@ export default function ChatInput({
                 onClick={buttonClickHandler}
                 color="primary"
                 variant="solid"
-                isDisabled={buttonDisabled}
+                isDisabled={
+                    isInputEmpty || status === "waiting" || status === "pending"
+                }
             >
-                {isGenerating ? (
+                {status === "generating" ? (
                     <FontAwesomeIcon icon={faStop} />
                 ) : (
                     <FontAwesomeIcon icon={faPaperPlane} />
