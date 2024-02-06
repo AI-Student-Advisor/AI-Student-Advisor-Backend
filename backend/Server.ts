@@ -14,6 +14,7 @@ import {
   SessionId,
 } from "./structs/api/APIStructs";
 import { dlog } from "./utilities/dlog";
+import * as crypto from "crypto";
 
 dlog.msg("Server.ts - Setting up Server");
 

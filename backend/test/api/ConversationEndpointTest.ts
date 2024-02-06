@@ -10,6 +10,7 @@ import {
   REQUEST_STATUS,
   RESPONSE_TYPE,
 } from "../../structs/api/APIStructs";
+import * as crypto from "crypto";
 
 const port = AppConfig.api.port || 3000;
 const apiEndpoint = "/api/conversation";

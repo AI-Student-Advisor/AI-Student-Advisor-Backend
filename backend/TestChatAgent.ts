@@ -22,7 +22,7 @@ import { getWebBaseLoader } from "./ai/data-loaders/WebDataLoaders";
 import { DataRetriever } from "./ai/data-retrievers/DataRetriever";
 import { TU } from "./test/Util";
 import { ChatAgent } from "./ai/chat-agents/ChatAgent";
-
+import * as crypto from "crypto";
 class TestChatAgent {
   private static TEST_PARAMS = {
     using_test_query: false, // if false, will start CLI interface

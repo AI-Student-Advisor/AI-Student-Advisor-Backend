@@ -16,6 +16,7 @@ import {
   SessionId,
 } from "../../structs/api/APIStructs";
 import { Session } from "../../server/Sessions";
+import * as crypto from "crypto";
 
 /**
  * Query the chat agent with the user query and return the response to the client

@@ -38,6 +38,7 @@ import { getWebBaseLoader } from "../../../ai/data-loaders/WebDataLoaders";
 import { DataRetriever } from "../../../ai/data-retrievers/DataRetriever";
 import { TU } from "../../Util";
 import { ChatAgent } from "../../../ai/chat-agents/ChatAgent";
+import * as crypto from "crypto";
 
 const TEST_NAME = "CHAT_AGENT_TEST";
 
