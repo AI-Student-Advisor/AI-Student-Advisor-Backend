@@ -50,8 +50,8 @@ const TEST_PARAMS = {
   embeddings_model: EMBEDDING_MODELS.OPENAI,
   data_retriever_name: "uOttawaChat",
   data_context: "University of Ottawa",
-  loadCloseVectorStoreFromCloud: true,
-  vector_db_type: VECTOR_DB_TYPE.CLOSE_VECTOR_STORE,
+  loadVectorStoreFromCloud: false,
+  vector_db_type: VECTOR_DB_TYPE.ASTRA_DB,
   sessionId: crypto.randomUUID(),
 };
 
@@ -62,7 +62,7 @@ async function testChatAgent() {
     name: TEST_PARAMS.data_retriever_name,
     context: TEST_PARAMS.data_context,
     loader: webDataLoader,
-    loadCloseVectorStoreFromCloud: TEST_PARAMS.loadCloseVectorStoreFromCloud,
+    loadVectorStoreFromCloud: TEST_PARAMS.loadVectorStoreFromCloud,
     vectorDBType: TEST_PARAMS.vector_db_type,
     embeddingModelType: TEST_PARAMS.embeddings_model,
   });

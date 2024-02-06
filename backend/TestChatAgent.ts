@@ -33,8 +33,9 @@ class TestChatAgent {
     embeddings_model: EMBEDDING_MODELS.OPENAI,
     data_retriever_name: "uOttawaChat",
     data_context: "University of Ottawa",
-    loadCloseVectorStoreFromCloud: true,
-    vector_db_type: VECTOR_DB_TYPE.CLOSE_VECTOR_STORE_CLOUD,
+    generateEmbeddings: false,
+    loadVectorStoreFromCloud: true,
+    vector_db_type: VECTOR_DB_TYPE.ASTRA_DB,
     sessionId: crypto.randomUUID(),
   };
   private chatAgent: any;
@@ -50,8 +51,9 @@ class TestChatAgent {
       name: TestChatAgent.TEST_PARAMS.data_retriever_name,
       context: TestChatAgent.TEST_PARAMS.data_context,
       loader: webDataLoader,
-      loadCloseVectorStoreFromCloud:
-        TestChatAgent.TEST_PARAMS.loadCloseVectorStoreFromCloud,
+      generateEmbeddings: TestChatAgent.TEST_PARAMS.generateEmbeddings,
+      loadVectorStoreFromCloud:
+        TestChatAgent.TEST_PARAMS.loadVectorStoreFromCloud,
       vectorDBType: TestChatAgent.TEST_PARAMS.vector_db_type,
       embeddingModelType: TestChatAgent.TEST_PARAMS.embeddings_model,
     });

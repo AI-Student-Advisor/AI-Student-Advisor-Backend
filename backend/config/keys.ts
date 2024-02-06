@@ -55,22 +55,31 @@ const getAWSSecretAccessKey = () => {
   return AWS_SECRET_ACCESS_KEY;
 };
 
-// Get close vector store Access Key
-const getCloseVectorStoreAccessKey = () => {
-  const { CLOSE_VECTOR_ACCESS_KEY } = process.env;
-  if (!CLOSE_VECTOR_ACCESS_KEY) {
-    throw new Error("CLOSE_VECTOR_ACCESS_KEY not set");
+// Get Astra DB Application Token from environment variables
+const getAstraDBApplicationToken = () => {
+  const { ASTRA_DB_APPLICATION_TOKEN } = process.env;
+  if (!ASTRA_DB_APPLICATION_TOKEN) {
+    throw new Error("ASTRA_DB_APPLICATION_TOKEN not set");
   }
-  return CLOSE_VECTOR_ACCESS_KEY;
+  return ASTRA_DB_APPLICATION_TOKEN;
 };
 
-// Get close vector store Secret Key
-const getCloseVectorStoreSecretKey = () => {
-  const { CLOSE_VECTOR_SECRET_KEY } = process.env;
-  if (!CLOSE_VECTOR_SECRET_KEY) {
-    throw new Error("CLOSE_VECTOR_SECRET_KEY not set");
+// Get Astra DB Endpoint from environment variables
+const getAstraDBEndpoint = () => {
+  const { ASTRA_DB_ENDPOINT } = process.env;
+  if (!ASTRA_DB_ENDPOINT) {
+    throw new Error("ASTRA_DB_ENDPOINT not set");
   }
-  return CLOSE_VECTOR_SECRET_KEY;
+  return ASTRA_DB_ENDPOINT;
+};
+
+// Get Astra DB Collection from environment variables
+const getAstraDBCollection = () => {
+  const { ASTRA_DB_COLLECTION } = process.env;
+  if (!ASTRA_DB_COLLECTION) {
+    throw new Error("ASTRA_DB_COLLECTION not set");
+  }
+  return ASTRA_DB_COLLECTION;
 };
 
 export {
@@ -80,6 +89,7 @@ export {
   getAWSRegion,
   getAWSAccessKeyID,
   getAWSSecretAccessKey,
-  getCloseVectorStoreAccessKey,
-  getCloseVectorStoreSecretKey,
+  getAstraDBApplicationToken,
+  getAstraDBEndpoint,
+  getAstraDBCollection,
 };

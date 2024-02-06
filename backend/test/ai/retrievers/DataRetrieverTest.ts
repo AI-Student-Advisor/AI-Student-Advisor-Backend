@@ -12,7 +12,7 @@ const TEST_PARAMS = {
   testUrl: "https://catalogue.uottawa.ca/en/courses/csi/",
   data_retriever_name: "uOttawaChat",
   data_context: "University of Ottawa",
-  loadCloseVectorStoreFromCloud: false,
+  loadVectorStoreFromCloud: false,
   vector_db_type: VECTOR_DB_TYPE.MEMORY,
   embeddings_model: EMBEDDING_MODELS.OPENAI,
 };
@@ -23,7 +23,7 @@ async function testWebDataRetriever() {
     context: TEST_PARAMS.data_context,
     loader: getWebBaseLoader(TEST_PARAMS.testUrl),
     vectorDBType: TEST_PARAMS.vector_db_type,
-    loadCloseVectorStoreFromCloud: TEST_PARAMS.loadCloseVectorStoreFromCloud,
+    loadVectorStoreFromCloud: TEST_PARAMS.loadVectorStoreFromCloud,
     embeddingModelType: TEST_PARAMS.embeddings_model,
   });
 

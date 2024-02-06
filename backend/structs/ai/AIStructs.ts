@@ -42,11 +42,25 @@ export type ChatAgentConfig = {
   verbose?: boolean;
 };
 
+export type DataRetrieverConfig = {
+  name: string;
+  context: string;
+  loader: any;
+  vectorDBType: VECTOR_DB_TYPE;
+  embeddingModelType: EMBEDDING_MODELS;
+  generateEmbeddings?: boolean;
+  loadVectorStoreFromCloud?: boolean;
+  saveEmbeddingsToCloud?: boolean;
+  chunkSize?: number;
+  chunkOverlap?: number;
+};
+
 export type VectorStoreConfig = {
   vectorDBType: VECTOR_DB_TYPE;
   embeddingModelType: EMBEDDING_MODELS;
   loader: any;
-  loadCloseVectorStoreFromCloud?: boolean;
+  generateEmbeddings?: boolean;
+  loadVectorStoreFromCloud?: boolean;
   saveEmbeddingsToCloud?: boolean;
   chunkSize?: number;
   chunkOverlap?: number;
@@ -68,5 +82,5 @@ export const enum VECTOR_DB_TYPE {
   CLOSE_VECTOR_STORE,
   MEMORY,
   // cloud-hosted
-  CLOSE_VECTOR_STORE_CLOUD,
+  ASTRA_DB,
 }

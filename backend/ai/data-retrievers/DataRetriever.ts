@@ -1,25 +1,18 @@
 import { createRetrieverTool } from "langchain/tools/retriever";
 import { dlog } from "../../utilities/dlog";
-import { VECTOR_DB_TYPE, EMBEDDING_MODELS } from "../../structs/ai/AIStructs";
+import {
+  VECTOR_DB_TYPE,
+  EMBEDDING_MODELS,
+  DataRetrieverConfig,
+} from "../../structs/ai/AIStructs";
 import { getVectorStore } from "../vector-stores/VectorStore";
-
-export type DataRetrieverConfig = {
-  name: string;
-  context: string;
-  loader: any;
-  vectorDBType: VECTOR_DB_TYPE;
-  embeddingModelType: EMBEDDING_MODELS;
-  loadCloseVectorStoreFromCloud?: boolean;
-  saveEmbeddingsToCloud?: boolean;
-  chunkSize?: number;
-  chunkOverlap?: number;
-};
 
 export class DataRetriever {
   name: string;
   context: string;
   loader?: any;
-  loadCloseVectorStoreFromCloud?: boolean;
+  generateEmbeddings?: boolean;
+  loadVectorStoreFromCloud?: boolean;
   vectorDBType: VECTOR_DB_TYPE;
   embeddingModelType: EMBEDDING_MODELS;
   saveEmbeddingsToCloud?: boolean;
@@ -38,8 +31,9 @@ export class DataRetriever {
     this.loader = dataRetrieverConfig.loader;
     this.vectorDBType = dataRetrieverConfig.vectorDBType;
     this.embeddingModelType = dataRetrieverConfig.embeddingModelType;
-    this.loadCloseVectorStoreFromCloud =
-      dataRetrieverConfig.loadCloseVectorStoreFromCloud || false;
+    this.generateEmbeddings = dataRetrieverConfig.generateEmbeddings || false;
+    this.loadVectorStoreFromCloud =
+      dataRetrieverConfig.loadVectorStoreFromCloud || false;
     this.saveEmbeddingsToCloud =
       dataRetrieverConfig.saveEmbeddingsToCloud || false;
     this.chunkSize =
@@ -67,7 +61,7 @@ export class DataRetriever {
     // depending on the loader provided and
     // other configuration settings
     let vectorstore = await getVectorStore({
-      loadCloseVectorStoreFromCloud: this.loadCloseVectorStoreFromCloud,
+      loadVectorStoreFromCloud: this.loadVectorStoreFromCloud,
       embeddingModelType: this.embeddingModelType,
       loader: this.loader,
       chunkSize: this.chunkSize,

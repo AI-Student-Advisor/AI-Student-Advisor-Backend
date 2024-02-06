@@ -1,19 +1,18 @@
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { CloseVectorNode } from "@langchain/community/vectorstores/closevector/node";
 import { getEmbeddingModel } from "../embedding-models/EmbeddingModel";
-import { VectorStoreConfig } from "../../structs/ai/AIStructs";
-import { getCloudVectorDatabase, getVectorDatabase } from "./VectorDatabases";
+import { VECTOR_DB_TYPE, VectorStoreConfig } from "../../structs/ai/AIStructs";
 import { dlog } from "../../utilities/dlog";
 import {
-  getCloseVectorStoreAccessKey,
-  getCloseVectorStoreSecretKey,
-} from "../../config/keys";
+  getAstraDBFromDocuments,
+  getExistingAstraDBStore,
+} from "./AstraDBVectorStore";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 
 export async function getVectorStore(config: VectorStoreConfig) {
   // to store the vector store
   let vectorstore: any = null;
 
-  if (config.loadCloseVectorStoreFromCloud) {
+  if (config.loadVectorStoreFromCloud) {
     // get the embedding model based on the type
     const embeddingsModel = getEmbeddingModel(config.embeddingModelType);
     vectorstore = await getCloudVectorDatabase(
@@ -43,44 +42,44 @@ export async function getVectorStore(config: VectorStoreConfig) {
     const embeddings = getEmbeddingModel(config.embeddingModelType);
     dlog.msg("Embedding model created");
 
-    // get appropriate vector store based on the type
-    const vectoreStoreInstance = getVectorDatabase(config.vectorDBType);
-    // verify if vector store instance is valid
-    if (vectoreStoreInstance === undefined || vectoreStoreInstance === null) {
-      throw new Error("DataRetriever.ts: Invalid vector store instance");
-    }
-
-    // Save the vector store to cloud
-    if (vectoreStoreInstance === CloseVectorNode) {
-      // generate embeddings for the documents and store in the vector store
-      vectorstore = await vectoreStoreInstance.fromDocuments(
-        docs,
-        embeddings,
-        undefined,
-        {
-          key: getCloseVectorStoreAccessKey(),
-          secret: getCloseVectorStoreSecretKey(),
-        }
-      );
-      dlog.msg("Vector store created");
-
-      if (config.saveEmbeddingsToCloud) {
-        await vectorstore.saveToCloud({
-          description: "uOttawa",
-          public: true,
-        });
-        dlog.msg("Vector store saved to cloud");
-
-        const { uuid } = vectorstore.instance;
-        dlog.msg("Vector store UUID: " + uuid);
-      }
-    } else {
-      // Most likely in-memory store
-      vectorstore = await vectoreStoreInstance.fromDocuments(docs, embeddings);
-      dlog.msg("Vector store created");
-    }
+    // get the vector database based on the type
+    vectorstore = await getVectorStoreFromDocuments(
+      config.vectorDBType,
+      docs,
+      embeddings
+    );
+    dlog.msg("Vector store created");
   }
 
   // return the vector store
   return vectorstore;
+}
+
+async function getVectorStoreFromDocuments(
+  vectorDBType: VECTOR_DB_TYPE,
+  docs: any,
+  embeddings: any
+) {
+  switch (vectorDBType) {
+    case VECTOR_DB_TYPE.ASTRA_DB:
+      return await getAstraDBFromDocuments(docs, embeddings);
+    case VECTOR_DB_TYPE.MEMORY:
+      return await MemoryVectorStore.fromDocuments(docs, embeddings);
+    default:
+      throw new Error("Invalid vector store type");
+  }
+}
+
+async function getCloudVectorDatabase(
+  vectorDBType: VECTOR_DB_TYPE,
+  embeddingModel: any
+) {
+  if (embeddingModel === undefined || embeddingModel === null)
+    throw new Error("Embedding model is required for Close Vector Store");
+  switch (vectorDBType) {
+    case VECTOR_DB_TYPE.ASTRA_DB:
+      return await getExistingAstraDBStore(embeddingModel);
+    default:
+      throw new Error("Invalid cloud vector database type");
+  }
 }
