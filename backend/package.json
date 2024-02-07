@@ -7,7 +7,8 @@
     "tsc": "rm -fr dist && npx tsc",
     "start": "rm -fr dist && npx tsc && ./node_modules/.bin/nodemon -L ./dist/Server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start2": "del -fr dist && npx tsc && .\\node_modules\\.bin\\nodemon -L .\\dist\\Server.js"
+    "startWin": "del -fr dist && npx tsc && .\\node_modules\\.bin\\nodemon -L .\\dist\\Server.js",
+    "startServer": "node Server.js"
   },
   "author": "",
   "license": "ISC",

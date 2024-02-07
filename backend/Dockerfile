@@ -1,10 +1,12 @@
 FROM node:21
 
-WORKDIR /backend
+COPY "dist/" /workplace/
+COPY package*.json /workplace/
+COPY .env /workplace/
 
-COPY package*.json ./
+WORKDIR /workplace/
 
-RUN npm install
+RUN npm install --force
 
-EXPOSE 8080
-CMD [ "npm", "start" ]
+EXPOSE 3001
+CMD ["npm" , "run", "startServer"]
