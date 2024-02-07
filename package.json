@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon -x tsx src/Server.ts",
     "format": "prettier --write src",
-    "lint": "eslint src",
+    "lint": "tsc && eslint src",
     "build": "swc --strip-leading-paths --delete-dir-on-start -d dist src",
     "serve": "node dist/Server.js"
   },

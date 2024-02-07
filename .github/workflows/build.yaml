@@ -1,0 +1,74 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: AI-Student-Advisor/backend
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-publish-image:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checking Out Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v4.0.2
+      with:
+        node-version: 20
+    - name: Fetching node modules
+      run: |
+        npm install
+    - name: Build distributable
+      run: |
+        npm run lint || true
+        npm run build
+
+    - name: Prepare Production-Only node_modules
+      run: |
+        rm -rf node_modules
+        npm install --omit=dev
+
+    - name: Docker Set up QEMU
+      uses: docker/setup-qemu-action@v3.0.0
+
+    - name: Docker Setup Buildx
+      uses: docker/setup-buildx-action@v3.0.0
+
+    - name: Extract Metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v5.5.1
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+    - name: Log in to the Container Registry
+      if: ${{ github.ref == 'refs/heads/main' }}
+      uses: docker/login-action@v3.0.0
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5.1.0
+      with:
+        context: .
+        push: ${{ github.ref == 'refs/heads/main' }}
+        platforms: >
+            linux/amd64,
+            linux/arm64/v8,
+            linux/arm/v6,linux/arm/v7,
+            linux/ppc64le,
+            linux/s390x
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
