@@ -33,7 +33,6 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        npm run tsc
         npm run start
 
 networks:
