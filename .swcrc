@@ -1,0 +1,35 @@
+{
+  "minify": true,
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": false,
+      "dynamicImport": false
+    },
+    "target": "es2016",
+    "loose": false,
+    "transform": {
+      "legacyDecorator": false,
+      "decoratorVersion": "2022-03"
+    },
+    "keepClassNames": false,
+    "paths": {
+      "/*": ["./*"]
+    },
+    "baseUrl": "./src",
+    "minify": {
+      "compress": {
+        "arguments": true,
+        "ecma": "2016",
+        "reduce_funcs": true
+      },
+      "mangle": {},
+      "format": {
+        "comments": false
+      }
+    }
+  },
+  "sourceMaps": true,
+  "isModule": true
+}

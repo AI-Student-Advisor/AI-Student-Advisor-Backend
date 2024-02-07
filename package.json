@@ -4,14 +4,15 @@
   "description": "Backend for the AI Student Advisor application",
   "main": "Server.js",
   "scripts": {
-    "tsc": "rm -fr dist && npx tsc",
-    "start": "rm -fr dist && npx tsc && ./node_modules/.bin/nodemon -L ./dist/Server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "startWin": "del -fr dist && npx tsc && .\\node_modules\\.bin\\nodemon -L .\\dist\\Server.js",
-    "startServer": "node Server.js"
+    "dev": "nodemon -x tsx src/Server.ts",
+    "format": "prettier --write src",
+    "lint": "eslint src",
+    "build": "swc --strip-leading-paths --delete-dir-on-start -d dist src",
+    "serve": "node dist/Server.js"
   },
   "author": "",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-sdk/client-bedrock-runtime": "^3.507.0",
@@ -36,7 +37,16 @@
     "prompt": "^1.3.0"
   },
   "devDependencies": {
+    "@swc/cli": "^0.3.9",
+    "@swc/core": "^1.4.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
     "nodemon": "^3.0.3",
+    "prettier": "^3.2.5",
+    "run-script-os": "^1.1.6",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
 }
