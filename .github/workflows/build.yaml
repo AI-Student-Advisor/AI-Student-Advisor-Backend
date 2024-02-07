@@ -34,6 +34,11 @@ jobs:
         npm run lint || true
         npm run build
 
+    - name: Prepare Production-Only node_modules
+      run: |
+        rm -rf node_modules
+        npm install --omit=dev
+
     - name: Docker Set up QEMU
       uses: docker/setup-qemu-action@v3.0.0
 
