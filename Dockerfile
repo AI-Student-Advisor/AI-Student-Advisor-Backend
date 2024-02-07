@@ -1,14 +1,11 @@
-FROM node:21
+FROM node:20-alpine
 
-COPY "dist/" /workplace/
-COPY "public/" /workplace/
+COPY dist/ /workplace/
 COPY package*.json /workplace/
-COPY .env /workplace/
-COPY tsconfig.json /workplace/
 
 WORKDIR /workplace/
 
-RUN npm install
+RUN npm install --omit=dev
 
 EXPOSE 3001
-CMD ["npm" , "run", "startServer"]
+CMD ["node" , "Server.js"]

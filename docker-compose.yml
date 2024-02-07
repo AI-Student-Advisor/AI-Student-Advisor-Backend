@@ -1,44 +1,16 @@
 version: "3"
 
 services:
-  nodejs:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ai-backend
-    container_name: ai-backend
+  ai-student-advisor-backend:
+    image: ai-student-advisor/backend
+    build: .
+    container_name: ai-student-advisor-backend
     restart: unless-stopped
     env_file: .env
-    environment:
-      - OPEN_AI_API_KEY=$OPEN_AI_API_KEY
-      - UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL
-      - UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN
-      - AWS_REGION=$AWS_REGION
-      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-      - ASTRA_DB_APPLICATION_TOKEN=$ASTRA_DB_APPLICATION_TOKEN
-      - ASTRA_DB_ENDPOINT=$ASTRA_DB_ENDPOINT
-      - ASTRA_DB_COLLECTION=$ASTRA_DB_COLLECTION
-      - LANGCHAIN_TRACING_V2=$LANGCHAIN_TRACING_V2
-      - LANGCHAIN_ENDPOINT=$LANGCHAIN_ENDPOINT
-      - LANGCHAIN_API_KEY=$LANGCHAIN_API_KEY
-      - LANGCHAIN_PROJECT=$LANGCHAIN_PROJECT
     ports:
-      - "80:8080"
-    volumes:
-      - .:/backend
-      - node_modules:/backend/node_modules
+      - "127.0.0.1:3001:3001"
     networks:
-      - app-network
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        npm run start
+      - ai-student-advisor-default
 
 networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  dbdata:
-  node_modules:
+  ai-student-advisor-default:

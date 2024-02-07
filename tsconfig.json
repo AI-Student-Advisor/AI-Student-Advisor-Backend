@@ -1,19 +1,36 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "module": "CommonJS",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": [
+      "ESNext"
+    ],
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
     "strictNullChecks": true,
-    "preserveConstEnums": true,
-    "removeComments": true,
-    "outDir": "dist",
-    "rootDir": ".",
-    "baseUrl": "."
-  },
-  "include": ["**/*", "*.ts"],
-  "exclude": ["node_modules", "dist", "public", "**/*.spec.ts"]
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "Bundler",
+    "incremental": true,
+    "baseUrl": "./src",
+    "paths": {
+      "/*": [
+        "./*"
+      ]
+    }
+  }
 }
