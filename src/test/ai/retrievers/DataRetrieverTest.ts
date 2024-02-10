@@ -1,6 +1,6 @@
 import { getWebBaseLoader } from "/ai/data-loaders/WebDataLoaders";
 import { DataRetriever } from "/ai/data-retrievers/DataRetriever";
-import { EMBEDDING_MODELS, VECTOR_DB_TYPE } from "/structs/ai/AIStructs";
+import { EMBEDDING_MODELS, VECTOR_STORE } from "/structs/ai/AIStructs";
 import { TU } from "/test/Util";
 
 const TEST_NAME = "DATA_RETRIEVER_TEST";
@@ -10,7 +10,7 @@ const TEST_PARAMS = {
   data_retriever_name: "uOttawaChat",
   data_context: "University of Ottawa",
   loadVectorStoreFromCloud: false,
-  vector_db_type: VECTOR_DB_TYPE.MEMORY,
+  vector_db_type: VECTOR_STORE.MEMORY,
   embeddings_model: EMBEDDING_MODELS.OPENAI
 };
 

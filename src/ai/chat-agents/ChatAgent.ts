@@ -25,12 +25,12 @@ export class ChatAgent {
     // Order is important
 
     // Set the user role
-    this.userRole = chatAgentConfig.user_role || "student";
+    this.userRole = chatAgentConfig.userRole || "student";
     // Set the sessionId
     this.sessionId = chatAgentConfig.sessionId;
     // Set params for the chat agent
-    this.llmType = chatAgentConfig.llm_type;
-    this.initialPrompt = chatAgentConfig.initial_prompt;
+    this.llmType = chatAgentConfig.llmType;
+    this.initialPrompt = chatAgentConfig.initialPrompt;
     this.tools = chatAgentConfig.tools;
     this.maxIterations = chatAgentConfig.maxIterations;
     this.verbose = chatAgentConfig.verbose;
@@ -52,7 +52,7 @@ export class ChatAgent {
       return this.chatEnabled;
     }
     // initialize chat agent if not already initialized
-    if (this.chatAgent === null || this.chatAgent == undefined) {
+    if (this.chatAgent === null || this.chatAgent === undefined) {
       // if using Open AI LLM
       if (this.llmType === LLM_TYPE.OPEN_AI) {
         this.chatAgent = await getOpenAIAgentExecutor(
@@ -104,7 +104,7 @@ export class ChatAgent {
       throw new Error("Chat is disabled");
     }
     // let response handler know response is being prepared
-    if (responseHandler != null && responseHandler != undefined) {
+    if (responseHandler !== null && responseHandler !== undefined) {
       responseHandler({ status: QUERY_STATUS.PENDING });
     }
     try {

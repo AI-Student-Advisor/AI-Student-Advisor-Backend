@@ -3,7 +3,7 @@ import {
   getExistingAstraDBStore
 } from "./AstraDBVectorStore.js";
 import { getEmbeddingModel } from "/ai/embedding-models/EmbeddingModel.js";
-import { VECTOR_DB_TYPE, VectorStoreConfig } from "/structs/ai/AIStructs.js";
+import { VECTOR_STORE, VectorStoreConfig } from "/structs/ai/AIStructs.js";
 import { dlog } from "/utilities/dlog.js";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
@@ -56,14 +56,14 @@ export async function getVectorStore(config: VectorStoreConfig) {
 }
 
 async function getVectorStoreFromDocuments(
-  vectorDBType: VECTOR_DB_TYPE,
+  vectorDBType: VECTOR_STORE,
   docs: any,
   embeddings: any
 ) {
   switch (vectorDBType) {
-    case VECTOR_DB_TYPE.ASTRA_DB:
+    case VECTOR_STORE.ASTRA_DB:
       return await getAstraDBFromDocuments(docs, embeddings);
-    case VECTOR_DB_TYPE.MEMORY:
+    case VECTOR_STORE.MEMORY:
       return await MemoryVectorStore.fromDocuments(docs, embeddings);
     default:
       throw new Error("Invalid vector store type");
@@ -71,14 +71,14 @@ async function getVectorStoreFromDocuments(
 }
 
 async function getCloudVectorDatabase(
-  vectorDBType: VECTOR_DB_TYPE,
+  vectorDBType: VECTOR_STORE,
   embeddingModel: any
 ) {
   if (embeddingModel === undefined || embeddingModel === null) {
     throw new Error("Embedding model is required for Close Vector Store");
   }
   switch (vectorDBType) {
-    case VECTOR_DB_TYPE.ASTRA_DB:
+    case VECTOR_STORE.ASTRA_DB:
       return await getExistingAstraDBStore(embeddingModel);
     default:
       throw new Error("Invalid cloud vector database type");

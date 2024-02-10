@@ -33,10 +33,10 @@ export const enum LLM_TYPE {
  */
 export type ChatAgentConfig = {
   sessionId: string;
-  user_role?: USER_ROLE;
-  llm_type: LLM_TYPE;
-  initial_prompt?: string;
-  remember_history?: boolean;
+  userRole?: USER_ROLE;
+  llmType: LLM_TYPE;
+  initialPrompt?: string;
+  rememberHistory?: boolean;
   tools?: any;
   maxIterations?: number;
   verbose?: boolean;
@@ -46,7 +46,7 @@ export type DataRetrieverConfig = {
   name: string;
   context: string;
   loader: any;
-  vectorDBType: VECTOR_DB_TYPE;
+  vectorDBType: VECTOR_STORE;
   embeddingModelType: EMBEDDING_MODELS;
   generateEmbeddings?: boolean;
   loadVectorStoreFromCloud?: boolean;
@@ -56,7 +56,7 @@ export type DataRetrieverConfig = {
 };
 
 export type VectorStoreConfig = {
-  vectorDBType: VECTOR_DB_TYPE;
+  vectorDBType: VECTOR_STORE;
   embeddingModelType: EMBEDDING_MODELS;
   loader: any;
   generateEmbeddings?: boolean;
@@ -77,10 +77,17 @@ export const enum EMBEDDING_MODELS {
 /**
  * Types of vector databases supported
  */
-export const enum VECTOR_DB_TYPE {
+export const enum VECTOR_STORE {
   // local in-memory
-  CLOSE_VECTOR_STORE,
   MEMORY,
   // cloud-hosted
   ASTRA_DB
+}
+
+/**
+ * Types of databases supported for storing chat history
+ */
+export const enum CHAT_HISTORY_STORE {
+  ASTRA_DB,
+  UPSTASH
 }

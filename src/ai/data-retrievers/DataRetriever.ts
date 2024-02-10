@@ -1,6 +1,6 @@
 import { getVectorStore } from "/ai/vector-stores/VectorStore.js";
 import {
-  VECTOR_DB_TYPE,
+  VECTOR_STORE,
   EMBEDDING_MODELS,
   DataRetrieverConfig
 } from "/structs/ai/AIStructs.js";
@@ -13,7 +13,7 @@ export class DataRetriever {
   loader?: any;
   generateEmbeddings?: boolean;
   loadVectorStoreFromCloud?: boolean;
-  vectorDBType: VECTOR_DB_TYPE;
+  vectorDBType: VECTOR_STORE;
   embeddingModelType: EMBEDDING_MODELS;
   saveEmbeddingsToCloud?: boolean;
   chunkSize: number;

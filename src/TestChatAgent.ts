@@ -16,11 +16,10 @@ import { DataRetriever } from "/ai/data-retrievers/DataRetriever.js";
 import {
   LLM_TYPE,
   EMBEDDING_MODELS,
-  VECTOR_DB_TYPE,
+  VECTOR_STORE,
   AgentInput,
   ChatAgentConfig
 } from "/structs/ai/AIStructs.js";
-import { TU } from "/test/Util.js";
 import * as crypto from "crypto";
 
 class TestChatAgent {
@@ -35,13 +34,10 @@ class TestChatAgent {
     data_context: "University of Ottawa",
     generateEmbeddings: false,
     loadVectorStoreFromCloud: true,
-    vector_db_type: VECTOR_DB_TYPE.ASTRA_DB,
+    vector_db_type: VECTOR_STORE.ASTRA_DB,
     sessionId: crypto.randomUUID()
   };
   private chatAgent: any;
-
-  // constructor
-  constructor() {}
 
   async setupChatAgent() {
     // setup chat agent
@@ -62,7 +58,7 @@ class TestChatAgent {
     // PART 2: Create Chat Agent
     const chatAgentConfig: ChatAgentConfig = {
       sessionId: TestChatAgent.TEST_PARAMS.sessionId, // required parameter
-      llm_type: TestChatAgent.TEST_PARAMS.llm_model, // LLM to use
+      llmType: TestChatAgent.TEST_PARAMS.llm_model, // LLM to use
       // provide retriever tool so chat agent can retriever context from out data
       tools: [retrieverTool]
     };

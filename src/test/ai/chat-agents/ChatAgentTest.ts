@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 /*
 
 Basic workflow for a webpage based chat agent:
@@ -34,7 +36,7 @@ import {
   LLM_TYPE,
   QUERY_STATUS,
   EMBEDDING_MODELS,
-  VECTOR_DB_TYPE,
+  VECTOR_STORE,
   ChatAgentConfig
 } from "/structs/ai/AIStructs.js";
 import { TU } from "/test/Util.js";
@@ -52,7 +54,7 @@ const TEST_PARAMS = {
   data_retriever_name: "uOttawaChat",
   data_context: "University of Ottawa",
   loadVectorStoreFromCloud: false,
-  vector_db_type: VECTOR_DB_TYPE.ASTRA_DB,
+  vector_db_type: VECTOR_STORE.ASTRA_DB,
   sessionId: crypto.randomUUID()
 };
 
@@ -72,7 +74,7 @@ async function testChatAgent() {
   // PART 2: Create Chat Agent
   const chatAgentConfig: ChatAgentConfig = {
     sessionId: TEST_PARAMS.sessionId, // required parameter
-    llm_type: TEST_PARAMS.llm_model, // LLM to use
+    llmType: TEST_PARAMS.llm_model, // LLM to use
     // provide retriever tool so chat agent can retriever context from out data
     tools: [retrieverTool]
   };

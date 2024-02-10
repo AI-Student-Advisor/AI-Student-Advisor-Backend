@@ -1,8 +1,10 @@
+import { getChatHistoryStore } from "../chat-history/getChatHistoryStore";
 import { getOpenAIChatModel } from "/ai/chat-models/OpenAIChatModel.js";
 import {
   getUpstashRedisRESTAPIKey,
   getUpstashRedisRESTAPIURL
 } from "/config/keys.js";
+import { CHAT_HISTORY_STORE } from "/structs/ai/AIStructs";
 import { dlog } from "/utilities/dlog.js";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 import {
@@ -65,13 +67,7 @@ export async function getOpenAIAgentExecutor(
   return new RunnableWithMessageHistory({
     runnable: agentExecutor,
     getMessageHistory: (sessionId: string) =>
-      new UpstashRedisChatMessageHistory({
-        sessionId,
-        config: {
-          url: getUpstashRedisRESTAPIURL(),
-          token: getUpstashRedisRESTAPIKey()
-        }
-      }),
+      getChatHistoryStore(sessionId, CHAT_HISTORY_STORE.ASTRA_DB),
     inputMessagesKey: INPUT_MESSAGE_KEY,
     historyMessagesKey: HISTORY_MESSAGE_KEY
   });
