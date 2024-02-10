@@ -62,17 +62,25 @@ async function eventHandler(
 
   try {
     // Get session if ID provided, otherwise create a new session
-    const session = getSession(params.id, res);
+    const session = getSession(params.id);
+
+    // if session was in queue to be expired, terminate the expiration
+    sessionManager.terminateSessionExpiration(session.id);
+
+    // handle closing of response stream once request is complete
+    res.on("close", () => {
+      dlog.msg(
+        `SERVER: Response stream closed for session: ${session.id}. Will expire after a certain time period if stays inactive.`
+      );
+      // Set the session to expire after a certain time period
+      sessionManager.setSessionExpiration(
+        session.id,
+        AppConfig.api.session_expiry_time
+      );
+    });
 
     // Query the chat agent - asynchoronous
-    await ConversationEndpoints.query(session, params.message, res);
-
-    // Close the connection when the client disconnects
-    req.on("close", () => {
-      dlog.msg("Server: Client disconnected");
-      res.end("OK");
-      sessionManager.deleteSession(session.id);
-    });
+    ConversationEndpoints.query(session, params.message, res);
   } catch (err: any) {
     dlog.err(`Server: Error in eventHandler: ${err}`);
     sendErrResponse(err instanceof Error ? err.message : err, res);
@@ -89,25 +97,27 @@ async function eventHandler(
   }
 }
 
-export function getSession(
-  sessionID: string | undefined,
-  res: Response
-): Session {
+export function getSession(sessionID: string | undefined): Session {
   // If a valid session ID is provided, get the session by ID
   if (sessionID) {
     // get the session by ID
     const session = sessionManager.getSession(sessionID);
-    // If the session does not exist, return an error control?: Control,
+    // If the session does not exist, return a new session with the given ID
     if (session === undefined) {
-      throw new Error(`Session not found for the given id: ${sessionID}`);
-    } else {
-      return session;
+      // confirm session ID is valid UUID format
+      if (Session.isValidSessionId(sessionID)) {
+        throw new Error(
+          `Invalid format for session ID. Should conform to UUID v4 pattern. Session ID: ${sessionID}`
+        );
+      }
+      // Create a new session with the given ID
+      return sessionManager.getNewSession({ id: sessionID });
     }
+    // If the session exists, return the session
+    return session;
   }
-  // Create a new session
-  else {
-    return sessionManager.getNewSession({ id: crypto.randomUUID() });
-  }
+  // Create a new session with new ID
+  return sessionManager.getNewSession({ id: crypto.randomUUID() });
 }
 
 function sendData(res: Response, data: string) {

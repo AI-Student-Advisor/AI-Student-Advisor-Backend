@@ -13,6 +13,11 @@ export const dlog = {
       console.error("DLOG: ", message);
     }
   },
+  warn: (message: string) => {
+    if (AppConfig.DEBUG_MODE) {
+      console.warn("DLOG: ", message);
+    }
+  },
   dir: (obj: any) => {
     if (AppConfig.DEBUG_MODE) {
       console.dir(obj);

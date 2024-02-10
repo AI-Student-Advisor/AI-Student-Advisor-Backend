@@ -5,12 +5,10 @@ import {
   AUTHOR_ROLE,
   CONTROL_SIGNAL,
   Message,
-  PostRequest,
   REQUEST_STATUS,
   SessionId
 } from "/structs/api/APIStructs.js";
 import {
-  getSession,
   sendControlResponse,
   sendErrResponse,
   sendMsgResponse
@@ -101,18 +99,24 @@ function getResponseHandler(sessionId: SessionId, res: Response) {
           res.end("ERROR");
           break;
         case QUERY_STATUS.SUCCESS:
-          const queryResult = agentResponse.response;
-          // send the response to the client
-          if (queryResult !== undefined && queryResult.output !== undefined) {
-            sendMsgResponse(sessionId, getNewMessage(queryResult.output), res);
-            // TESTING: until we have streaming
-            sendControlResponse(
-              CONTROL_SIGNAL.GENERATION_DONE,
-              REQUEST_STATUS.SUCCESS,
-              res
-            );
-            // since we don't have stream we end the response after sending the result
-            res.end("OK");
+          {
+            const queryResult = agentResponse.response;
+            // send the response to the client
+            if (queryResult !== undefined && queryResult.output !== undefined) {
+              sendMsgResponse(
+                sessionId,
+                getNewMessage(queryResult.output),
+                res
+              );
+              // TESTING: until we have streaming
+              sendControlResponse(
+                CONTROL_SIGNAL.GENERATION_DONE,
+                REQUEST_STATUS.SUCCESS,
+                res
+              );
+              // since we don't have stream we end the response after sending the result
+              res.end("OK");
+            }
           }
           break;
         case QUERY_STATUS.DONE:
