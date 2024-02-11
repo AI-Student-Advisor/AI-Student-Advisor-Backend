@@ -7,8 +7,6 @@ export function getChatModel(llmType: LLM_TYPE) {
   switch (llmType) {
     case LLM_TYPE.OPEN_AI:
       return getOpenAIChatModel();
-    case LLM_TYPE.PALM:
-    // return new PalmChatModel();
     case LLM_TYPE.LLAMA:
       return getLlamaChatModel();
     default:

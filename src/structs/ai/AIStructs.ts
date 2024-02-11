@@ -32,34 +32,28 @@ export const enum LLM_TYPE {
  * Chat agent configurations required to initialize the chat agent.
  */
 export type ChatAgentConfig = {
-  sessionId: string;
-  user_role?: USER_ROLE;
-  llm_type: LLM_TYPE;
-  initial_prompt?: string;
-  remember_history?: boolean;
+  llmType: LLM_TYPE;
+  context: string;
+  userRole: USER_ROLE;
+  chatHistoryStore: CHAT_HISTORY_STORE;
+  useKnowledgeBase?: boolean;
+  initialPrompt?: string;
+  rememberHistory?: boolean;
   tools?: any;
   maxIterations?: number;
   verbose?: boolean;
 };
 
 export type DataRetrieverConfig = {
-  name: string;
+  retrieverToolName: string;
   context: string;
-  loader: any;
-  vectorDBType: VECTOR_DB_TYPE;
-  embeddingModelType: EMBEDDING_MODELS;
-  generateEmbeddings?: boolean;
-  loadVectorStoreFromCloud?: boolean;
-  saveEmbeddingsToCloud?: boolean;
-  chunkSize?: number;
-  chunkOverlap?: number;
+  vectorStoreConfig: VectorStoreConfig;
 };
 
 export type VectorStoreConfig = {
-  vectorDBType: VECTOR_DB_TYPE;
+  vectorDBType: VECTOR_STORE;
   embeddingModelType: EMBEDDING_MODELS;
   loader: any;
-  generateEmbeddings?: boolean;
   loadVectorStoreFromCloud?: boolean;
   saveEmbeddingsToCloud?: boolean;
   chunkSize?: number;
@@ -77,10 +71,24 @@ export const enum EMBEDDING_MODELS {
 /**
  * Types of vector databases supported
  */
-export const enum VECTOR_DB_TYPE {
+export const enum VECTOR_STORE {
   // local in-memory
-  CLOSE_VECTOR_STORE,
   MEMORY,
   // cloud-hosted
   ASTRA_DB
+}
+
+/**
+ * Types of databases supported for storing chat history
+ */
+export const enum CHAT_HISTORY_STORE {
+  ASTRA_DB,
+  UPSTASH
+}
+
+/**
+ * Supported chat agents for specific schools
+ */
+export const enum SUPPORTED_CHAT_AGENTS {
+  U_OTTAWA = "uOttawa"
 }
