@@ -4,6 +4,7 @@ import {
   getAstraDBChatHistoryKeyspace,
   getAstraDBChatHistoryTable
 } from "/config/keys";
+import { dlog } from "/utilities/dlog";
 import { CassandraChatMessageHistory } from "@langchain/community/stores/message/cassandra";
 
 const configConnection = {
@@ -16,6 +17,9 @@ const configConnection = {
 };
 
 export function getAstraDBChatHistoryStore(sessionId: string) {
+  dlog.msg(
+    `Setting up AstraDB chat history store for session: ${sessionId}...`
+  );
   try {
     const db = new CassandraChatMessageHistory({
       ...configConnection,

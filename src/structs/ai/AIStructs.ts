@@ -32,9 +32,11 @@ export const enum LLM_TYPE {
  * Chat agent configurations required to initialize the chat agent.
  */
 export type ChatAgentConfig = {
-  sessionId: string;
-  userRole?: USER_ROLE;
   llmType: LLM_TYPE;
+  context: string;
+  userRole: USER_ROLE;
+  chatHistoryStore: CHAT_HISTORY_STORE;
+  useKnowledgeBase?: boolean;
   initialPrompt?: string;
   rememberHistory?: boolean;
   tools?: any;
@@ -43,23 +45,15 @@ export type ChatAgentConfig = {
 };
 
 export type DataRetrieverConfig = {
-  name: string;
+  retrieverToolName: string;
   context: string;
-  loader: any;
-  vectorDBType: VECTOR_STORE;
-  embeddingModelType: EMBEDDING_MODELS;
-  generateEmbeddings?: boolean;
-  loadVectorStoreFromCloud?: boolean;
-  saveEmbeddingsToCloud?: boolean;
-  chunkSize?: number;
-  chunkOverlap?: number;
+  vectorStoreConfig: VectorStoreConfig;
 };
 
 export type VectorStoreConfig = {
   vectorDBType: VECTOR_STORE;
   embeddingModelType: EMBEDDING_MODELS;
   loader: any;
-  generateEmbeddings?: boolean;
   loadVectorStoreFromCloud?: boolean;
   saveEmbeddingsToCloud?: boolean;
   chunkSize?: number;
@@ -90,4 +84,11 @@ export const enum VECTOR_STORE {
 export const enum CHAT_HISTORY_STORE {
   ASTRA_DB,
   UPSTASH
+}
+
+/**
+ * Supported chat agents for specific schools
+ */
+export const enum SUPPORTED_CHAT_AGENTS {
+  U_OTTAWA = "uOttawa"
 }

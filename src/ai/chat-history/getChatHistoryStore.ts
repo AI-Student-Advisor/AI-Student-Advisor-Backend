@@ -1,10 +1,6 @@
 import { getAstraDBChatHistoryStore } from "./AstraDBChatHistoryStore";
-import {
-  getUpstashRedisRESTAPIKey,
-  getUpstashRedisRESTAPIURL
-} from "/config/keys";
+import { getUpstashChatHistoryStore } from "./UpstashChatHistoryStore";
 import { CHAT_HISTORY_STORE } from "/structs/ai/AIStructs.js";
-import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 
 export function getChatHistoryStore(
   sessionId: string,
@@ -14,13 +10,7 @@ export function getChatHistoryStore(
     case CHAT_HISTORY_STORE.ASTRA_DB:
       return getAstraDBChatHistoryStore(sessionId);
     case CHAT_HISTORY_STORE.UPSTASH:
-      return new UpstashRedisChatMessageHistory({
-        sessionId,
-        config: {
-          url: getUpstashRedisRESTAPIURL(),
-          token: getUpstashRedisRESTAPIKey()
-        }
-      });
+      return getUpstashChatHistoryStore(sessionId);
     default:
       throw new Error("Invalid chat history store");
   }
