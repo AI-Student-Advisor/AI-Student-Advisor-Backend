@@ -1,5 +1,6 @@
-import { getTestChatAgent } from "/TestChatAgent.js";
 import { ChatAgent } from "/ai/chat-agents/ChatAgent.js";
+import { setupNewChatAgent } from "/ai/chat-agents/ChatAgents";
+import { SUPPORTED_CHAT_AGENTS } from "/structs/ai/AIStructs";
 import { APISession, SessionId } from "/structs/api/APIStructs.js";
 import { dlog } from "/utilities/dlog.js";
 
@@ -15,7 +16,9 @@ export class Session implements APISession {
   }
 
   async setupChatAgent() {
-    this.chatAgent = await getTestChatAgent();
+    if (this.chatAgent) return;
+    // TODO: until functionality is implemented, use uOttawa chat agent
+    this.chatAgent = await setupNewChatAgent(SUPPORTED_CHAT_AGENTS.U_OTTAWA);
   }
 
   getChatAgent() {

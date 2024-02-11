@@ -105,7 +105,7 @@ export function getSession(sessionID: string | undefined): Session {
     // If the session does not exist, return a new session with the given ID
     if (session === undefined) {
       // confirm session ID is valid UUID format
-      if (Session.isValidSessionId(sessionID)) {
+      if (!Session.isValidSessionId(sessionID)) {
         throw new Error(
           `Invalid format for session ID. Should conform to UUID v4 pattern. Session ID: ${sessionID}`
         );

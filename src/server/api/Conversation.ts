@@ -1,3 +1,4 @@
+import { ChatAgent } from "/ai/chat-agents/ChatAgent";
 import { AppConfig } from "/config/AppConfig.js";
 import { Session } from "/server/Sessions.js";
 import { AgentResponse, QUERY_STATUS } from "/structs/ai/AIStructs.js";
@@ -39,33 +40,34 @@ async function query(
   if (!validationResult.valid) {
     throw new Error(validationResult.err);
   }
+
   // should be true at this point, but needed for type checking
   if (message.content === undefined) {
     throw new Error("Invalid post request. Message content is undefined.");
   }
 
-  try {
-    // setup chat agent if not already initialized
-    if (session.chatAgent === undefined) {
-      await session.setupChatAgent();
-    }
+  // setup chat agent if not already initialized
+  if (session.chatAgent === undefined) {
+    await session.setupChatAgent();
+  }
 
-    // confirm chat agent is available and enabled
-    if (session.chatAgent && session.chatAgent.isChatEnabled()) {
-      // prepare input to query the chat agent
-      const agentInput = session.chatAgent.prepareInput(message.content);
-      // create a response handler which which will handle the responses from the chat agent
-      const responseHandler = getResponseHandler(session.id, res);
-      // query the chat agent with the user query and the response handler
-      await session.chatAgent.query(agentInput, responseHandler);
-    } else {
-      // if chat agent is not available or chat is not enabled, send a message to the client
-      throw new Error(
-        session.chatAgent ? "Chat is disabled" : "Chat agent is not available"
-      );
-    }
-  } catch (err: any) {
-    throw err instanceof Error ? err : new Error(err);
+  // create a response handler which which will handle the responses from the chat agent
+  const responseHandler = getResponseHandler(session.id, res);
+
+  // confirm chat agent is available and enabled
+  if (session.chatAgent && session.chatAgent.isChatEnabled()) {
+    // prepare input to query the chat agent
+    const agentInput = ChatAgent.prepareInput(message.content, session.id);
+    // query the chat agent with the user query and the response handler
+    await session.chatAgent.query(agentInput, responseHandler);
+  } else {
+    // if chat agent is not available or chat is not enabled, send a message to the client
+    responseHandler({
+      status: QUERY_STATUS.ERROR,
+      response: session.chatAgent
+        ? "Chat is disabled"
+        : "Chat agent is not available"
+    });
   }
 }
 
