@@ -1,46 +1,13 @@
 import { getVectorStore } from "/ai/vector-stores/VectorStore.js";
-import {
-  VECTOR_STORE,
-  EMBEDDING_MODELS,
-  DataRetrieverConfig
-} from "/structs/ai/AIStructs.js";
+import { DataRetrieverConfig } from "/structs/ai/AIStructs.js";
 import { dlog } from "/utilities/dlog.js";
 import { createRetrieverTool } from "langchain/tools/retriever";
 
 export class DataRetriever {
-  name: string;
-  context: string;
-  loader?: any;
-  generateEmbeddings?: boolean;
-  loadVectorStoreFromCloud?: boolean;
-  vectorDBType: VECTOR_STORE;
-  embeddingModelType: EMBEDDING_MODELS;
-  saveEmbeddingsToCloud?: boolean;
-  chunkSize: number;
-  chunkOverlap: number;
+  retrieverToolName: string = "";
+  context: string = "";
   retrieverTool: any;
   private retriever: any;
-
-  // https://js.langchain.com/docs/modules/data_connection/document_transformers/#get-started-with-text-splitters
-  private static DEFAULT_CHUNK_SIZE = 1000;
-  private static DEFAULT_CHUNK_OVERLAP = 200;
-
-  constructor(dataRetrieverConfig: DataRetrieverConfig) {
-    this.name = dataRetrieverConfig.name;
-    this.context = dataRetrieverConfig.context;
-    this.loader = dataRetrieverConfig.loader;
-    this.vectorDBType = dataRetrieverConfig.vectorDBType;
-    this.embeddingModelType = dataRetrieverConfig.embeddingModelType;
-    this.generateEmbeddings = dataRetrieverConfig.generateEmbeddings || false;
-    this.loadVectorStoreFromCloud =
-      dataRetrieverConfig.loadVectorStoreFromCloud || false;
-    this.saveEmbeddingsToCloud =
-      dataRetrieverConfig.saveEmbeddingsToCloud || false;
-    this.chunkSize =
-      dataRetrieverConfig.chunkSize || DataRetriever.DEFAULT_CHUNK_SIZE;
-    this.chunkOverlap =
-      dataRetrieverConfig.chunkOverlap || DataRetriever.DEFAULT_CHUNK_OVERLAP;
-  }
 
   /**
    * Setup the retriever and the retriever tool to be used by the
@@ -52,39 +19,35 @@ export class DataRetriever {
    *  3. Retriever tool
    * @returns Retriever tool
    */
-  async setupRetriever() {
+  async setupRetriever(config: DataRetrieverConfig) {
     dlog.msg("Setting up retriever...");
+
+    // set name and context
+    this.retrieverToolName = config.retrieverToolName;
+    this.context = config.context;
 
     // get the appropriate vector store
     // this might also involve embedding generation
     // and saving the embeddings to the cloud
     // depending on the loader provided and
     // other configuration settings
-    const vectorstore = await getVectorStore({
-      loadVectorStoreFromCloud: this.loadVectorStoreFromCloud,
-      embeddingModelType: this.embeddingModelType,
-      loader: this.loader,
-      chunkSize: this.chunkSize,
-      chunkOverlap: this.chunkOverlap,
-      vectorDBType: this.vectorDBType,
-      saveEmbeddingsToCloud: this.saveEmbeddingsToCloud
-    });
+    const vectorstore = await getVectorStore(config.vectorStoreConfig);
 
     // create retriever using the vector store
     this.retriever = vectorstore.asRetriever();
-    // setup retriever tool
-    this.retrieverTool = createRetrieverTool(this.retriever, {
-      name: this.name,
-      description: `Search for information about ${this.context}. You must use this tool! If user query is not found in the knowledge base, inform the user about it.`
-    });
-    dlog.msg("Retriever tool created");
 
     dlog.msg("Data Retriever setup completed");
     return this.retrieverTool;
   }
 
   getRetrieverTool() {
-    return this.retrieverTool;
+    // setup retriever tool
+    const retrieverTool = createRetrieverTool(this.retriever, {
+      name: this.retrieverToolName,
+      description: `Search for information about ${this.context}. You must use this tool if user's question is related to ${this.context} and the information present in the conversation history is not enough. If the user query can not be confidently answered using the information retrieved and returned by this tool and the ongoing conversation history, don't answer the user query but instead simply inform the user that you don't have enough information to answer the query.`
+    });
+    dlog.msg("Retriever tool created");
+    return retrieverTool;
   }
 
   async queryRetriever(userQuery: string) {
