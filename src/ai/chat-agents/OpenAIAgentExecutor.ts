@@ -1,10 +1,7 @@
+import { getChatHistoryStore } from "../chat-history/getChatHistoryStore";
 import { getOpenAIChatModel } from "/ai/chat-models/OpenAIChatModel.js";
-import {
-  getUpstashRedisRESTAPIKey,
-  getUpstashRedisRESTAPIURL
-} from "/config/keys.js";
+import { CHAT_HISTORY_STORE } from "/structs/ai/AIStructs";
 import { dlog } from "/utilities/dlog.js";
-import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder
@@ -17,6 +14,7 @@ export const HISTORY_MESSAGE_KEY = "history";
 
 export async function getOpenAIAgentExecutor(
   systemPrompt: string,
+  chatHistoryStore: CHAT_HISTORY_STORE,
   tools?: any,
   maxIterations?: number,
   verbose?: boolean
@@ -65,13 +63,7 @@ export async function getOpenAIAgentExecutor(
   return new RunnableWithMessageHistory({
     runnable: agentExecutor,
     getMessageHistory: (sessionId: string) =>
-      new UpstashRedisChatMessageHistory({
-        sessionId,
-        config: {
-          url: getUpstashRedisRESTAPIURL(),
-          token: getUpstashRedisRESTAPIKey()
-        }
-      }),
+      getChatHistoryStore(sessionId, chatHistoryStore),
     inputMessagesKey: INPUT_MESSAGE_KEY,
     historyMessagesKey: HISTORY_MESSAGE_KEY
   });

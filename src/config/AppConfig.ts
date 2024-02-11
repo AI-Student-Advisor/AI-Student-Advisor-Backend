@@ -1,7 +1,8 @@
 export const AppConfig = {
   api: {
     port: 3001,
-    message_max_length: 10000
+    message_max_length: 10000,
+    session_expiry_time: 900000
   },
   ai: {
     bedrock: {
@@ -30,7 +31,9 @@ export const AppConfig = {
       "file-fccd8af8549b5019d1c9f52ef7d063c27a5241da87ee2dad8e3c2f69b2f1d56f-a7bc8902-2bd3-4a08-bf0f-e7f6bd16cbfd",
     astraDB: {
       dimension: 1536,
-      metric: "cosine"
+      metric: "cosine",
+      chat_history_keyspace: "ai_student_advisor",
+      chat_history_table: "ai_student_advisor_chat_history"
     }
   },
   DEBUG_MODE: true

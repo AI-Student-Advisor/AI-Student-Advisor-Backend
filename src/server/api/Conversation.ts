@@ -1,3 +1,4 @@
+import { ChatAgent } from "/ai/chat-agents/ChatAgent";
 import { AppConfig } from "/config/AppConfig.js";
 import { Session } from "/server/Sessions.js";
 import { AgentResponse, QUERY_STATUS } from "/structs/ai/AIStructs.js";
@@ -5,12 +6,10 @@ import {
   AUTHOR_ROLE,
   CONTROL_SIGNAL,
   Message,
-  PostRequest,
   REQUEST_STATUS,
   SessionId
 } from "/structs/api/APIStructs.js";
 import {
-  getSession,
   sendControlResponse,
   sendErrResponse,
   sendMsgResponse
@@ -41,33 +40,34 @@ async function query(
   if (!validationResult.valid) {
     throw new Error(validationResult.err);
   }
+
   // should be true at this point, but needed for type checking
   if (message.content === undefined) {
     throw new Error("Invalid post request. Message content is undefined.");
   }
 
-  try {
-    // setup chat agent if not already initialized
-    if (session.chatAgent === undefined) {
-      await session.setupChatAgent();
-    }
+  // setup chat agent if not already initialized
+  if (session.chatAgent === undefined) {
+    await session.setupChatAgent();
+  }
 
-    // confirm chat agent is available and enabled
-    if (session.chatAgent && session.chatAgent.isChatEnabled()) {
-      // prepare input to query the chat agent
-      const agentInput = session.chatAgent.prepareInput(message.content);
-      // create a response handler which which will handle the responses from the chat agent
-      const responseHandler = getResponseHandler(session.id, res);
-      // query the chat agent with the user query and the response handler
-      await session.chatAgent.query(agentInput, responseHandler);
-    } else {
-      // if chat agent is not available or chat is not enabled, send a message to the client
-      throw new Error(
-        session.chatAgent ? "Chat is disabled" : "Chat agent is not available"
-      );
-    }
-  } catch (err: any) {
-    throw err instanceof Error ? err : new Error(err);
+  // create a response handler which which will handle the responses from the chat agent
+  const responseHandler = getResponseHandler(session.id, res);
+
+  // confirm chat agent is available and enabled
+  if (session.chatAgent && session.chatAgent.isChatEnabled()) {
+    // prepare input to query the chat agent
+    const agentInput = ChatAgent.prepareInput(message.content, session.id);
+    // query the chat agent with the user query and the response handler
+    await session.chatAgent.query(agentInput, responseHandler);
+  } else {
+    // if chat agent is not available or chat is not enabled, send a message to the client
+    responseHandler({
+      status: QUERY_STATUS.ERROR,
+      response: session.chatAgent
+        ? "Chat is disabled"
+        : "Chat agent is not available"
+    });
   }
 }
 
@@ -101,18 +101,24 @@ function getResponseHandler(sessionId: SessionId, res: Response) {
           res.end("ERROR");
           break;
         case QUERY_STATUS.SUCCESS:
-          const queryResult = agentResponse.response;
-          // send the response to the client
-          if (queryResult !== undefined && queryResult.output !== undefined) {
-            sendMsgResponse(sessionId, getNewMessage(queryResult.output), res);
-            // TESTING: until we have streaming
-            sendControlResponse(
-              CONTROL_SIGNAL.GENERATION_DONE,
-              REQUEST_STATUS.SUCCESS,
-              res
-            );
-            // since we don't have stream we end the response after sending the result
-            res.end("OK");
+          {
+            const queryResult = agentResponse.response;
+            // send the response to the client
+            if (queryResult !== undefined && queryResult.output !== undefined) {
+              sendMsgResponse(
+                sessionId,
+                getNewMessage(queryResult.output),
+                res
+              );
+              // TESTING: until we have streaming
+              sendControlResponse(
+                CONTROL_SIGNAL.GENERATION_DONE,
+                REQUEST_STATUS.SUCCESS,
+                res
+              );
+              // since we don't have stream we end the response after sending the result
+              res.end("OK");
+            }
           }
           break;
         case QUERY_STATUS.DONE:

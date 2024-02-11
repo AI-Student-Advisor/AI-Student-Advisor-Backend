@@ -1,80 +1,19 @@
-import { getCustomAgentExecutor } from "./CustomAgentExecutor.js";
-import { getOpenAIAgentExecutor } from "./OpenAIAgentExecutor.js";
-import { getChatModel } from "/ai/chat-models/ChatModels.js";
-import {
-  AgentInput,
-  QUERY_STATUS,
-  USER_ROLE,
-  LLM_TYPE,
-  ChatAgentConfig
-} from "/structs/ai/AIStructs.js";
+import { AgentInput, QUERY_STATUS } from "/structs/ai/AIStructs.js";
 import { dlog } from "/utilities/dlog.js";
 
 export class ChatAgent {
-  private chatAgent: any;
+  protected chatAgent: any;
   private chatEnabled: boolean = false;
-  private userRole: USER_ROLE;
-  private sessionId: string = "";
-  private llmType: LLM_TYPE;
-  private initialPrompt?: string;
-  private tools?: [];
-  private maxIterations?: number;
-  private verbose?: boolean;
 
-  constructor(chatAgentConfig: ChatAgentConfig) {
-    // Order is important
-
-    // Set the user role
-    this.userRole = chatAgentConfig.user_role || "student";
-    // Set the sessionId
-    this.sessionId = chatAgentConfig.sessionId;
-    // Set params for the chat agent
-    this.llmType = chatAgentConfig.llm_type;
-    this.initialPrompt = chatAgentConfig.initial_prompt;
-    this.tools = chatAgentConfig.tools;
-    this.maxIterations = chatAgentConfig.maxIterations;
-    this.verbose = chatAgentConfig.verbose;
-
+  constructor() {
     // Setup the chat agent
     this.chatAgent = undefined;
   }
 
-  private getSystemPrompt(initialPrompt?: string) {
-    if (initialPrompt) {
-      return initialPrompt;
-    }
-    return `You're an extremely helpful and insightful academic adivisor who is an expert on University of Ottawa. You're helping a ${this.userRole} who is interested in the University of Ottawa.`;
-  }
-
   async enableChat() {
     // check if chat is already enabled
-    if (this.chatEnabled) {
-      return this.chatEnabled;
-    }
-    // initialize chat agent if not already initialized
-    if (this.chatAgent === null || this.chatAgent == undefined) {
-      // if using Open AI LLM
-      if (this.llmType === LLM_TYPE.OPEN_AI) {
-        this.chatAgent = await getOpenAIAgentExecutor(
-          this.getSystemPrompt(this.initialPrompt),
-          this.tools,
-          this.maxIterations,
-          this.verbose
-        );
-        dlog.msg("ChatAgent: Open AI agent initialized");
-      }
-      // if using custom LLM
-      else {
-        this.chatAgent = getCustomAgentExecutor(
-          getChatModel(this.llmType),
-          this.getSystemPrompt(this.initialPrompt),
-          this.tools,
-          this.maxIterations,
-          this.verbose
-        );
-        dlog.msg("ChatAgent: Custom agent initialized");
-      }
-    }
+    if (this.chatEnabled) return this.chatEnabled;
+
     // enable chat
     this.chatEnabled = true;
     dlog.msg("ChatAgent: Chat enabled");
@@ -104,7 +43,7 @@ export class ChatAgent {
       throw new Error("Chat is disabled");
     }
     // let response handler know response is being prepared
-    if (responseHandler != null && responseHandler != undefined) {
+    if (responseHandler !== null && responseHandler !== undefined) {
       responseHandler({ status: QUERY_STATUS.PENDING });
     }
     try {
@@ -154,10 +93,10 @@ export class ChatAgent {
   }
 
   // return in the format {"input":"foo"}, {"configurable":{"sessionId":"123"}}
-  prepareInput(userQuery: string): AgentInput {
+  static prepareInput(userQuery: string, sessionId: string): AgentInput {
     return {
       user: { input: userQuery },
-      config: { configurable: { sessionId: this.sessionId } }
+      config: { configurable: { sessionId } }
     };
   }
 }
