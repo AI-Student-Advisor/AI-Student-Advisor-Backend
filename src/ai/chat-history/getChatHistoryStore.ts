@@ -1,5 +1,5 @@
-import { getAstraDBChatHistoryStore } from "./AstraDBChatHistoryStore";
-import { getUpstashChatHistoryStore } from "./UpstashChatHistoryStore";
+import { getAstraDBChatHistoryStore } from "./AstraDBChatHistoryStore.js";
+import { getUpstashChatHistoryStore } from "./UpstashChatHistoryStore.js";
 import { CHAT_HISTORY_STORE } from "/structs/ai/AIStructs.js";
 
 export function getChatHistoryStore(

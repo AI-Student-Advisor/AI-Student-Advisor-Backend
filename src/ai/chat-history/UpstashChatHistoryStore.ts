@@ -1,7 +1,7 @@
 import {
   getUpstashRedisRESTAPIKey,
   getUpstashRedisRESTAPIURL
-} from "/config/keys";
+} from "/config/keys.js";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 
 export function getUpstashChatHistoryStore(sessionId: string) {

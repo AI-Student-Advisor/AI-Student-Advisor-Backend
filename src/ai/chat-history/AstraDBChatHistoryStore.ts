@@ -3,8 +3,8 @@ import {
   getAstraDBChatHistoryEndpoint,
   getAstraDBChatHistoryKeyspace,
   getAstraDBChatHistoryTable
-} from "/config/keys";
-import { dlog } from "/utilities/dlog";
+} from "/config/keys.js";
+import { dlog } from "/utilities/dlog.js";
 import { CassandraChatMessageHistory } from "@langchain/community/stores/message/cassandra";
 
 const configConnection = {
