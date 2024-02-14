@@ -75,7 +75,8 @@ export const enum VECTOR_STORE {
   // local in-memory
   MEMORY,
   // cloud-hosted
-  ASTRA_DB
+  ASTRA_DB,
+  PINECONE
 }
 
 /**
