@@ -1,6 +1,6 @@
 import { ChatAgent } from "/ai/chat-agents/ChatAgent.js";
-import { setupNewChatAgent } from "/ai/chat-agents/ChatAgents";
-import { SUPPORTED_CHAT_AGENTS } from "/structs/ai/AIStructs";
+import { setupNewChatAgent } from "/ai/chat-agents/ChatAgents.js";
+import { SUPPORTED_CHAT_AGENTS } from "/structs/ai/AIStructs.js";
 import { APISession, SessionId } from "/structs/api/APIStructs.js";
 import { dlog } from "/utilities/dlog.js";
 

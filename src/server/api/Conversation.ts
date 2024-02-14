@@ -1,4 +1,4 @@
-import { ChatAgent } from "/ai/chat-agents/ChatAgent";
+import { ChatAgent } from "/ai/chat-agents/ChatAgent.js";
 import { AppConfig } from "/config/AppConfig.js";
 import { Session } from "/server/Sessions.js";
 import { AgentResponse, QUERY_STATUS } from "/structs/ai/AIStructs.js";

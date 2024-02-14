@@ -1,8 +1,8 @@
 /*
  * Class to get a specialized chat agent
  */
-import { uOttawaChatAgent } from "./specialized-chat-agents/uOttawaChatAgent";
-import { SUPPORTED_CHAT_AGENTS } from "/structs/ai/AIStructs";
+import { uOttawaChatAgent } from "./specialized-chat-agents/uOttawaChatAgent.js";
+import { SUPPORTED_CHAT_AGENTS } from "/structs/ai/AIStructs.js";
 
 export async function setupNewChatAgent(agentType: SUPPORTED_CHAT_AGENTS) {
   switch (agentType) {

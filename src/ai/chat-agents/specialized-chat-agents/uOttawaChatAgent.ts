@@ -1,17 +1,17 @@
-import { ChatAgent } from "../ChatAgent";
-import { getSystemPrompt } from "../ChatAgentSystemPrompt";
-import { getCustomAgentExecutor } from "../CustomAgentExecutor";
-import { getOpenAIAgentExecutor } from "../OpenAIAgentExecutor";
-import { getChatModel } from "/ai/chat-models/ChatModels";
-import { DataRetriever } from "/ai/data-retrievers/DataRetriever";
+import { ChatAgent } from "../ChatAgent.js";
+import { getSystemPrompt } from "../ChatAgentSystemPrompt.js";
+import { getCustomAgentExecutor } from "../CustomAgentExecutor.js";
+import { getOpenAIAgentExecutor } from "../OpenAIAgentExecutor.js";
+import { getChatModel } from "/ai/chat-models/ChatModels.js";
+import { DataRetriever } from "/ai/data-retrievers/DataRetriever.js";
 import {
   CHAT_HISTORY_STORE,
   ChatAgentConfig,
   EMBEDDING_MODELS,
   LLM_TYPE,
   VECTOR_STORE
-} from "/structs/ai/AIStructs";
-import { dlog } from "/utilities/dlog";
+} from "/structs/ai/AIStructs.js";
+import { dlog } from "/utilities/dlog.js";
 import { JSONLinesLoader } from "langchain/document_loaders/fs/json";
 
 export class uOttawaChatAgent extends ChatAgent {

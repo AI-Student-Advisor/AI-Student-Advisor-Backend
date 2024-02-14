@@ -1,6 +1,6 @@
-import { getChatHistoryStore } from "../chat-history/getChatHistoryStore";
+import { getChatHistoryStore } from "../chat-history/getChatHistoryStore.js";
 import { getOpenAIChatModel } from "/ai/chat-models/OpenAIChatModel.js";
-import { CHAT_HISTORY_STORE } from "/structs/ai/AIStructs";
+import { CHAT_HISTORY_STORE } from "/structs/ai/AIStructs.js";
 import { dlog } from "/utilities/dlog.js";
 import {
   ChatPromptTemplate,
