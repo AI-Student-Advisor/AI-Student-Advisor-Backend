@@ -1,8 +1,8 @@
 import { AppConfig } from "/config/AppConfig.js";
 import {
-  getAstraDBApplicationToken,
-  getAstraDBEndpoint,
-  getAstraDBCollection
+  getUOttawaEmbAppToken,
+  getUOttawaEmbEndpoint,
+  getUOttawaEmbCollection
 } from "/config/keys.js";
 import { dlog } from "/utilities/dlog.js";
 import {
@@ -10,10 +10,22 @@ import {
   AstraLibArgs
 } from "@langchain/community/vectorstores/astradb";
 
+// const astraConfig: AstraLibArgs = {
+//   token: getAstraDBApplicationToken(),
+//   endpoint: getAstraDBEndpoint(),
+//   collection: getAstraDBCollection(),
+//   collectionOptions: {
+//     vector: {
+//       dimension: AppConfig.ai.astraDB.dimension,
+//       metric: "cosine"
+//     }
+//   }
+// };
+
 const astraConfig: AstraLibArgs = {
-  token: getAstraDBApplicationToken(),
-  endpoint: getAstraDBEndpoint(),
-  collection: getAstraDBCollection(),
+  token: getUOttawaEmbAppToken(),
+  endpoint: getUOttawaEmbEndpoint(),
+  collection: getUOttawaEmbCollection(),
   collectionOptions: {
     vector: {
       dimension: AppConfig.ai.astraDB.dimension,
