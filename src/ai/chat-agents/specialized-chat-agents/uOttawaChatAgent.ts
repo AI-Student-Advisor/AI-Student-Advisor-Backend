@@ -12,15 +12,24 @@ import {
   VECTOR_STORE
 } from "/structs/ai/AIStructs";
 import { dlog } from "/utilities/dlog";
+import { JSONLinesLoader } from "langchain/document_loaders/fs/json";
 
 export class uOttawaChatAgent extends ChatAgent {
   async setupNewUOttawaChatAgent() {
+    // specify whether to generate embeddings
+    const GENERATE_EMBEDDINGS = false;
+    const DATA_FILE_PATH =
+      "src/ai/chat-agents/specialized-chat-agents/uottawa_catalog_data.jsonl";
+    const loader = GENERATE_EMBEDDINGS
+      ? new JSONLinesLoader(DATA_FILE_PATH, "/text")
+      : undefined;
+
     // PART 1: Configurations
     const vectorStoreConfig = {
-      loader: undefined,
-      vectorDBType: VECTOR_STORE.ASTRA_DB,
+      loader: loader,
+      vectorDBType: VECTOR_STORE.PINECONE,
       embeddingModelType: EMBEDDING_MODELS.OPENAI,
-      loadVectorStoreFromCloud: true,
+      loadVectorStoreFromCloud: !GENERATE_EMBEDDINGS,
       saveEmbeddingsToCloud: undefined,
       chunkSize: undefined,
       chunkOverlap: undefined

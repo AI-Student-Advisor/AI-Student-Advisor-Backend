@@ -2,6 +2,10 @@ import {
   getAstraDBFromDocuments,
   getExistingAstraDBStore
 } from "./AstraDBVectorStore.js";
+import {
+  getExistingPinconeStore,
+  getPineconeFromDocuments
+} from "./PineconeVectorStore.js";
 import { getEmbeddingModel } from "/ai/embedding-models/EmbeddingModel.js";
 import { VECTOR_STORE, VectorStoreConfig } from "/structs/ai/AIStructs.js";
 import { dlog } from "/utilities/dlog.js";
@@ -63,6 +67,8 @@ async function getVectorStoreFromDocuments(
   switch (vectorDBType) {
     case VECTOR_STORE.ASTRA_DB:
       return await getAstraDBFromDocuments(docs, embeddings);
+    case VECTOR_STORE.PINECONE:
+      return await getPineconeFromDocuments(docs, embeddings);
     case VECTOR_STORE.MEMORY:
       return await MemoryVectorStore.fromDocuments(docs, embeddings);
     default:
@@ -80,6 +86,8 @@ async function getCloudVectorDatabase(
   switch (vectorDBType) {
     case VECTOR_STORE.ASTRA_DB:
       return await getExistingAstraDBStore(embeddingModel);
+    case VECTOR_STORE.PINECONE:
+      return await getExistingPinconeStore(embeddingModel);
     default:
       throw new Error("Invalid cloud vector database type");
   }
