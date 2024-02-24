@@ -23,7 +23,7 @@
     "@langchain/openai": "^0.0.14",
     "@langchain/pinecone": "^0.0.3",
     "@pinecone-database/pinecone": "^2.0.1",
-    "@smithy/eventstream-codec": "^2.1.1",
+    "@smithy/eventstream-codec": "^2.1.2",
     "@smithy/protocol-http": "^3.2.0",
     "@smithy/signature-v4": "^2.1.1",
     "@smithy/util-utf8": "^2.1.1",
