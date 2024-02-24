@@ -4,7 +4,7 @@ import {
   getUOttawaEmbEndpoint,
   getUOttawaEmbCollection
 } from "/config/keys.js";
-import { dlog } from "/utilities/dlog.js";
+import { logger } from "/utilities/Log.js";
 import {
   AstraDBVectorStore,
   AstraLibArgs
@@ -22,6 +22,8 @@ import {
 //   }
 // };
 
+const loggerContext = "AstraDBVectorStore";
+
 const astraConfig: AstraLibArgs = {
   token: getUOttawaEmbAppToken(),
   endpoint: getUOttawaEmbEndpoint(),
@@ -35,20 +37,26 @@ const astraConfig: AstraLibArgs = {
 };
 
 export async function getAstraDBFromDocuments(docs: any, embeddings: any) {
-  dlog.msg("Creating AstraDB vector store from documents");
+  logger.debug(
+    { context: loggerContext },
+    "Creating AstraDB vector store from documents"
+  );
   // Create the vector store from a webpage
   const createdVectorStore = await AstraDBVectorStore.fromDocuments(
     docs,
     embeddings,
     astraConfig
   );
-  dlog.msg("AstraDB vector store created");
+  logger.debug({ context: loggerContext }, "AstraDB vector store created");
   // return the vector store
   return createdVectorStore;
 }
 
 export async function getExistingAstraDBStore(embeddingModel: any) {
-  dlog.msg("Loading AstraDB vector store from the cloud");
+  logger.debug(
+    { context: loggerContext },
+    "Loading AstraDB vector store from the cloud"
+  );
   // Load the vector store from the cloud
   const loadedVectorStore = await AstraDBVectorStore.fromExistingIndex(
     embeddingModel,

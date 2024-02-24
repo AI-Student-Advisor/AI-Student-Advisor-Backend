@@ -4,8 +4,10 @@ import {
   getAstraDBChatHistoryKeyspace,
   getAstraDBChatHistoryTable
 } from "/config/keys.js";
-import { dlog } from "/utilities/dlog.js";
+import { logger } from "/utilities/Log.js";
 import { CassandraChatMessageHistory } from "@langchain/community/stores/message/cassandra";
+
+const loggerContext = "AstraDBChatHistoryStore";
 
 const configConnection = {
   serviceProviderArgs: {
@@ -17,8 +19,10 @@ const configConnection = {
 };
 
 export function getAstraDBChatHistoryStore(sessionId: string) {
-  dlog.msg(
-    `Setting up AstraDB chat history store for session: ${sessionId}...`
+  logger.debug(
+    { context: loggerContext },
+    "Setting up AstraDB chat history store",
+    { sessionId: sessionId }
   );
   try {
     const db = new CassandraChatMessageHistory({
@@ -29,7 +33,7 @@ export function getAstraDBChatHistoryStore(sessionId: string) {
     });
     return db;
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     throw e;
   }
 }

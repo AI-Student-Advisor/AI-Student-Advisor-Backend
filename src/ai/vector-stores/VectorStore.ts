@@ -6,57 +6,59 @@ import {
   getExistingPinconeStore,
   getPineconeFromDocuments
 } from "./PineconeVectorStore.js";
+import { VECTOR_STORE, VectorStoreConfig } from "/ai/AIStructs.js";
 import { getEmbeddingModel } from "/ai/embedding-models/EmbeddingModel.js";
-import { VECTOR_STORE, VectorStoreConfig } from "/structs/ai/AIStructs.js";
-import { dlog } from "/utilities/dlog.js";
+import { logger } from "/utilities/Log.js";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 
+const loggerContext = "VectorStore";
+
 export async function getVectorStore(config: VectorStoreConfig) {
   // to store the vector store
-  let vectorstore: any = null;
+  let vectorStore: any = null;
 
   if (config.loadVectorStoreFromCloud) {
     // get the embedding model based on the type
     const embeddingsModel = getEmbeddingModel(config.embeddingModelType);
-    vectorstore = await getCloudVectorDatabase(
+    vectorStore = await getCloudVectorDatabase(
       config.vectorDBType,
       embeddingsModel
     );
-    dlog.msg("Vector store loaded");
+    logger.debug({ context: loggerContext }, "Vector store loaded");
   } else {
     // confirm loader is initialized
     if (config.loader === undefined || config.loader === null) {
-      throw new Error("DataRetriever.ts: Loader is not initialized");
+      throw new Error("Vector store loader is not initialized");
     }
 
     const rawDocs = await config.loader.load();
-    dlog.msg("Raw docs loaded");
+    logger.debug({ context: loggerContext }, "Raw docs loaded");
 
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: config.chunkSize,
       chunkOverlap: config.chunkOverlap
     });
-    dlog.msg("Text splitter completed");
+    logger.debug({ context: loggerContext }, "Text splitter completed");
 
     const docs = await splitter.splitDocuments(rawDocs);
-    dlog.msg("Documents splitter completed");
+    logger.debug({ context: loggerContext }, "Documents splitter completed");
 
     // get the embedding model based on the type
     const embeddings = getEmbeddingModel(config.embeddingModelType);
-    dlog.msg("Embedding model created");
+    logger.debug({ context: loggerContext }, "Embedding model created");
 
     // get the vector database based on the type
-    vectorstore = await getVectorStoreFromDocuments(
+    vectorStore = await getVectorStoreFromDocuments(
       config.vectorDBType,
       docs,
       embeddings
     );
-    dlog.msg("Vector store created");
+    logger.debug({ context: loggerContext }, "Vector store created");
   }
 
   // return the vector store
-  return vectorstore;
+  return vectorStore;
 }
 
 async function getVectorStoreFromDocuments(

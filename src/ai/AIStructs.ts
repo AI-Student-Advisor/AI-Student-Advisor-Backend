@@ -13,6 +13,7 @@ export const enum QUERY_STATUS {
 export type AgentResponse = {
   status: QUERY_STATUS;
   response?: any;
+  error?: any;
 };
 
 export type AgentInput = {

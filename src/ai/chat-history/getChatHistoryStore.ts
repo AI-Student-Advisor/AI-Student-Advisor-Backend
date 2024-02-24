@@ -1,6 +1,6 @@
 import { getAstraDBChatHistoryStore } from "./AstraDBChatHistoryStore.js";
 import { getUpstashChatHistoryStore } from "./UpstashChatHistoryStore.js";
-import { CHAT_HISTORY_STORE } from "/structs/ai/AIStructs.js";
+import { CHAT_HISTORY_STORE } from "/ai/AIStructs.js";
 
 export function getChatHistoryStore(
   sessionId: string,
