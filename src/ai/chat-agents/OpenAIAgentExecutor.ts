@@ -1,13 +1,15 @@
 import { getChatHistoryStore } from "../chat-history/getChatHistoryStore.js";
+import { CHAT_HISTORY_STORE } from "/ai/AIStructs.js";
 import { getOpenAIChatModel } from "/ai/chat-models/OpenAIChatModel.js";
-import { CHAT_HISTORY_STORE } from "/structs/ai/AIStructs.js";
-import { dlog } from "/utilities/dlog.js";
+import { logger } from "/utilities/Log.js";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder
 } from "@langchain/core/prompts";
 import { RunnableWithMessageHistory } from "@langchain/core/runnables";
 import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
+
+const loggerContext = "OpenAIAgentExecutor";
 
 export const INPUT_MESSAGE_KEY = "input";
 export const HISTORY_MESSAGE_KEY = "history";
@@ -19,7 +21,10 @@ export async function getOpenAIAgentExecutor(
   maxIterations?: number,
   verbose?: boolean
 ) {
-  dlog.msg("Setting up Open AI agent executor...");
+  logger.debug(
+    { context: loggerContext },
+    "Setting up Open AI agent executor..."
+  );
   // verify optional parameters
   // check if any tools provided
   if (tools === undefined || tools === null) {
@@ -48,7 +53,7 @@ export async function getOpenAIAgentExecutor(
     prompt
   });
 
-  dlog.msg("Done initializing agent");
+  logger.debug({ context: loggerContext }, "Done initializing agent");
 
   // AgentExecutor - calls the agent and executes the tools
   const agentExecutor = new AgentExecutor({
@@ -58,7 +63,7 @@ export async function getOpenAIAgentExecutor(
     maxIterations: maxIterations
     // returnIntermediateSteps: false,  // turn on for debugging
   });
-  dlog.msg("Done initializing agent executor");
+  logger.debug({ context: loggerContext }, "Done initializing agent executor");
 
   return new RunnableWithMessageHistory({
     runnable: agentExecutor,

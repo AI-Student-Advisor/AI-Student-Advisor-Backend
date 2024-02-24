@@ -2,17 +2,19 @@ import { ChatAgent } from "../ChatAgent.js";
 import { getSystemPrompt } from "../ChatAgentSystemPrompt.js";
 import { getCustomAgentExecutor } from "../CustomAgentExecutor.js";
 import { getOpenAIAgentExecutor } from "../OpenAIAgentExecutor.js";
-import { getChatModel } from "/ai/chat-models/ChatModels.js";
-import { DataRetriever } from "/ai/data-retrievers/DataRetriever.js";
 import {
   CHAT_HISTORY_STORE,
   ChatAgentConfig,
   EMBEDDING_MODELS,
   LLM_TYPE,
   VECTOR_STORE
-} from "/structs/ai/AIStructs.js";
-import { dlog } from "/utilities/dlog.js";
+} from "/ai/AIStructs.js";
+import { getChatModel } from "/ai/chat-models/ChatModels.js";
+import { DataRetriever } from "/ai/data-retrievers/DataRetriever.js";
+import { logger } from "/utilities/Log.js";
 import { JSONLinesLoader } from "langchain/document_loaders/fs/json";
+
+const loggerContext = "uOttawaChatAgent";
 
 export class uOttawaChatAgent extends ChatAgent {
   async setupNewUOttawaChatAgent() {
@@ -64,7 +66,7 @@ export class uOttawaChatAgent extends ChatAgent {
         config.maxIterations,
         config.verbose
       );
-      dlog.msg("uOttawaChatAgent: Open AI agent initialized");
+      logger.debug({ context: loggerContext }, "Open AI agent initialized");
     } else {
       this.chatAgent = getCustomAgentExecutor(
         getChatModel(config.llmType),
@@ -73,7 +75,7 @@ export class uOttawaChatAgent extends ChatAgent {
         config.maxIterations,
         config.verbose
       );
-      dlog.msg("uOttawaChatAgent: Custom agent initialized");
+      logger.debug({ context: loggerContext }, "Custom agent initialized");
     }
 
     // PART 4: Enable chat by default

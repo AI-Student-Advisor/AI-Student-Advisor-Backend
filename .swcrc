@@ -14,10 +14,10 @@
       "decoratorVersion": "2022-03"
     },
     "keepClassNames": false,
+    "baseUrl": "./src",
     "paths": {
       "/*": ["./*"]
     },
-    "baseUrl": "./src",
     "minify": {
       "compress": {
         "arguments": true,

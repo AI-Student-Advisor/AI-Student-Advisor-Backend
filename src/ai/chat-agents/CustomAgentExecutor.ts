@@ -2,7 +2,7 @@ import {
   getUpstashRedisRESTAPIKey,
   getUpstashRedisRESTAPIURL
 } from "/config/keys.js";
-import { dlog } from "/utilities/dlog.js";
+import { logger } from "/utilities/Log.js";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 import {
   ChatPromptTemplate,
@@ -14,6 +14,8 @@ import {
 } from "@langchain/core/runnables";
 import { AgentExecutor } from "langchain/agents";
 
+const loggerContext = "CustomAgentExecutor";
+
 export const INPUT_MESSAGE_KEY = "input";
 export const HISTORY_MESSAGE_KEY = "history";
 
@@ -24,7 +26,10 @@ export function getCustomAgentExecutor(
   maxIterations?: number,
   verbose?: boolean
 ) {
-  dlog.msg("Setting up custom agent executor...");
+  logger.debug(
+    { context: loggerContext },
+    "Setting up custom agent executor..."
+  );
   // verify optional parameters
   // check if any tools provided
   if (tools === undefined || tools === null) {
@@ -49,7 +54,7 @@ export function getCustomAgentExecutor(
   const llm_with_tools = llm.bind({
     tools
   });
-  dlog.msg("Done binding tools to LLM");
+  logger.debug({ context: loggerContext }, "Done binding tools to LLM");
 
   // Initialize the agent with the LLM (with tools) and prompt
   const agent = RunnableSequence.from([
@@ -61,7 +66,7 @@ export function getCustomAgentExecutor(
     prompt,
     llm_with_tools
   ]);
-  dlog.msg("Done initializing agent");
+  logger.debug({ context: loggerContext }, "Done initializing agent");
 
   // AgentExecutor - calls the agent and executes the tools
   const agentExecutor = new AgentExecutor({
@@ -70,7 +75,7 @@ export function getCustomAgentExecutor(
     verbose: verbose,
     maxIterations: maxIterations
   });
-  dlog.msg("Done initializing agent executor");
+  logger.debug({ context: loggerContext }, "Done initializing agent executor");
 
   return new RunnableWithMessageHistory({
     runnable: agentExecutor,
