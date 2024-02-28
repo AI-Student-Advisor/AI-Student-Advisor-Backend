@@ -134,7 +134,7 @@ async function* query(
           type: "message",
           message: {
             id: crypto.randomUUID(),
-            content: agentResponse.response,
+            content: agentResponse.response.output,
             author: {
               role: "assistant"
             }
