@@ -47,7 +47,7 @@ export class uOttawaChatAgent extends ChatAgent {
       llmType: LLM_TYPE.OPEN_AI,
       context: "University of Ottawa",
       userRole: "student",
-      chatHistoryStore: CHAT_HISTORY_STORE.ASTRA_DB,
+      chatHistoryStore: CHAT_HISTORY_STORE.UPSTASH,
       maxIterations: undefined,
       verbose: undefined
     };
