@@ -45,7 +45,7 @@
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "@types/node": "^20.11.20",
+    "@types/node": "^20.11.24",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
