@@ -67,6 +67,7 @@ export class ChatAgent {
     } catch (error) {
       yield { status: QUERY_STATUS.ERROR, error: error };
     }
+    yield { status: QUERY_STATUS.DONE };
   }
 
   async *queryStream(agentInput: AgentInput): AsyncGenerator<AgentResponse> {
