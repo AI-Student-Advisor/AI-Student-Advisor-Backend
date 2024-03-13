@@ -56,3 +56,19 @@ export const HistorySessionSchema = z.object({
   // eslint-disable-next-line no-magic-numbers
   title: z.string().trim().min(1)
 });
+
+export const UserSchema = z.object({
+  /**
+   * Unique username
+   */
+  username: z.string().trim().min(1),
+
+  /**
+   * User password with minimum length of 6
+   */
+  password: z.string().trim().min(6),
+  /**
+   * An array of Session ID for an user
+   */
+  sessions: z.array(SessionIdSchema)
+});
