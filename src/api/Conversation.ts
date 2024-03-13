@@ -7,16 +7,20 @@ import {
   PostRequestSchema,
   PostResponseSchema
 } from "/api/schemas/Conversation.js";
+import { HistorySessionModelSchema } from "/model/schemas/HistorySessionModel.js";
+import { HistorySessionsModelSchema } from "/model/schemas/HistorySessionsModel.js";
 import { Session } from "/session/Session.js";
-import { HTTP_OK } from "/utilities/Constants.js";
+import { HTTP_BAD_REQUEST, HTTP_OK } from "/utilities/Constants.js";
 import { parseError } from "/utilities/ErrorParser.js";
+import { HTTPError } from "/utilities/HTTPError.js";
 import { logger } from "/utilities/Log.js";
 import crypto from "crypto";
 import { json, Request, Response } from "express";
 
 export function handleConversation({
   app,
-  sessionManager
+  sessionManager,
+  database
 }: EndpointHandlerContext) {
   const loggerContext = "ConversationAPIHandler";
   const endpoint = "/api/conversation";
@@ -60,6 +64,28 @@ export function handleConversation({
         message
       });
 
+      // Get records from database
+      const historySessionsPath = "chatHistory/historySessions";
+      const historySessionsRecords = await database.get(
+        historySessionsPath,
+        HistorySessionsModelSchema
+      );
+      const historySessionPath = "chatHistory/historySession";
+      const historySessionRecords = await database.get(
+        historySessionPath,
+        HistorySessionModelSchema
+      );
+
+      const sessionIdExist = id
+        ? historySessionsRecords[id] !== undefined
+        : false;
+
+      if (id && !sessionIdExist) {
+        // If session ID is specified, and it does not exist in the database
+        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid session ID");
+      }
+      // else: if session ID is not specified, or it exists in the database
+
       // Get session if ID provided, otherwise create a new session
       const session = await sessionManager.getSession(id);
       logger.debug(
@@ -68,8 +94,52 @@ export function handleConversation({
         session.id
       );
 
+      // Create a new record in the database if ID does not exist
+      if (!sessionIdExist) {
+        historySessionsRecords[session.id] = {
+          id: session.id,
+          dateTime: new Date().toISOString(),
+          title: "New Chat"
+        };
+        historySessionRecords[session.id] = {
+          messages: []
+        };
+        await database.set(
+          historySessionsPath,
+          historySessionsRecords,
+          HistorySessionsModelSchema
+        );
+        await database.set(
+          historySessionPath,
+          historySessionRecords,
+          HistorySessionModelSchema
+        );
+      }
+
+      historySessionRecords[session.id].messages.push(message);
+      await database.set(
+        historySessionPath,
+        historySessionRecords,
+        HistorySessionModelSchema
+      );
+
+      let finalMessage: Message | null = null;
       for await (const postResponse of query(session, message)) {
         writeSseMessage(response, JSON.stringify(postResponse));
+        if (
+          postResponse.status === "success" &&
+          postResponse.type === "message"
+        ) {
+          finalMessage = postResponse.message;
+        }
+      }
+      if (finalMessage) {
+        historySessionRecords[session.id].messages.push(finalMessage);
+        await database.set(
+          historySessionPath,
+          historySessionRecords,
+          HistorySessionModelSchema
+        );
       }
     } catch (error) {
       const { reason } = parseError(error);
@@ -98,7 +168,7 @@ async function* query(
   }
 
   const agentInput = ChatAgent.prepareInput(message.content, session.id);
-  // Query the chat agent with the user query and the response handler
+  // Query the chat agent with the user query
   for await (const agentResponse of session.chatAgent.query(agentInput)) {
     switch (agentResponse.status) {
       case QUERY_STATUS.PENDING:
