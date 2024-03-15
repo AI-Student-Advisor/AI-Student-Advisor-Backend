@@ -19,7 +19,7 @@
     "@aws-sdk/credential-provider-node": "^3.521.0",
     "@aws-sdk/types": "^3.521.0",
     "@datastax/astra-db-ts": "^0.1.4",
-    "@langchain/community": "^0.0.37",
+    "@langchain/community": "^0.0.39",
     "@langchain/openai": "^0.0.19",
     "@langchain/pinecone": "^0.0.3",
     "@pinecone-database/pinecone": "^2.0.1",
