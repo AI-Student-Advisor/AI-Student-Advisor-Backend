@@ -43,7 +43,7 @@ jobs:
       uses: docker/setup-qemu-action@v3.0.0
 
     - name: Docker Setup Buildx
-      uses: docker/setup-buildx-action@v3.0.0
+      uses: docker/setup-buildx-action@v3.1.0
 
     - name: Extract Metadata (tags, labels) for Docker
       id: meta
@@ -60,7 +60,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and Push Docker Image
-      uses: docker/build-push-action@v5.1.0
+      uses: docker/build-push-action@v5.2.0
       with:
         context: .
         push: ${{ github.ref == 'refs/heads/main' }}

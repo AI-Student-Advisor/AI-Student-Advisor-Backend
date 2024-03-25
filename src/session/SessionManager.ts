@@ -3,8 +3,6 @@ import { SUPPORTED_CHAT_AGENTS } from "/ai/AIStructs.js";
 import { setupNewChatAgent } from "/ai/chat-agents/ChatAgents.js";
 import type { SessionId } from "/api/interfaces/Common.js";
 import { AppConfig } from "/config/AppConfig.js";
-import { HTTP_BAD_REQUEST } from "/utilities/Constants.js";
-import { HTTPError } from "/utilities/HTTPError.js";
 import { logger } from "/utilities/Log.js";
 import { Watchdog } from "/utilities/Watchdog.js";
 import * as crypto from "crypto";
@@ -18,22 +16,22 @@ export class SessionManager {
   public async getSession(sessionId?: SessionId) {
     if (sessionId) {
       const session = this.sessions.get(sessionId);
-      if (!session) {
-        throw new HTTPError(
-          HTTP_BAD_REQUEST,
-          `Invalid session ID: ${sessionId}`
+      if (session) {
+        logger.debug(
+          { context: loggerContext },
+          "Found existing session: feed the dog and reuse",
+          { sessionId: sessionId }
         );
+        this.watchdog.feed(sessionId);
+        return session;
       }
-      logger.debug(
-        { context: loggerContext },
-        "Found existing session: feed the dog and reuse",
-        { sessionId: sessionId }
-      );
-      this.watchdog.feed(sessionId);
-      return session;
     }
 
-    const newSessionId = crypto.randomUUID();
+    const newSessionId = sessionId ?? crypto.randomUUID();
+    logger.debug({ context: loggerContext }, "Creating session", {
+      newSessionId: newSessionId
+    });
+
     const session = {
       id: newSessionId,
       chatAgent: await setupNewChatAgent(SUPPORTED_CHAT_AGENTS.U_OTTAWA)
