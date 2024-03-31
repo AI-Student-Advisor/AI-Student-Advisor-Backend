@@ -9,6 +9,7 @@ import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
 
 const endpoint = "/api/sign";
+const usersPath = "users";
 
 export function handleSignUp({ app, userManager }: UserManagerHandler) {
   const loggerContext = "SignUpAPIHandler";

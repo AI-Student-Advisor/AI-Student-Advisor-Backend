@@ -15,6 +15,11 @@ export const PostRequestSchema = z.object({
    * Can be `undefined` for creating a new session.
    */
   id: SessionIdSchema.optional(),
+  /**
+   * User ID. Define who sent the message
+   */
+  // eslint-disable-next-line no-magic-numbers
+  username: z.string().trim(),
   message: MessageSchema
 });
 

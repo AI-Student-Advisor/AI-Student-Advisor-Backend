@@ -72,3 +72,5 @@ export const UserSchema = z.object({
    */
   sessions: z.array(SessionIdSchema)
 });
+
+export const UsersSchema = z.record(UserSchema);
