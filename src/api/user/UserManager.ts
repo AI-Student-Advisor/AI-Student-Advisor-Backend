@@ -1,8 +1,12 @@
 import { SessionId, Users } from "../interfaces/Common";
-import { UsersSchema } from "./../schemas/Common";
+import { UserStore } from "../interfaces/SignUp";
+import { UserSchema, UsersSchema } from "./../schemas/Common";
 import { Database } from "/database/interfaces/Database";
 import { HTTP_BAD_REQUEST } from "/utilities/Constants";
+import { parseError } from "/utilities/ErrorParser";
 import { HTTPError } from "/utilities/HTTPError";
+import { Session } from "inspector";
+import { array, string, z } from "zod";
 
 const usersPath = "users/userManager";
 
@@ -29,22 +33,36 @@ export class UserManager {
         `The length of the password should be larger than 5. Actual: ${password.length}`
       );
     }
-    const users = await this.database.get(usersPath, UsersSchema);
-    console.log(users);
+    try {
+      const users = await this.database.get(usersPath, UsersSchema);
+      console.log(users);
+      if (users[username] !== undefined) {
+        throw new HTTPError(
+          HTTP_BAD_REQUEST,
+          `This username has been used, please try another one.`
+        );
+      }
+      users[username] = {
+        username: username,
+        password: password,
+        sessions: []
+      };
 
-    if (users[username] !== undefined) {
-      throw new HTTPError(
-        HTTP_BAD_REQUEST,
-        `This username has been used, please try another one.`
-      );
+      await this.database.set(usersPath, users, UsersSchema);
+    } catch (error) {
+      const { statusCode } = parseError(error);
+      if (statusCode === 400) {
+        const users: UserStore = {};
+        users[username] = {
+          username: username,
+          password: password,
+          sessions: []
+        };
+        await this.database.set(usersPath, users, UsersSchema);
+      } else {
+        throw error;
+      }
     }
-    users[username] = {
-      username: username,
-      password: password,
-      sessions: []
-    };
-
-    await this.database.set(usersPath, users, UsersSchema);
 
     return username;
   }
