@@ -6,7 +6,6 @@ import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
 
 const endpoint = "/api/login";
-
 export function handleLogin({ app, userManager }: UserManagerHandler) {
   const loggerContext = "LoginAPIHandler";
   app.use(endpoint, json());

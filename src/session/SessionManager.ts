@@ -1,3 +1,4 @@
+import { UserManager } from "./../api/user/UserManager";
 import type { Session } from "./Session.js";
 import { SUPPORTED_CHAT_AGENTS } from "/ai/AIStructs.js";
 import { setupNewChatAgent } from "/ai/chat-agents/ChatAgents.js";
@@ -13,7 +14,11 @@ export class SessionManager {
   private sessions: Map<SessionId, Session> = new Map();
   private watchdog: Watchdog = new Watchdog();
 
-  public async getSession(sessionId?: SessionId) {
+  public async getSession(
+    username: string,
+    userManager: UserManager,
+    sessionId?: SessionId
+  ) {
     if (sessionId) {
       const session = this.sessions.get(sessionId);
       if (session) {
@@ -25,47 +30,49 @@ export class SessionManager {
         this.watchdog.feed(sessionId);
         return session;
       }
+    } else {
+      sessionId = crypto.randomUUID();
+      await userManager.addSession(username, sessionId);
     }
 
-    const newSessionId = sessionId ?? crypto.randomUUID();
     logger.debug({ context: loggerContext }, "Creating session", {
-      newSessionId: newSessionId
+      newSessionId: sessionId
     });
 
     const session = {
-      id: newSessionId,
+      id: sessionId,
       chatAgent: await setupNewChatAgent(SUPPORTED_CHAT_AGENTS.U_OTTAWA)
     };
     logger.info(
       { context: loggerContext },
       "Created new session %s",
-      newSessionId
+      sessionId
     );
-    this.sessions.set(newSessionId, session);
+    this.sessions.set(sessionId, session);
 
-    this.watchdog.registerTimingGroup(newSessionId);
+    this.watchdog.registerTimingGroup(sessionId);
     logger.debug(
       { context: loggerContext },
       "Watchdog timing group registered",
       {
-        sessionId: newSessionId
+        sessionId: sessionId
       }
     );
 
-    this.watchdog.registerHandler(newSessionId, async () => {
+    this.watchdog.registerHandler(sessionId, async () => {
       logger.debug(
         { context: loggerContext },
         "Watchdog timeout for session %s",
-        newSessionId
+        sessionId
       );
-      this.deleteSession(newSessionId);
+      this.deleteSession(sessionId);
     });
 
-    this.watchdog.start(newSessionId, AppConfig.api.session_expiry_time);
+    this.watchdog.start(sessionId, AppConfig.api.session_expiry_time);
     logger.debug(
       { context: loggerContext },
       "Watchdog started for session %s; expires after %d ms",
-      newSessionId,
+      sessionId,
       AppConfig.api.session_expiry_time
     );
 

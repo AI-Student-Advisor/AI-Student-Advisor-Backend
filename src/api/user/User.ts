@@ -1,6 +1,4 @@
 import { SessionId } from "../interfaces/Common";
-import { HTTP_BAD_REQUEST } from "/utilities/Constants";
-import { HTTPError } from "/utilities/HTTPError";
 
 export class User {
   private username: string;

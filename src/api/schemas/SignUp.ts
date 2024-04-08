@@ -1,3 +1,4 @@
+import { UserSchema } from "./Common";
 import { z } from "zod";
 
 /**
@@ -6,16 +7,16 @@ import { z } from "zod";
  * Request payload schema
  */
 export const PostUserRequestSchema = z.object({
-    /**
-     * User id
-     */
-    // eslint-disable-next-line no-magic-numbers
-    username: z.string().trim().min(1),
-    /**
-     * User password
-     */
-    // eslint-disable-next-line no-magic-numbers
-    password: z.string().trim().min(1)
+  /**
+   * User id
+   */
+  // eslint-disable-next-line no-magic-numbers
+  username: z.string().trim().min(1),
+  /**
+   * User password
+   */
+  // eslint-disable-next-line no-magic-numbers
+  password: z.string().trim().min(1)
 });
 /**
  * 'POST /api/sign
@@ -23,12 +24,14 @@ export const PostUserRequestSchema = z.object({
  * Response payload schema
  */
 export const PostUserResponseSchema = z.discriminatedUnion("status", [
-    z.object({
-        status: z.literal("success")
-    }),
-    z.object({
-        status: z.literal("fail"),
-        // eslint-disable-next-line no-magic-numbers
-        reason: z.string().trim().min(1)
-    })
+  z.object({
+    status: z.literal("success")
+  }),
+  z.object({
+    status: z.literal("fail"),
+    // eslint-disable-next-line no-magic-numbers
+    reason: z.string().trim().min(1)
+  })
 ]);
+
+export const UserStoreSchema = z.record(z.string(), UserSchema);

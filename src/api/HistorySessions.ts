@@ -3,6 +3,7 @@ import {
   GetResponseSchema
 } from "./schemas/HistorySessions.js";
 import type { EndpointHandlerContext } from "/api/types/EndpointHandler.js";
+import { HistorySessionsModel } from "/model/interfaces/HistorySessionsModel.js";
 import { HistorySessionsModelSchema } from "/model/schemas/HistorySessionsModel.js";
 import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
@@ -12,7 +13,8 @@ const CHAT_HISTORY_SESSION_ENTRY_LIMIT = 50;
 
 export function handleHistorySessions({
   app,
-  database
+  database,
+  userManager
 }: EndpointHandlerContext) {
   const loggerContext = "HistorySessionsAPIHandler";
   const endpoint = "/api/history-sessions";
@@ -41,6 +43,9 @@ export function handleHistorySessions({
       const path = "chatHistory/historySessions";
 
       const parsedRequest = GetRequestSchema.parse({
+        username: request.query.username
+          ? String(request.query.username)
+          : undefined,
         offset: request.query.offset
           ? parseInt(String(request.query.offset))
           : undefined,
@@ -54,7 +59,6 @@ export function handleHistorySessions({
         "Request received: %o",
         parsedRequest
       );
-
       const offset = parsedRequest.offset ?? 0;
       const limit = parsedRequest.limit ?? CHAT_HISTORY_SESSION_ENTRY_LIMIT;
       logger.debug(
@@ -63,8 +67,19 @@ export function handleHistorySessions({
         { offset, limit }
       );
 
-      const records = await database.get(path, HistorySessionsModelSchema);
-
+      let records = await database.get(path, HistorySessionsModelSchema);
+      if (parsedRequest.username) {
+        const userSessions = await userManager.getUserSession(
+          parsedRequest.username
+        );
+        const userRecords: HistorySessionsModel = {};
+        for (const key in records) {
+          if (userSessions.indexOf(String(key)) !== -1) {
+            userRecords[key] = records[key];
+          }
+        }
+        records = userRecords;
+      }
       logger.debug(
         { context: loggerContext },
         "Retrieved from database: %o",

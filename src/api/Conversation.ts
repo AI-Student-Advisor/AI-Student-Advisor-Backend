@@ -20,6 +20,7 @@ import { json, Request, Response } from "express";
 export function handleConversation({
   app,
   sessionManager,
+  userManager,
   database
 }: EndpointHandlerContext) {
   const loggerContext = "ConversationAPIHandler";
@@ -58,9 +59,10 @@ export function handleConversation({
     });
 
     try {
-      const { id, message } = PostRequestSchema.parse(request.body);
+      const { message, username, id } = PostRequestSchema.parse(request.body);
       logger.info({ context: loggerContext }, "Request received: %o", {
         id,
+        username,
         message
       });
 
@@ -87,7 +89,11 @@ export function handleConversation({
       // else: if session ID is not specified, or it exists in the database
 
       // Get session if ID provided, otherwise create a new session
-      const session = await sessionManager.getSession(id);
+      const session = await sessionManager.getSession(
+        username,
+        userManager,
+        id
+      );
       logger.debug(
         { context: loggerContext },
         "Session retrieved with ID %s",
@@ -204,6 +210,7 @@ async function* query(
           type: "message",
           message: {
             id: crypto.randomUUID(),
+            username: "",
             content: agentResponse.response.output,
             author: {
               role: "assistant"

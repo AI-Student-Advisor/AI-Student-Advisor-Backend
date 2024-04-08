@@ -7,6 +7,8 @@ import { z } from "zod";
  * Request query parameters schema
  */
 export const GetRequestSchema = z.object({
+  // eslint-disable-next-line no-magic-numbers
+  username: z.string().trim().min(1).optional(),
   offset: z.number().int().nonnegative().optional(),
   limit: z.number().int().positive().optional()
 });
