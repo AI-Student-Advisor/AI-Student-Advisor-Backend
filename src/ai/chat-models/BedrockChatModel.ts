@@ -3,7 +3,7 @@ import {
   getAWSAccessKeyID,
   getAWSRegion,
   getAWSSecretAccessKey
-} from "/config/keys.js";
+} from "/ai/AIKeys.js";
 import { Bedrock } from "@langchain/community/llms/bedrock";
 
 export function getLlamaChatModel() {

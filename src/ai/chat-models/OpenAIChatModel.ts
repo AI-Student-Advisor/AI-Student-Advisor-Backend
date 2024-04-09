@@ -1,5 +1,5 @@
 import { AppConfig } from "/config/AppConfig.js";
-import { getOpenAIAPIKey } from "/config/keys.js";
+import { getOpenAIAPIKey } from "/ai/AIKeys.js";
 import { ChatOpenAI } from "@langchain/openai";
 
 export function getOpenAIChatModel() {

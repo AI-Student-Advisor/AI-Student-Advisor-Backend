@@ -3,7 +3,7 @@ import {
   getAWSAccessKeyID,
   getAWSRegion,
   getAWSSecretAccessKey
-} from "/config/keys.js";
+} from "/ai/AIKeys.js";
 import { BedrockEmbeddings } from "@langchain/community/embeddings/bedrock";
 
 export function getBedrockEmbeddingModel() {

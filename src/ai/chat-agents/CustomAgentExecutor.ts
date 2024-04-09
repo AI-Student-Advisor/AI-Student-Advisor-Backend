@@ -1,7 +1,7 @@
 import {
   getUpstashRedisRESTAPIKey,
   getUpstashRedisRESTAPIURL
-} from "/config/keys.js";
+} from "/ai/AIKeys.js";
 import { logger } from "/utilities/Log.js";
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
 import {
