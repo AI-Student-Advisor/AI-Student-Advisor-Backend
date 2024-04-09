@@ -1,4 +1,4 @@
-import { SessionId } from "../interfaces/Common";
+import { SessionId } from "../api/interfaces/Common.js";
 
 export class User {
   private username: string;
@@ -43,7 +43,7 @@ export class User {
         this.sessions.splice(index, 1);
         return sessionId;
       }
-      //Invalid Session ID
+      //Invalid ChatSession ID
       return sessionId;
     } catch (error) {
       return null;

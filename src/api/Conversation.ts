@@ -1,6 +1,7 @@
 import type { EndpointHandlerContext } from "./types/EndpointHandler.js";
 import { QUERY_STATUS } from "/ai/AIStructs.js";
 import { ChatAgent } from "/ai/chat-agents/ChatAgent.js";
+import { ChatSession } from "/ai/chat-session/ChatSession.js";
 import type { Message } from "/api/interfaces/Common.js";
 import type { PostResponse } from "/api/interfaces/Conversation.js";
 import {
@@ -9,7 +10,6 @@ import {
 } from "/api/schemas/Conversation.js";
 import { HistorySessionModelSchema } from "/model/schemas/HistorySessionModel.js";
 import { HistorySessionsModelSchema } from "/model/schemas/HistorySessionsModel.js";
-import { Session } from "/session/Session.js";
 import { HTTP_BAD_REQUEST, HTTP_OK } from "/utilities/Constants.js";
 import { parseError } from "/utilities/ErrorParser.js";
 import { HTTPError } from "/utilities/HTTPError.js";
@@ -19,8 +19,7 @@ import { json, Request, Response } from "express";
 
 export function handleConversation({
   app,
-  sessionManager,
-  userManager,
+  chatSessionManager,
   database
 }: EndpointHandlerContext) {
   const loggerContext = "ConversationAPIHandler";
@@ -36,7 +35,7 @@ export function handleConversation({
   app.post(endpoint, handleConversationPost);
   logger.debug(
     { context: loggerContext },
-    "POST handler registered endpoint %s",
+    "POST handler registered for endpoint %s",
     endpoint
   );
 
@@ -83,17 +82,13 @@ export function handleConversation({
         : false;
 
       if (id && !sessionIdExist) {
-        // If session ID is specified, and it does not exist in the database
-        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid session ID");
+        // If chat session ID is specified, and it does not exist in the database
+        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid chat session ID");
       }
-      // else: if session ID is not specified, or it exists in the database
+      // else: if chat session ID is not specified, or it exists in the database
 
-      // Get session if ID provided, otherwise create a new session
-      const session = await sessionManager.getSession(
-        username,
-        userManager,
-        id
-      );
+      // Get chat session if ID provided, otherwise create a new chat-session
+      const session = await chatSessionManager.getSession(id);
       logger.debug(
         { context: loggerContext },
         "Session retrieved with ID %s",
@@ -161,10 +156,10 @@ export function handleConversation({
 }
 
 async function* query(
-  session: Session,
+  chatSession: ChatSession,
   message: Message
 ): AsyncGenerator<PostResponse> {
-  if (!session.chatAgent.isChatEnabled()) {
+  if (!chatSession.chatAgent.isChatEnabled()) {
     yield PostResponseSchema.parse({
       status: "fail",
       reason: "Chat agent is not available"
@@ -173,14 +168,14 @@ async function* query(
     return {};
   }
 
-  const agentInput = ChatAgent.prepareInput(message.content, session.id);
+  const agentInput = ChatAgent.prepareInput(message.content, chatSession.id);
   // Query the chat agent with the user query
-  for await (const agentResponse of session.chatAgent.query(agentInput)) {
+  for await (const agentResponse of chatSession.chatAgent.query(agentInput)) {
     switch (agentResponse.status) {
       case QUERY_STATUS.PENDING:
         yield PostResponseSchema.parse({
           status: "success",
-          id: session.id,
+          id: chatSession.id,
           type: "control",
           control: {
             signal: "generation-pending"
@@ -190,7 +185,7 @@ async function* query(
       case QUERY_STATUS.STARTED:
         yield PostResponseSchema.parse({
           status: "success",
-          id: session.id,
+          id: chatSession.id,
           type: "control",
           control: {
             signal: "generation-started"
@@ -206,7 +201,7 @@ async function* query(
       case QUERY_STATUS.SUCCESS:
         yield PostResponseSchema.parse({
           status: "success",
-          id: session.id,
+          id: chatSession.id,
           type: "message",
           message: {
             id: crypto.randomUUID(),
@@ -221,7 +216,7 @@ async function* query(
       case QUERY_STATUS.DONE:
         yield PostResponseSchema.parse({
           status: "success",
-          id: session.id,
+          id: chatSession.id,
           type: "control",
           control: {
             signal: "generation-done"

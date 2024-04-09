@@ -1,17 +1,15 @@
-import { UserManagerHandler } from "./interfaces/Common";
 import {
   PostUserRequestSchema,
   PostUserResponseSchema
-} from "./schemas/SignUp";
-import { HTTP_OK } from "/utilities/Constants";
-import { parseError } from "/utilities/ErrorParser";
+} from "./schemas/SignUp.js";
+import type { EndpointHandlerContext } from "/api/types/EndpointHandler.js";
+import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
 
 const endpoint = "/api/sign";
-const usersPath = "users";
 
-export function handleSignUp({ app, userManager }: UserManagerHandler) {
+export function handleSignUp({ app, userManager }: EndpointHandlerContext) {
   const loggerContext = "SignUpAPIHandler";
   app.use(endpoint, json());
   logger.debug(
@@ -22,26 +20,22 @@ export function handleSignUp({ app, userManager }: UserManagerHandler) {
   app.post(endpoint, handleSignUpPost);
   logger.debug(
     { context: loggerContext },
-    "POST handler registered endpoint %s",
+    "POST handler registered for endpoint %s",
     endpoint
   );
 
   async function handleSignUpPost(request: Request, response: Response) {
     const loggerContext = "SignUpPOSTHandler";
-    response.writeHead(HTTP_OK, {
-      "Content-Type": "text/plain",
-      "Cache-Control": "no-cache"
-    });
     try {
       const { username, password } = PostUserRequestSchema.parse(request.body);
       logger.info({ context: loggerContext }, "Request received: %o", {
         username,
         password
       });
-      const result = await userManager.createUser(username, password);
+      const result = await userManager.register(username, password);
       logger.info(
         { context: loggerContext },
-        "User %s has been created.",
+        "User %s has been created",
         result
       );
       const responseBody = PostUserResponseSchema.parse({
@@ -57,7 +51,7 @@ export function handleSignUp({ app, userManager }: UserManagerHandler) {
       response.write(JSON.stringify(errorResponseBody));
       logger.warn(
         { context: loggerContext },
-        "User Sign up is denied: %s",
+        "User sign up is denied: %s",
         reason
       );
     } finally {

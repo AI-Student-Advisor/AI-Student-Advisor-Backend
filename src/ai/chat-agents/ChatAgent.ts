@@ -61,7 +61,7 @@ export class ChatAgent {
       // retrieve and return response
       const response = await this.chatAgent.invoke(
         agentInput.user, // user input
-        agentInput.config // session ID
+        agentInput.config // chat session ID
       );
       yield { status: QUERY_STATUS.SUCCESS, response: response };
     } catch (error) {

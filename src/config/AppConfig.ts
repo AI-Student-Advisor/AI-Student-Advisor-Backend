@@ -2,7 +2,7 @@ export const AppConfig = {
   api: {
     port: 3001,
     message_max_length: 10000,
-    session_expiry_time: 900000
+    chat_session_expiry_time: 900000
   },
   ai: {
     bedrock: {

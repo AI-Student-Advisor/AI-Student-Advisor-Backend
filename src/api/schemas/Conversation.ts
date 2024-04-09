@@ -10,9 +10,9 @@ export const PostRequestSchema = z.object({
   /**
    * Session ID
    *
-   * A unique identifier for a session.
+   * A unique identifier for a chat session.
    *
-   * Can be `undefined` for creating a new session.
+   * Can be `undefined` for creating a new chat session.
    */
   id: SessionIdSchema.optional(),
   /**

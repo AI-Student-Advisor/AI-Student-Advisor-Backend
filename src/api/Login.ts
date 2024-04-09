@@ -1,12 +1,15 @@
-import { UserManagerHandler } from "./interfaces/Common";
-import { GetUserResponseSchema, GetUserRequestSchema } from "./schemas/Login";
-import { HTTP_OK } from "/utilities/Constants";
-import { parseError } from "/utilities/ErrorParser";
+import {
+  PostUserRequestSchema,
+  PostUserResponseSchema
+} from "./schemas/Login.js";
+import type { EndpointHandlerContext } from "/api/types/EndpointHandler.js";
+import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
 
 const endpoint = "/api/login";
-export function handleLogin({ app, userManager }: UserManagerHandler) {
+
+export function handleLogin({ app, userManager }: EndpointHandlerContext) {
   const loggerContext = "LoginAPIHandler";
   app.use(endpoint, json());
   logger.debug(
@@ -14,35 +17,30 @@ export function handleLogin({ app, userManager }: UserManagerHandler) {
     "JSON middleware enabled for endpoint %s",
     endpoint
   );
-  app.get(endpoint, handleLoginGet);
+  app.post(endpoint, handleLoginPost);
   logger.debug(
     { context: loggerContext },
-    "GET handler registered endpoint %s",
+    "POST handler registered for endpoint %s",
     endpoint
   );
 
-  async function handleLoginGet(request: Request, response: Response) {
-    const loggerContext = "LoginGETHandler";
-    response.writeHead(HTTP_OK, {
-      "Content-Type": "text/plain",
-      "Cache-Control": "no-cache"
-    });
+  async function handleLoginPost(request: Request, response: Response) {
+    const loggerContext = "LoginPOSTHandler";
     try {
-      const { username, password } = GetUserRequestSchema.parse(request.query);
+      const { username, password } = PostUserRequestSchema.parse(request.body);
       logger.info({ context: loggerContext }, "Request received: %o", {
         username,
         password
       });
-      const userSessions = await userManager.getUser(username, password);
-      const responseBody = GetUserResponseSchema.parse({
-        status: "success",
-        conversations: userSessions
+      await userManager.verify(username, password);
+      const responseBody = PostUserResponseSchema.parse({
+        status: "success"
       });
       response.write(JSON.stringify(responseBody));
-      logger.info({ context: loggerContext }, "User %s is online.", username);
+      logger.info({ context: loggerContext }, "User %s is logged in", username);
     } catch (error) {
       const { reason } = parseError(error);
-      const errorResponseBody = GetUserResponseSchema.parse({
+      const errorResponseBody = PostUserResponseSchema.parse({
         status: "fail",
         reason: reason
       });

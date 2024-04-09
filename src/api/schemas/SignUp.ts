@@ -1,8 +1,7 @@
-import { UserSchema } from "./Common";
 import { z } from "zod";
 
 /**
- * 'POST /api/sign
+ * `POST /api/sign`
  *
  * Request payload schema
  */
@@ -16,10 +15,11 @@ export const PostUserRequestSchema = z.object({
    * User password
    */
   // eslint-disable-next-line no-magic-numbers
-  password: z.string().trim().min(1)
+  password: z.string().trim().min(6)
 });
+
 /**
- * 'POST /api/sign
+ * `POST /api/sign`
  *
  * Response payload schema
  */
@@ -33,5 +33,3 @@ export const PostUserResponseSchema = z.discriminatedUnion("status", [
     reason: z.string().trim().min(1)
   })
 ]);
-
-export const UserStoreSchema = z.record(z.string(), UserSchema);

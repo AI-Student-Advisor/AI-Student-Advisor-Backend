@@ -32,21 +32,21 @@ export function handleHistorySession({
   app.get(endpoint, handleHistorySessionsGet);
   logger.debug(
     { context: loggerContext },
-    "GET handler registered endpoint %s",
+    "GET handler registered for endpoint %s",
     endpoint
   );
 
   app.patch(endpoint, handleHistorySessionsPatch);
   logger.debug(
     { context: loggerContext },
-    "PATCH handler registered endpoint %s",
+    "PATCH handler registered for endpoint %s",
     endpoint
   );
 
   app.delete(endpoint, handleHistorySessionsDelete);
   logger.debug(
     { context: loggerContext },
-    "DELETE handler registered endpoint %s",
+    "DELETE handler registered for endpoint %s",
     endpoint
   );
 
@@ -74,7 +74,7 @@ export function handleHistorySession({
 
       const session = records[parsedRequest.id];
       if (!session) {
-        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid session ID");
+        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid chat session ID");
       }
 
       const parsedResponse = GetResponseSchema.parse({
@@ -124,7 +124,7 @@ export function handleHistorySession({
       );
 
       if (!historySessionsRecords[parsedRequest.id]) {
-        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid session ID");
+        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid chat session ID");
       }
 
       historySessionsRecords[parsedRequest.id].title = parsedRequest.name;
@@ -181,7 +181,7 @@ export function handleHistorySession({
       );
 
       if (!historySessionsRecords[parsedRequest.id]) {
-        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid session ID");
+        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid chat session ID");
       }
       delete historySessionsRecords[parsedRequest.id];
       await database.set(
