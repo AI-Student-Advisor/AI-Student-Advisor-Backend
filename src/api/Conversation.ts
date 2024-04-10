@@ -8,6 +8,8 @@ import {
   PostRequestSchema,
   PostResponseSchema
 } from "/api/schemas/Conversation.js";
+import { auth } from "/auth/Middleware.js";
+import type { AuthorizedRequest } from "/auth/types/AuthorizedRequest.js";
 import { HistorySessionModelSchema } from "/model/schemas/HistorySessionModel.js";
 import { HistorySessionsModelSchema } from "/model/schemas/HistorySessionsModel.js";
 import { HTTP_BAD_REQUEST, HTTP_OK } from "/utilities/Constants.js";
@@ -20,7 +22,8 @@ import { json, Request, Response } from "express";
 export function handleConversation({
   app,
   chatSessionManager,
-  database
+  database,
+  jwt
 }: EndpointHandlerContext) {
   const loggerContext = "ConversationAPIHandler";
   const endpoint = "/api/conversation";
@@ -29,6 +32,13 @@ export function handleConversation({
   logger.debug(
     { context: loggerContext },
     "JSON middleware enabled for endpoint %s",
+    endpoint
+  );
+
+  app.use(endpoint, auth(jwt));
+  logger.debug(
+    { context: loggerContext },
+    "JWT authorization middleware enabled for endpoint %s",
     endpoint
   );
 
@@ -43,6 +53,9 @@ export function handleConversation({
   //  and converted to an error response to be sent to the frontend.
   async function handleConversationPost(request: Request, response: Response) {
     const loggerContext = "ConversationPOSTHandler";
+
+    request = request as AuthorizedRequest;
+    // TODO: Add support to user-specific history
 
     // Set up the response headers
     response.writeHead(HTTP_OK, {

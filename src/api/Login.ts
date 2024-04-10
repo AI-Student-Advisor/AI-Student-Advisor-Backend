@@ -3,13 +3,14 @@ import {
   PostUserResponseSchema
 } from "./schemas/Login.js";
 import type { EndpointHandlerContext } from "/api/types/EndpointHandler.js";
+import { AuthPayloadSchema } from "/auth/schemas/AuthPayload.js";
 import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
 
 const endpoint = "/api/login";
 
-export function handleLogin({ app, userManager }: EndpointHandlerContext) {
+export function handleLogin({ app, userManager, jwt }: EndpointHandlerContext) {
   const loggerContext = "LoginAPIHandler";
   app.use(endpoint, json());
   logger.debug(
@@ -33,8 +34,15 @@ export function handleLogin({ app, userManager }: EndpointHandlerContext) {
         password
       });
       await userManager.verify(username, password);
+
+      const token = jwt.encode(
+        AuthPayloadSchema.parse({
+          username: username
+        })
+      );
       const responseBody = PostUserResponseSchema.parse({
-        status: "success"
+        status: "success",
+        token: token
       });
       response.write(JSON.stringify(responseBody));
       logger.info({ context: loggerContext }, "User %s is logged in", username);

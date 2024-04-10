@@ -3,6 +3,8 @@ import {
   GetResponseSchema
 } from "./schemas/HistorySessions.js";
 import type { EndpointHandlerContext } from "/api/types/EndpointHandler.js";
+import { auth } from "/auth/Middleware.js";
+import type { AuthorizedRequest } from "/auth/types/AuthorizedRequest.js";
 import { HistorySessionsModelSchema } from "/model/schemas/HistorySessionsModel.js";
 import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
@@ -12,7 +14,8 @@ const CHAT_HISTORY_SESSION_ENTRY_LIMIT = 50;
 
 export function handleHistorySessions({
   app,
-  database
+  database,
+  jwt
 }: EndpointHandlerContext) {
   const loggerContext = "HistorySessionsAPIHandler";
   const endpoint = "/api/history-sessions";
@@ -21,6 +24,13 @@ export function handleHistorySessions({
   logger.debug(
     { context: loggerContext },
     "JSON middleware enabled for endpoint %s",
+    endpoint
+  );
+
+  app.use(endpoint, auth(jwt));
+  logger.debug(
+    { context: loggerContext },
+    "JWT authorization middleware enabled for endpoint %s",
     endpoint
   );
 
@@ -36,6 +46,9 @@ export function handleHistorySessions({
     response: Response
   ) {
     const loggerContext = "HistorySessionsGETHandler";
+
+    request = request as AuthorizedRequest;
+    // TODO: Add support to user-specific history
 
     try {
       const path = "chatHistory/historySessions";

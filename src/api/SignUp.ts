@@ -3,13 +3,18 @@ import {
   PostUserResponseSchema
 } from "./schemas/SignUp.js";
 import type { EndpointHandlerContext } from "/api/types/EndpointHandler.js";
+import { AuthPayloadSchema } from "/auth/schemas/AuthPayload.js";
 import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
 
 const endpoint = "/api/sign";
 
-export function handleSignUp({ app, userManager }: EndpointHandlerContext) {
+export function handleSignUp({
+  app,
+  userManager,
+  jwt
+}: EndpointHandlerContext) {
   const loggerContext = "SignUpAPIHandler";
   app.use(endpoint, json());
   logger.debug(
@@ -32,14 +37,21 @@ export function handleSignUp({ app, userManager }: EndpointHandlerContext) {
         username,
         password
       });
-      const result = await userManager.register(username, password);
+      await userManager.register(username, password);
       logger.info(
         { context: loggerContext },
         "User %s has been created",
-        result
+        username
+      );
+
+      const token = jwt.encode(
+        AuthPayloadSchema.parse({
+          username: username
+        })
       );
       const responseBody = PostUserResponseSchema.parse({
-        status: "success"
+        status: "success",
+        token: token
       });
       response.write(JSON.stringify(responseBody));
     } catch (error) {

@@ -4,6 +4,7 @@ import { ChatSessionManager } from "/ai/chat-session/ChatSessionManager.js";
 import { handleConversation } from "/api/Conversation.js";
 import { handleHistorySession } from "/api/HistorySession.js";
 import { handleHistorySessions } from "/api/HistorySessions.js";
+import { JWT } from "/auth/JWT.js";
 import { AppConfig } from "/config/AppConfig.js";
 import { Firebase } from "/database/Firebase.js";
 import { UserManager } from "/model/UserManager";
@@ -25,31 +26,39 @@ const chatSessionManager = new ChatSessionManager();
 const database = new Firebase();
 // User manager
 const userManager = new UserManager(database);
+// JWT
+const jwt = new JWT(
+  AppConfig.api.jwt.signOptions,
+  AppConfig.api.jwt.verifyOptions
+);
 
 // TODO: enable CORS only for production
 // Set up CORS
 app.use(cors());
 logger.warn({ context: loggerContext }, "CORS middleware enabled globally");
 
-handleLogin({ app, chatSessionManager, userManager, database });
-handleSignUp({ app, chatSessionManager, userManager, database });
+handleLogin({ app, chatSessionManager, userManager, database, jwt });
+handleSignUp({ app, chatSessionManager, userManager, database, jwt });
 handleConversation({
   app,
   chatSessionManager: chatSessionManager,
   userManager,
-  database
+  database,
+  jwt
 });
 handleHistorySessions({
   app,
   chatSessionManager: chatSessionManager,
   userManager,
-  database
+  database,
+  jwt
 });
 handleHistorySession({
   app,
   chatSessionManager: chatSessionManager,
   userManager,
-  database
+  database,
+  jwt
 });
 
 app.listen(port, () => {

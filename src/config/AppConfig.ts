@@ -1,8 +1,35 @@
+import type { SignOptions, VerifyOptions } from "jsonwebtoken";
+
+const jwtIssuer = "AI Student Advisor";
+
+const jwtSignOptions: SignOptions = {
+  algorithm: "ES256",
+  expiresIn: "7d",
+  issuer: jwtIssuer,
+  allowInsecureKeySizes: false,
+  allowInvalidAsymmetricKeyTypes: false
+};
+
+const jwtVerifyOptions: VerifyOptions = {
+  algorithms: ["ES256"],
+  // 5 minutes
+  clockTolerance: 5 * 60,
+  complete: false,
+  issuer: jwtIssuer,
+  ignoreExpiration: false,
+  ignoreNotBefore: false,
+  allowInvalidAsymmetricKeyTypes: false
+};
+
 export const AppConfig = {
   api: {
     port: 3001,
     message_max_length: 10000,
-    chat_session_expiry_time: 900000
+    chat_session_expiry_time: 900000,
+    jwt: {
+      signOptions: jwtSignOptions,
+      verifyOptions: jwtVerifyOptions
+    }
   },
   ai: {
     bedrock: {
