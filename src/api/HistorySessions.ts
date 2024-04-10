@@ -120,7 +120,7 @@ export function handleHistorySessions({
     path: string,
     schema: T
   ): Promise<z.infer<T>> {
-    let records;
+    let records = {};
     try {
       records = await database.get(path, schema);
     } catch (e) {

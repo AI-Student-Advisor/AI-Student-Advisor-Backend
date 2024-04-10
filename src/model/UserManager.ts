@@ -48,7 +48,7 @@ export class UserManager {
     path: string,
     schema: T
   ): Promise<z.infer<T>> {
-    let records;
+    let records = {};
     try {
       records = await this.database.get(path, schema);
     } catch (e) {
