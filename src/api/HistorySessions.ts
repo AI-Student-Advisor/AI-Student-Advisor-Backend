@@ -37,7 +37,7 @@ export function handleHistorySessions({
   app.get(endpoint, handleHistorySessionsGet);
   logger.debug(
     { context: loggerContext },
-    "GET handler registered endpoint %s",
+    "GET handler registered for endpoint %s",
     endpoint
   );
 
