@@ -58,7 +58,7 @@ export const HistorySessionSchema = z.object({
 });
 
 // eslint-disable-next-line no-magic-numbers
-export const UsernameSchema = z.string().trim().min(1);
+export const UsernameSchema = z.string().trim().min(1).max(32).regex(/^\w*$/u);
 
 // eslint-disable-next-line no-magic-numbers
-export const PasswordSchema = z.string().trim().min(6);
+export const PasswordSchema = z.string().trim().min(6).max(64);

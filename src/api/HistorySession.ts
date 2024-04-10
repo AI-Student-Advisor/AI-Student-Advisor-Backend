@@ -16,6 +16,7 @@ import { parseError } from "/utilities/ErrorParser.js";
 import { HTTPError } from "/utilities/HTTPError.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
+import { z, ZodError, ZodType } from "zod";
 
 export function handleHistorySession({
   app,
@@ -39,36 +40,29 @@ export function handleHistorySession({
     endpoint
   );
 
-  app.get(endpoint, handleHistorySessionsGet);
+  app.get(endpoint, handleHistorySessionGet);
   logger.debug(
     { context: loggerContext },
     "GET handler registered for endpoint %s",
     endpoint
   );
 
-  app.patch(endpoint, handleHistorySessionsPatch);
+  app.patch(endpoint, handleHistorySessionPatch);
   logger.debug(
     { context: loggerContext },
     "PATCH handler registered for endpoint %s",
     endpoint
   );
 
-  app.delete(endpoint, handleHistorySessionsDelete);
+  app.delete(endpoint, handleHistorySessionDelete);
   logger.debug(
     { context: loggerContext },
     "DELETE handler registered for endpoint %s",
     endpoint
   );
 
-  async function handleHistorySessionsGet(
-    request: Request,
-    response: Response
-  ) {
+  async function handleHistorySessionGet(request: Request, response: Response) {
     const loggerContext = "HistorySessionGETHandler";
-    const path = "chatHistory/historySession";
-
-    request = request as AuthorizedRequest;
-    // TODO: Add support to user-specific history
 
     try {
       const parsedRequest = GetRequestSchema.parse(request.params);
@@ -78,14 +72,21 @@ export function handleHistorySession({
         parsedRequest
       );
 
-      const records = await database.get(path, HistorySessionModelSchema);
+      const authorizedRequest = request as AuthorizedRequest;
+      const { username } = authorizedRequest.auth;
+
+      const path = `/user/${username}/chatHistory/historySession`;
+      const record = await getRecordFromDatabase(
+        path,
+        HistorySessionModelSchema
+      );
       logger.debug(
         { context: loggerContext },
         "Retrieved from database: %o",
-        records
+        record
       );
 
-      const session = records[parsedRequest.id];
+      const session = record[parsedRequest.id];
       if (!session) {
         throw new HTTPError(HTTP_BAD_REQUEST, "Invalid chat session ID");
       }
@@ -108,13 +109,12 @@ export function handleHistorySession({
     }
   }
 
-  async function handleHistorySessionsPatch(
+  async function handleHistorySessionPatch(
     request: Request,
     response: Response
   ) {
     try {
       const loggerContext = "HistorySessionPATCHHandler";
-      const historySessionsPath = "chatHistory/historySessions";
 
       const parsedRequest = PatchRequestSchema.parse({
         ...request.params,
@@ -126,26 +126,26 @@ export function handleHistorySession({
         parsedRequest
       );
 
-      const historySessionsRecords = await database.get(
-        historySessionsPath,
+      const authorizedRequest = request as AuthorizedRequest;
+      const { username } = authorizedRequest.auth;
+
+      const path = `/user/${username}/chatHistory/historySessions`;
+      const record = await getRecordFromDatabase(
+        path,
         HistorySessionsModelSchema
       );
       logger.debug(
         { context: loggerContext },
         "Retrieved from database: %o",
-        historySessionsRecords
+        record
       );
 
-      if (!historySessionsRecords[parsedRequest.id]) {
+      if (!record[parsedRequest.id]) {
         throw new HTTPError(HTTP_BAD_REQUEST, "Invalid chat session ID");
       }
 
-      historySessionsRecords[parsedRequest.id].title = parsedRequest.name;
-      await database.set(
-        historySessionsPath,
-        historySessionsRecords,
-        HistorySessionsModelSchema
-      );
+      record[parsedRequest.id].title = parsedRequest.name;
+      await database.set(path, record, HistorySessionsModelSchema);
 
       const parsedResponse = PatchResponseSchema.parse({
         status: "success"
@@ -164,14 +164,12 @@ export function handleHistorySession({
     }
   }
 
-  async function handleHistorySessionsDelete(
+  async function handleHistorySessionDelete(
     request: Request,
     response: Response
   ) {
     try {
       const loggerContext = "HistorySessionDELETEHandler";
-      const historySessionsPath = "chatHistory/historySessions";
-      const historySessionPath = "chatHistory/historySession";
 
       const parsedRequest = DeleteRequestSchema.parse({
         ...request.params,
@@ -183,41 +181,46 @@ export function handleHistorySession({
         parsedRequest
       );
 
-      const historySessionsRecords = await database.get(
+      const authorizedRequest = request as AuthorizedRequest;
+      const { username } = authorizedRequest.auth;
+
+      const historySessionsPath = `/user/${username}/chatHistory/historySessions`;
+      const historySessionsRecord = await getRecordFromDatabase(
         historySessionsPath,
         HistorySessionsModelSchema
       );
       logger.debug(
         { context: loggerContext },
         "Retrieved from database: %o",
-        historySessionsRecords
+        historySessionsRecord
       );
 
-      if (!historySessionsRecords[parsedRequest.id]) {
+      if (!historySessionsRecord[parsedRequest.id]) {
         throw new HTTPError(HTTP_BAD_REQUEST, "Invalid chat session ID");
       }
-      delete historySessionsRecords[parsedRequest.id];
+      delete historySessionsRecord[parsedRequest.id];
       await database.set(
         historySessionsPath,
-        historySessionsRecords,
+        historySessionsRecord,
         HistorySessionsModelSchema
       );
 
-      const historySessionRecords = await database.get(
+      const historySessionPath = `/user/${username}/chatHistory/historySession`;
+      const historySessionRecord = await getRecordFromDatabase(
         historySessionPath,
         HistorySessionModelSchema
       );
       logger.debug(
         { context: loggerContext },
         "Retrieved from database: %o",
-        historySessionRecords
+        historySessionRecord
       );
 
-      if (historySessionRecords[parsedRequest.id]) {
-        delete historySessionRecords[parsedRequest.id];
+      if (historySessionRecord[parsedRequest.id]) {
+        delete historySessionRecord[parsedRequest.id];
         await database.set(
           historySessionPath,
-          historySessionRecords,
+          historySessionRecord,
           HistorySessionModelSchema
         );
       }
@@ -237,5 +240,21 @@ export function handleHistorySession({
     } finally {
       response.end();
     }
+  }
+  async function getRecordFromDatabase<T extends ZodType>(
+    path: string,
+    schema: T
+  ): Promise<z.infer<T>> {
+    let records;
+    try {
+      records = await database.get(path, schema);
+    } catch (e) {
+      if (e instanceof ZodError) {
+        records = schema.parse({});
+      } else {
+        throw e;
+      }
+    }
+    return records;
   }
 }

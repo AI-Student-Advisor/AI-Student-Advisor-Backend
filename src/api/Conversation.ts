@@ -18,6 +18,7 @@ import { HTTPError } from "/utilities/HTTPError.js";
 import { logger } from "/utilities/Log.js";
 import crypto from "crypto";
 import { json, Request, Response } from "express";
+import { z, ZodError, ZodType } from "zod";
 
 export function handleConversation({
   app,
@@ -54,9 +55,6 @@ export function handleConversation({
   async function handleConversationPost(request: Request, response: Response) {
     const loggerContext = "ConversationPOSTHandler";
 
-    request = request as AuthorizedRequest;
-    // TODO: Add support to user-specific history
-
     // Set up the response headers
     response.writeHead(HTTP_OK, {
       "Content-Type": "text/event-stream",
@@ -78,20 +76,29 @@ export function handleConversation({
         message
       });
 
-      // Get records from database
-      const historySessionsPath = "chatHistory/historySessions";
-      const historySessionsRecords = await database.get(
+      const authorizedRequest = request as AuthorizedRequest;
+      if (authorizedRequest.auth.username !== username) {
+        throw new HTTPError(
+          HTTP_BAD_REQUEST,
+          "JWT token does not match request"
+        );
+      }
+
+      // Get record from database
+      const historySessionsPath = `/user/${username}/chatHistory/historySessions`;
+      const historySessionsRecord = await getRecordFromDatabase(
         historySessionsPath,
         HistorySessionsModelSchema
       );
-      const historySessionPath = "chatHistory/historySession";
-      const historySessionRecords = await database.get(
+
+      const historySessionPath = `/user/${username}/chatHistory/historySession`;
+      const historySessionRecord = await getRecordFromDatabase(
         historySessionPath,
         HistorySessionModelSchema
       );
 
       const sessionIdExist = id
-        ? historySessionsRecords[id] !== undefined
+        ? historySessionsRecord[id] !== undefined
         : false;
 
       if (id && !sessionIdExist) {
@@ -110,30 +117,30 @@ export function handleConversation({
 
       // Create a new record in the database if ID does not exist
       if (!sessionIdExist) {
-        historySessionsRecords[session.id] = {
+        historySessionsRecord[session.id] = {
           id: session.id,
           dateTime: new Date().toISOString(),
           title: "New Chat"
         };
-        historySessionRecords[session.id] = {
+        historySessionRecord[session.id] = {
           messages: []
         };
         await database.set(
           historySessionsPath,
-          historySessionsRecords,
+          historySessionsRecord,
           HistorySessionsModelSchema
         );
         await database.set(
           historySessionPath,
-          historySessionRecords,
+          historySessionRecord,
           HistorySessionModelSchema
         );
       }
 
-      historySessionRecords[session.id].messages.push(message);
+      historySessionRecord[session.id].messages.push(message);
       await database.set(
         historySessionPath,
-        historySessionRecords,
+        historySessionRecord,
         HistorySessionModelSchema
       );
 
@@ -148,10 +155,10 @@ export function handleConversation({
         }
       }
       if (finalMessage) {
-        historySessionRecords[session.id].messages.push(finalMessage);
+        historySessionRecord[session.id].messages.push(finalMessage);
         await database.set(
           historySessionPath,
-          historySessionRecords,
+          historySessionRecord,
           HistorySessionModelSchema
         );
       }
@@ -165,6 +172,23 @@ export function handleConversation({
     } finally {
       response.end();
     }
+  }
+
+  async function getRecordFromDatabase<T extends ZodType>(
+    path: string,
+    schema: T
+  ): Promise<z.infer<T>> {
+    let records;
+    try {
+      records = await database.get(path, schema);
+    } catch (e) {
+      if (e instanceof ZodError) {
+        records = schema.parse({});
+      } else {
+        throw e;
+      }
+    }
+    return records;
   }
 }
 

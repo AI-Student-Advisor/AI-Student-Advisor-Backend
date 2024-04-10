@@ -9,6 +9,7 @@ import { HistorySessionsModelSchema } from "/model/schemas/HistorySessionsModel.
 import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
+import { z, ZodError, ZodType } from "zod";
 
 const CHAT_HISTORY_SESSION_ENTRY_LIMIT = 50;
 
@@ -47,12 +48,7 @@ export function handleHistorySessions({
   ) {
     const loggerContext = "HistorySessionsGETHandler";
 
-    request = request as AuthorizedRequest;
-    // TODO: Add support to user-specific history
-
     try {
-      const path = "chatHistory/historySessions";
-
       const parsedRequest = GetRequestSchema.parse({
         offset: request.query.offset
           ? parseInt(String(request.query.offset))
@@ -76,15 +72,22 @@ export function handleHistorySessions({
         { offset, limit }
       );
 
-      const records = await database.get(path, HistorySessionsModelSchema);
+      const authorizedRequest = request as AuthorizedRequest;
+      const { username } = authorizedRequest.auth;
+
+      const path = `/user/${username}/chatHistory/historySessions`;
+      const record = await getRecordFromDatabase(
+        path,
+        HistorySessionsModelSchema
+      );
 
       logger.debug(
         { context: loggerContext },
         "Retrieved from database: %o",
-        records
+        record
       );
 
-      const values = Object.values(records);
+      const values = Object.values(record);
       const items = values.slice(offset, offset + limit);
       logger.debug(
         { context: loggerContext },
@@ -111,5 +114,22 @@ export function handleHistorySessions({
     } finally {
       response.end();
     }
+  }
+
+  async function getRecordFromDatabase<T extends ZodType>(
+    path: string,
+    schema: T
+  ): Promise<z.infer<T>> {
+    let records;
+    try {
+      records = await database.get(path, schema);
+    } catch (e) {
+      if (e instanceof ZodError) {
+        records = schema.parse({});
+      } else {
+        throw e;
+      }
+    }
+    return records;
   }
 }
