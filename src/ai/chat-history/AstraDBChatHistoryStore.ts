@@ -3,7 +3,7 @@ import {
   getAstraDBChatHistoryEndpoint,
   getAstraDBChatHistoryKeyspace,
   getAstraDBChatHistoryTable
-} from "/config/keys.js";
+} from "/ai/AIKeys.js";
 import { logger } from "/utilities/Log.js";
 import { CassandraChatMessageHistory } from "@langchain/community/stores/message/cassandra";
 

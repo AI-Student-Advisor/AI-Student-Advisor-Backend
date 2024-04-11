@@ -23,18 +23,18 @@ export interface TimingGroupInterface {
 }
 
 export class Watchdog {
-  #timingGroupMap: Map<TimingGroupId, TimingGroupInterface>;
+  private timingGroupMap: Map<TimingGroupId, TimingGroupInterface>;
 
   constructor() {
-    this.#timingGroupMap = new Map();
+    this.timingGroupMap = new Map();
   }
 
   registerTimingGroup(timingGroupId: TimingGroupId) {
-    if (this.#timingGroupMap.has(timingGroupId)) {
+    if (this.timingGroupMap.has(timingGroupId)) {
       throw new Error("Timing group ID has already been registered");
     }
 
-    this.#timingGroupMap.set(timingGroupId, {
+    this.timingGroupMap.set(timingGroupId, {
       id: timingGroupId,
       handlerMap: new Map()
     });
@@ -42,12 +42,12 @@ export class Watchdog {
 
   unregisterTimingGroup(timingGroupId: TimingGroupId) {
     this.cancel(timingGroupId);
-    this.#timingGroupMap.delete(timingGroupId);
+    this.timingGroupMap.delete(timingGroupId);
   }
 
   registerHandler(timingGroupId: TimingGroupId, handler: Handler) {
-    this.#timingGroupGuard(timingGroupId);
-    const { handlerMap } = this.#timingGroupMap.get(timingGroupId)!;
+    this.timingGroupGuard(timingGroupId);
+    const { handlerMap } = this.timingGroupMap.get(timingGroupId)!;
 
     const handlerId = crypto.randomUUID();
     handlerMap.set(handlerId, {
@@ -58,16 +58,16 @@ export class Watchdog {
   }
 
   unregisterHandler(timingGroupId: TimingGroupId, handlerId: HandlerId) {
-    this.#timingGroupGuard(timingGroupId);
-    const { handlerMap } = this.#timingGroupMap.get(timingGroupId)!;
-    Watchdog.#handlerGuard(handlerMap, handlerId);
+    this.timingGroupGuard(timingGroupId);
+    const { handlerMap } = this.timingGroupMap.get(timingGroupId)!;
+    Watchdog.handlerGuard(handlerMap, handlerId);
     handlerMap.delete(handlerId);
   }
 
   start(timingGroupId: TimingGroupId, timeout: number = TIMEOUT_MS) {
-    this.#timingGroupGuard(timingGroupId);
+    this.timingGroupGuard(timingGroupId);
 
-    const timingGroup = this.#timingGroupMap.get(timingGroupId)!;
+    const timingGroup = this.timingGroupMap.get(timingGroupId)!;
     timingGroup.timeout = setTimeout(() => {
       for (const handler of timingGroup.handlerMap.values()) {
         void handler.handler(timingGroup);
@@ -82,19 +82,19 @@ export class Watchdog {
   }
 
   cancel(timingGroupId: TimingGroupId) {
-    this.#timingGroupGuard(timingGroupId);
+    this.timingGroupGuard(timingGroupId);
 
-    const timingGroup = this.#timingGroupMap.get(timingGroupId)!;
+    const timingGroup = this.timingGroupMap.get(timingGroupId)!;
     clearTimeout(timingGroup.timeout);
   }
 
-  #timingGroupGuard(timingGroupId: TimingGroupId) {
-    if (!this.#timingGroupMap.has(timingGroupId)) {
+  private timingGroupGuard(timingGroupId: TimingGroupId) {
+    if (!this.timingGroupMap.has(timingGroupId)) {
       throw new Error("Timing group ID not registered yet");
     }
   }
 
-  static #handlerGuard(
+  private static handlerGuard(
     handlerMap: Map<HandlerId, HandlerInterface>,
     handlerId: HandlerId
   ) {

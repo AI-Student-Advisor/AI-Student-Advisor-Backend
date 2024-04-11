@@ -1,11 +1,13 @@
-import { UserManager } from "./../user/UserManager";
+import type { ChatSessionManager } from "/ai/chat-session/ChatSessionManager.js";
+import type { JWT } from "/auth/JWT.js";
 import type { Database } from "/database/interfaces/Database.js";
-import type { SessionManager } from "/session/SessionManager.js";
+import { UserManager } from "/model/UserManager.js";
 import { Express } from "express";
 
 export interface EndpointHandlerContext {
   app: Express;
-  sessionManager: SessionManager;
+  chatSessionManager: ChatSessionManager;
   userManager: UserManager;
   database: Database;
+  jwt: JWT;
 }

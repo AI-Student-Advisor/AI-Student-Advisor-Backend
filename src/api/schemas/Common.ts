@@ -41,7 +41,7 @@ export const ControlSchema = z.object({
 });
 
 /**
- * Describe a history session entry that is meant to be displayed in the
+ * Describe a history chat session entry that is meant to be displayed in the
  * sidebar.
  */
 export const HistorySessionSchema = z.object({
@@ -57,20 +57,8 @@ export const HistorySessionSchema = z.object({
   title: z.string().trim().min(1)
 });
 
-export const UserSchema = z.object({
-  /**
-   * Unique username
-   */
-  username: z.string().trim().min(1),
+// eslint-disable-next-line no-magic-numbers
+export const UsernameSchema = z.string().trim().min(1).max(32).regex(/^\w*$/u);
 
-  /**
-   * User password with minimum length of 6
-   */
-  password: z.string().trim().min(6),
-  /**
-   * An array of Session ID for an user
-   */
-  sessions: z.array(SessionIdSchema)
-});
-
-export const UsersSchema = z.record(UserSchema);
+// eslint-disable-next-line no-magic-numbers
+export const PasswordSchema = z.string().trim().min(6).max(64);

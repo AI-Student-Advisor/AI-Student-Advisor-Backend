@@ -1,27 +1,30 @@
 import type { EndpointHandlerContext } from "./types/EndpointHandler.js";
 import { QUERY_STATUS } from "/ai/AIStructs.js";
 import { ChatAgent } from "/ai/chat-agents/ChatAgent.js";
+import { ChatSession } from "/ai/chat-session/ChatSession.js";
 import type { Message } from "/api/interfaces/Common.js";
 import type { PostResponse } from "/api/interfaces/Conversation.js";
 import {
   PostRequestSchema,
   PostResponseSchema
 } from "/api/schemas/Conversation.js";
+import { auth } from "/auth/Middleware.js";
+import type { AuthorizedRequest } from "/auth/types/AuthorizedRequest.js";
 import { HistorySessionModelSchema } from "/model/schemas/HistorySessionModel.js";
 import { HistorySessionsModelSchema } from "/model/schemas/HistorySessionsModel.js";
-import { Session } from "/session/Session.js";
 import { HTTP_BAD_REQUEST, HTTP_OK } from "/utilities/Constants.js";
 import { parseError } from "/utilities/ErrorParser.js";
 import { HTTPError } from "/utilities/HTTPError.js";
 import { logger } from "/utilities/Log.js";
 import crypto from "crypto";
 import { json, Request, Response } from "express";
+import { z, ZodError, ZodType } from "zod";
 
 export function handleConversation({
   app,
-  sessionManager,
-  userManager,
-  database
+  chatSessionManager,
+  database,
+  jwt
 }: EndpointHandlerContext) {
   const loggerContext = "ConversationAPIHandler";
   const endpoint = "/api/conversation";
@@ -33,10 +36,17 @@ export function handleConversation({
     endpoint
   );
 
+  app.use(endpoint, auth(jwt));
+  logger.debug(
+    { context: loggerContext },
+    "JWT authorization middleware enabled for endpoint %s",
+    endpoint
+  );
+
   app.post(endpoint, handleConversationPost);
   logger.debug(
     { context: loggerContext },
-    "POST handler registered endpoint %s",
+    "POST handler registered for endpoint %s",
     endpoint
   );
 
@@ -59,41 +69,40 @@ export function handleConversation({
     });
 
     try {
-      const { message, username, id } = PostRequestSchema.parse(request.body);
+      const { message, id } = PostRequestSchema.parse(request.body);
       logger.info({ context: loggerContext }, "Request received: %o", {
         id,
-        username,
         message
       });
 
-      // Get records from database
-      const historySessionsPath = "chatHistory/historySessions";
-      const historySessionsRecords = await database.get(
+      const authorizedRequest = request as AuthorizedRequest;
+      const { username } = authorizedRequest.auth;
+
+      // Get record from database
+      const historySessionsPath = `/user/${username}/chatHistory/historySessions`;
+      const historySessionsRecord = await getRecordFromDatabase(
         historySessionsPath,
         HistorySessionsModelSchema
       );
-      const historySessionPath = "chatHistory/historySession";
-      const historySessionRecords = await database.get(
+
+      const historySessionPath = `/user/${username}/chatHistory/historySession`;
+      const historySessionRecord = await getRecordFromDatabase(
         historySessionPath,
         HistorySessionModelSchema
       );
 
       const sessionIdExist = id
-        ? historySessionsRecords[id] !== undefined
+        ? historySessionsRecord[id] !== undefined
         : false;
 
       if (id && !sessionIdExist) {
-        // If session ID is specified, and it does not exist in the database
-        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid session ID");
+        // If chat session ID is specified, and it does not exist in the database
+        throw new HTTPError(HTTP_BAD_REQUEST, "Invalid chat session ID");
       }
-      // else: if session ID is not specified, or it exists in the database
+      // else: if chat session ID is not specified, or it exists in the database
 
-      // Get session if ID provided, otherwise create a new session
-      const session = await sessionManager.getSession(
-        username,
-        userManager,
-        id
-      );
+      // Get chat session if ID provided, otherwise create a new chat-session
+      const session = await chatSessionManager.getSession(id);
       logger.debug(
         { context: loggerContext },
         "Session retrieved with ID %s",
@@ -102,30 +111,30 @@ export function handleConversation({
 
       // Create a new record in the database if ID does not exist
       if (!sessionIdExist) {
-        historySessionsRecords[session.id] = {
+        historySessionsRecord[session.id] = {
           id: session.id,
           dateTime: new Date().toISOString(),
           title: "New Chat"
         };
-        historySessionRecords[session.id] = {
+        historySessionRecord[session.id] = {
           messages: []
         };
         await database.set(
           historySessionsPath,
-          historySessionsRecords,
+          historySessionsRecord,
           HistorySessionsModelSchema
         );
         await database.set(
           historySessionPath,
-          historySessionRecords,
+          historySessionRecord,
           HistorySessionModelSchema
         );
       }
 
-      historySessionRecords[session.id].messages.push(message);
+      historySessionRecord[session.id].messages.push(message);
       await database.set(
         historySessionPath,
-        historySessionRecords,
+        historySessionRecord,
         HistorySessionModelSchema
       );
 
@@ -140,10 +149,10 @@ export function handleConversation({
         }
       }
       if (finalMessage) {
-        historySessionRecords[session.id].messages.push(finalMessage);
+        historySessionRecord[session.id].messages.push(finalMessage);
         await database.set(
           historySessionPath,
-          historySessionRecords,
+          historySessionRecord,
           HistorySessionModelSchema
         );
       }
@@ -158,13 +167,30 @@ export function handleConversation({
       response.end();
     }
   }
+
+  async function getRecordFromDatabase<T extends ZodType>(
+    path: string,
+    schema: T
+  ): Promise<z.infer<T>> {
+    let records = {};
+    try {
+      records = await database.get(path, schema);
+    } catch (e) {
+      if (e instanceof ZodError) {
+        records = schema.parse({});
+      } else {
+        throw e;
+      }
+    }
+    return records;
+  }
 }
 
 async function* query(
-  session: Session,
+  chatSession: ChatSession,
   message: Message
 ): AsyncGenerator<PostResponse> {
-  if (!session.chatAgent.isChatEnabled()) {
+  if (!chatSession.chatAgent.isChatEnabled()) {
     yield PostResponseSchema.parse({
       status: "fail",
       reason: "Chat agent is not available"
@@ -173,14 +199,14 @@ async function* query(
     return {};
   }
 
-  const agentInput = ChatAgent.prepareInput(message.content, session.id);
+  const agentInput = ChatAgent.prepareInput(message.content, chatSession.id);
   // Query the chat agent with the user query
-  for await (const agentResponse of session.chatAgent.query(agentInput)) {
+  for await (const agentResponse of chatSession.chatAgent.query(agentInput)) {
     switch (agentResponse.status) {
       case QUERY_STATUS.PENDING:
         yield PostResponseSchema.parse({
           status: "success",
-          id: session.id,
+          id: chatSession.id,
           type: "control",
           control: {
             signal: "generation-pending"
@@ -190,7 +216,7 @@ async function* query(
       case QUERY_STATUS.STARTED:
         yield PostResponseSchema.parse({
           status: "success",
-          id: session.id,
+          id: chatSession.id,
           type: "control",
           control: {
             signal: "generation-started"
@@ -206,7 +232,7 @@ async function* query(
       case QUERY_STATUS.SUCCESS:
         yield PostResponseSchema.parse({
           status: "success",
-          id: session.id,
+          id: chatSession.id,
           type: "message",
           message: {
             id: crypto.randomUUID(),
@@ -221,7 +247,7 @@ async function* query(
       case QUERY_STATUS.DONE:
         yield PostResponseSchema.parse({
           status: "success",
-          id: session.id,
+          id: chatSession.id,
           type: "control",
           control: {
             signal: "generation-done"

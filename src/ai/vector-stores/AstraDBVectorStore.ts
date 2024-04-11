@@ -3,7 +3,7 @@ import {
   getUOttawaEmbAppToken,
   getUOttawaEmbEndpoint,
   getUOttawaEmbCollection
-} from "/config/keys.js";
+} from "/ai/AIKeys.js";
 import { logger } from "/utilities/Log.js";
 import {
   AstraDBVectorStore,

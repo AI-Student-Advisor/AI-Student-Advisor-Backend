@@ -5,7 +5,7 @@ import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { z, ZodType } from "zod";
 
-const FirebaseConfigSchema = z.object({
+const FirebaseEnvConfigSchema = z.object({
   type: z.string().trim().min(1),
   project_id: z.string().trim().min(1),
   private_key_id: z.string().trim().min(1),
@@ -23,7 +23,7 @@ export class Firebase implements Database {
   private firestore: ReturnType<typeof getFirestore>;
 
   constructor() {
-    const config = parseFirebaseConfig();
+    const config = parseFirebaseEnvConfig();
     initializeApp({ credential: cert(config as ServiceAccount) });
     this.firestore = getFirestore();
   }
@@ -48,15 +48,15 @@ export class Firebase implements Database {
   }
 }
 
-function parseFirebaseConfig() {
+function parseFirebaseEnvConfig() {
   const config: Record<string, string> = {};
 
-  for (const key in FirebaseConfigSchema.shape) {
-    if (!Object.hasOwn(FirebaseConfigSchema.shape, key)) {
+  for (const key in FirebaseEnvConfigSchema.shape) {
+    if (!Object.hasOwn(FirebaseEnvConfigSchema.shape, key)) {
       continue;
     }
     config[key] = process.env[`FIREBASE_${key.toUpperCase()}`] ?? "";
   }
 
-  return FirebaseConfigSchema.parse(config);
+  return FirebaseEnvConfigSchema.parse(config);
 }

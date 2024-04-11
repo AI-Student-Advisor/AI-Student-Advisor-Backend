@@ -3,18 +3,20 @@ import {
   GetResponseSchema
 } from "./schemas/HistorySessions.js";
 import type { EndpointHandlerContext } from "/api/types/EndpointHandler.js";
-import { HistorySessionsModel } from "/model/interfaces/HistorySessionsModel.js";
+import { auth } from "/auth/Middleware.js";
+import type { AuthorizedRequest } from "/auth/types/AuthorizedRequest.js";
 import { HistorySessionsModelSchema } from "/model/schemas/HistorySessionsModel.js";
 import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
+import { z, ZodError, ZodType } from "zod";
 
 const CHAT_HISTORY_SESSION_ENTRY_LIMIT = 50;
 
 export function handleHistorySessions({
   app,
   database,
-  userManager
+  jwt
 }: EndpointHandlerContext) {
   const loggerContext = "HistorySessionsAPIHandler";
   const endpoint = "/api/history-sessions";
@@ -26,10 +28,17 @@ export function handleHistorySessions({
     endpoint
   );
 
+  app.use(endpoint, auth(jwt));
+  logger.debug(
+    { context: loggerContext },
+    "JWT authorization middleware enabled for endpoint %s",
+    endpoint
+  );
+
   app.get(endpoint, handleHistorySessionsGet);
   logger.debug(
     { context: loggerContext },
-    "GET handler registered endpoint %s",
+    "GET handler registered for endpoint %s",
     endpoint
   );
 
@@ -40,12 +49,7 @@ export function handleHistorySessions({
     const loggerContext = "HistorySessionsGETHandler";
 
     try {
-      const path = "chatHistory/historySessions";
-
       const parsedRequest = GetRequestSchema.parse({
-        username: request.query.username
-          ? String(request.query.username)
-          : undefined,
         offset: request.query.offset
           ? parseInt(String(request.query.offset))
           : undefined,
@@ -59,6 +63,7 @@ export function handleHistorySessions({
         "Request received: %o",
         parsedRequest
       );
+
       const offset = parsedRequest.offset ?? 0;
       const limit = parsedRequest.limit ?? CHAT_HISTORY_SESSION_ENTRY_LIMIT;
       logger.debug(
@@ -67,26 +72,22 @@ export function handleHistorySessions({
         { offset, limit }
       );
 
-      let records = await database.get(path, HistorySessionsModelSchema);
-      if (parsedRequest.username) {
-        const userSessions = await userManager.getUserSession(
-          parsedRequest.username
-        );
-        const userRecords: HistorySessionsModel = {};
-        for (const key in records) {
-          if (userSessions.indexOf(String(key)) !== -1) {
-            userRecords[key] = records[key];
-          }
-        }
-        records = userRecords;
-      }
+      const authorizedRequest = request as AuthorizedRequest;
+      const { username } = authorizedRequest.auth;
+
+      const path = `/user/${username}/chatHistory/historySessions`;
+      const record = await getRecordFromDatabase(
+        path,
+        HistorySessionsModelSchema
+      );
+
       logger.debug(
         { context: loggerContext },
         "Retrieved from database: %o",
-        records
+        record
       );
 
-      const values = Object.values(records);
+      const values = Object.values(record);
       const items = values.slice(offset, offset + limit);
       logger.debug(
         { context: loggerContext },
@@ -113,5 +114,22 @@ export function handleHistorySessions({
     } finally {
       response.end();
     }
+  }
+
+  async function getRecordFromDatabase<T extends ZodType>(
+    path: string,
+    schema: T
+  ): Promise<z.infer<T>> {
+    let records = {};
+    try {
+      records = await database.get(path, schema);
+    } catch (e) {
+      if (e instanceof ZodError) {
+        records = schema.parse({});
+      } else {
+        throw e;
+      }
+    }
+    return records;
   }
 }

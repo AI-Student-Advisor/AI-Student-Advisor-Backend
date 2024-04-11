@@ -156,3 +156,6 @@ dist
 
 # WebStorm
 .idea
+
+# Keys
+*.pem

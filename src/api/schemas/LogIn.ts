@@ -2,7 +2,7 @@ import { PasswordSchema, UsernameSchema } from "./Common.js";
 import { z } from "zod";
 
 /**
- * `POST /api/sign`
+ * `POST /api/login`
  *
  * Request payload schema
  */
@@ -12,7 +12,7 @@ export const PostUserRequestSchema = z.object({
 });
 
 /**
- * `POST /api/sign`
+ * `POST /api/login`
  *
  * Response payload schema
  */

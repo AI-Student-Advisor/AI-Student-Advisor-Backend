@@ -7,8 +7,6 @@ import { z } from "zod";
  * Request query parameters schema
  */
 export const GetRequestSchema = z.object({
-  // eslint-disable-next-line no-magic-numbers
-  username: z.string().trim().min(1).optional(),
   offset: z.number().int().nonnegative().optional(),
   limit: z.number().int().positive().optional()
 });
@@ -22,7 +20,7 @@ export const GetResponseSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal("success"),
     total: z.number().int().nonnegative(),
-    limit: z.number().int().positive(),
+    limit: z.number().int().nonnegative(),
     items: z.array(HistorySessionSchema)
   }),
   // eslint-disable-next-line no-magic-numbers

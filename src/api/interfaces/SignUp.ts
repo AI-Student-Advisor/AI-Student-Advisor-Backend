@@ -1,10 +1,8 @@
 import {
   PostUserRequestSchema,
-  PostUserResponseSchema,
-  UserStoreSchema
-} from "../schemas/SignUp";
+  PostUserResponseSchema
+} from "/api/schemas/SignUp.js";
 import { z } from "zod";
 
 export type PostUserRequest = z.infer<typeof PostUserRequestSchema>;
 export type PostUserResponse = z.infer<typeof PostUserResponseSchema>;
-export type UserStore = z.infer<typeof UserStoreSchema>;
