@@ -69,20 +69,14 @@ export function handleConversation({
     });
 
     try {
-      const { message, username, id } = PostRequestSchema.parse(request.body);
+      const { message, id } = PostRequestSchema.parse(request.body);
       logger.info({ context: loggerContext }, "Request received: %o", {
         id,
-        username,
         message
       });
 
       const authorizedRequest = request as AuthorizedRequest;
-      if (authorizedRequest.auth.username !== username) {
-        throw new HTTPError(
-          HTTP_BAD_REQUEST,
-          "JWT token does not match request"
-        );
-      }
+      const { username } = authorizedRequest.auth;
 
       // Get record from database
       const historySessionsPath = `/user/${username}/chatHistory/historySessions`;
