@@ -21,7 +21,7 @@
     "@datastax/astra-db-ts": "^0.1.4",
     "@langchain/community": "^0.0.47",
     "@langchain/openai": "^0.0.25",
-    "@langchain/pinecone": "^0.0.3",
+    "@langchain/pinecone": "^0.0.4",
     "@pinecone-database/pinecone": "^2.2.0",
     "@smithy/eventstream-codec": "^2.2.0",
     "@smithy/protocol-http": "^3.3.0",
