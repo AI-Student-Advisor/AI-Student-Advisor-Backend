@@ -1,5 +1,5 @@
 import { handleLogin } from "./api/LogIn.js";
-import { handleSignUp } from "./api/SignUp";
+import { handleSignUp } from "./api/SignUp.js";
 import { ChatSessionManager } from "/ai/chat-session/ChatSessionManager.js";
 import { handleConversation } from "/api/Conversation.js";
 import { handleHistorySession } from "/api/HistorySession.js";
@@ -7,7 +7,7 @@ import { handleHistorySessions } from "/api/HistorySessions.js";
 import { JWT } from "/auth/JWT.js";
 import { AppConfig } from "/config/AppConfig.js";
 import { Firebase } from "/database/Firebase.js";
-import { UserManager } from "/model/UserManager";
+import { UserManager } from "/model/UserManager.js";
 import { logger } from "/utilities/Log.js";
 import cors from "cors";
 import express from "express";

@@ -11,7 +11,7 @@
     "ecmaVersion": "latest"
   },
   "ignorePatterns": ["dist"],
-  "plugins": [],
+  "plugins": ["import"],
   "rules": {
     "no-duplicate-imports": "error",
     "no-self-compare": "error",
@@ -95,6 +95,13 @@
     "vars-on-top": "error",
     "unicode-bom": ["error", "never"],
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": "warn"
+    "@typescript-eslint/no-unused-vars": "warn",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "always"
+      }
+    ]
   }
 }
