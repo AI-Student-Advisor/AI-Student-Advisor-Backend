@@ -8,7 +8,7 @@ import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
 
-const endpoint = "/api/sign";
+const endpoint = "/api/sign-up";
 
 export function handleSignUp({
   app,

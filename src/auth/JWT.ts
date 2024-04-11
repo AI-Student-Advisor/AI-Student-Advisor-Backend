@@ -21,8 +21,10 @@ export class JWT {
     verifyOptions?: jwt.VerifyOptions
   ) {
     const config = parseJWTEnvConfig();
-    this.privateKey = crypto.createPrivateKey(config.privateKey);
-    this.publicKey = crypto.createPublicKey(config.privateKey);
+    this.privateKey = crypto.createPrivateKey(
+      config.privateKey.replaceAll("\\n", "\n")
+    );
+    this.publicKey = crypto.createPublicKey(this.privateKey);
     this.signOptions = signOptions;
     this.verifyOptions = verifyOptions;
   }

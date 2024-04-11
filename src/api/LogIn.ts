@@ -1,14 +1,14 @@
 import {
   PostUserRequestSchema,
   PostUserResponseSchema
-} from "./schemas/Login.js";
+} from "./schemas/LogIn.js";
 import type { EndpointHandlerContext } from "/api/types/EndpointHandler.js";
 import { AuthPayloadSchema } from "/auth/schemas/AuthPayload.js";
 import { parseError } from "/utilities/ErrorParser.js";
 import { logger } from "/utilities/Log.js";
 import { json, Request, Response } from "express";
 
-const endpoint = "/api/login";
+const endpoint = "/api/log-in";
 
 export function handleLogin({ app, userManager, jwt }: EndpointHandlerContext) {
   const loggerContext = "LoginAPIHandler";

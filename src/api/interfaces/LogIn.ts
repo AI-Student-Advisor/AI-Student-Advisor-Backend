@@ -1,7 +1,7 @@
 import {
   PostUserRequestSchema,
   PostUserResponseSchema
-} from "/api/schemas/Login.js";
+} from "/api/schemas/LogIn.js";
 import { z } from "zod";
 
 export type GetUserRequest = z.infer<typeof PostUserRequestSchema>;
