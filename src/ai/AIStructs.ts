@@ -76,7 +76,6 @@ export const enum VECTOR_STORE {
   // local in-memory
   MEMORY,
   // cloud-hosted
-  ASTRA_DB,
   PINECONE
 }
 
@@ -84,7 +83,6 @@ export const enum VECTOR_STORE {
  * Types of databases supported for storing chat history
  */
 export const enum CHAT_HISTORY_STORE {
-  ASTRA_DB,
   UPSTASH
 }
 

@@ -1,8 +1,4 @@
 import {
-  getAstraDBFromDocuments,
-  getExistingAstraDBStore
-} from "./AstraDBVectorStore.js";
-import {
   getExistingPinconeStore,
   getPineconeFromDocuments
 } from "./PineconeVectorStore.js";
@@ -67,8 +63,6 @@ async function getVectorStoreFromDocuments(
   embeddings: any
 ) {
   switch (vectorDBType) {
-    case VECTOR_STORE.ASTRA_DB:
-      return await getAstraDBFromDocuments(docs, embeddings);
     case VECTOR_STORE.PINECONE:
       return await getPineconeFromDocuments(docs, embeddings);
     case VECTOR_STORE.MEMORY:
@@ -86,8 +80,6 @@ async function getCloudVectorDatabase(
     throw new Error("Embedding model is required for Close Vector Store");
   }
   switch (vectorDBType) {
-    case VECTOR_STORE.ASTRA_DB:
-      return await getExistingAstraDBStore(embeddingModel);
     case VECTOR_STORE.PINECONE:
       return await getExistingPinconeStore(embeddingModel);
     default:
