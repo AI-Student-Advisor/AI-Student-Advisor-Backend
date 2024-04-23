@@ -36,7 +36,7 @@ export class DataRetriever {
     const vectorstore = await getVectorStore(config.vectorStoreConfig);
 
     // create retriever using the vector store
-    this.retriever = vectorstore.asRetriever();
+    this.retriever = vectorstore.asRetriever(20);
 
     logger.debug({ context: loggerContext }, "Data Retriever setup completed");
     return this.retrieverTool;
